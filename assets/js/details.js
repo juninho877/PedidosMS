@@ -1,7 +1,7 @@
 class DetailsApp {
-    constructor() {
-        this.contentType = window.contentType;
-        this.contentId = window.contentId;
+    constructor(contentType, contentId) {
+        this.contentType = contentType;
+        this.contentId = contentId;
         this.init();
     }
 
@@ -585,8 +585,3 @@ class DetailsApp {
         `;
     }
 }
-
-// Initialize the app
-document.addEventListener('DOMContentLoaded', () => {
-    new DetailsApp();
-});

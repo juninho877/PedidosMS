@@ -65,11 +65,11 @@ if (empty($type) || empty($id) || !in_array($type, ['movie', 'tv'])) {
         </div>
     </div>
 
-    <script>
-        const contentType = '<?php echo $type; ?>';
-        const contentId = '<?php echo $id; ?>';
-    </script>
     <script src="assets/js/details.js"></script>
+    <script>
+        // Initialize the app with PHP values
+        new DetailsApp('<?php echo $type; ?>', '<?php echo $id; ?>');
+    </script>
     <script>
         lucide.createIcons();
     </script>
