@@ -43,31 +43,31 @@ class DetailsApp {
             <div class="relative">
                 ${backdropUrl ? `
                     <div 
-                        class="h-[60vh] bg-cover bg-center bg-no-repeat"
+                        class="h-[50vh] sm:h-[55vh] lg:h-[60vh] bg-cover bg-center bg-no-repeat"
                         style="background-image: url(${backdropUrl})"
                     >
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent"></div>
                     </div>
                 ` : `
-                    <div class="h-[60vh] bg-gradient-to-br from-slate-800 to-slate-900">
+                    <div class="h-[50vh] sm:h-[55vh] lg:h-[60vh] bg-gradient-to-br from-slate-800 to-slate-900">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent"></div>
                     </div>
                 `}
                 
-                <!-- Mobile: Static layout, Desktop: Absolute positioning -->
-                <div class="lg:absolute lg:bottom-0 lg:left-0 lg:right-0 p-4 sm:p-6 lg:p-8 -mt-16 lg:mt-0 relative lg:relative z-10">
+                <!-- Content overlay with better positioning -->
+                <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8 z-10">
                     <div class="max-w-7xl mx-auto px-4 sm:px-0">
                         <div class="flex flex-col lg:flex-row gap-6 sm:gap-8">
                             <div class="flex-shrink-0">
                                 <img
                                     src="${posterUrl}"
                                     alt="${title}"
-                                    class="w-32 h-48 sm:w-48 sm:h-72 md:w-56 md:h-84 lg:w-64 lg:h-96 object-cover rounded-lg shadow-xl border border-slate-700 mx-auto lg:mx-0"
+                                    class="w-28 h-42 sm:w-40 sm:h-60 md:w-48 md:h-72 lg:w-56 lg:h-84 object-cover rounded-lg shadow-xl border border-slate-700 mx-auto lg:mx-0"
                                     onerror="this.src='/assets/images/placeholder-poster.jpg'"
                                 />
                             </div>
                             <div class="flex-1 space-y-3 sm:space-y-4 text-center lg:text-left">
-                                <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight">${title}</h1>
+                                <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-white leading-tight">${title}</h1>
                                 <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-slate-300 text-sm sm:text-base">
                                     <div class="flex items-center space-x-2">
                                         <i data-lucide="calendar" class="h-5 w-5"></i>
@@ -90,15 +90,15 @@ class DetailsApp {
                                         </div>
                                     ` : ''}
                                 </div>
-                                <p class="text-sm sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto lg:mx-0 line-clamp-3 lg:line-clamp-none">
+                                <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-3xl mx-auto lg:mx-0 line-clamp-2 sm:line-clamp-3 lg:line-clamp-none">
                                     ${content.overview || 'Sinopse não disponível.'}
                                 </p>
-                                <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
+                                <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-2 sm:space-y-0 sm:space-x-4 pt-2 sm:pt-4">
                                     <button
                                         id="requestBtn"
-                                        class="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg w-full sm:w-auto text-sm sm:text-base"
+                                        class="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-2 lg:py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg w-full sm:w-auto text-xs sm:text-sm lg:text-base"
                                     >
-                                        <i data-lucide="message-square" class="h-5 w-5"></i>
+                                        <i data-lucide="message-square" class="h-4 w-4 sm:h-5 sm:w-5"></i>
                                         <span>Solicitar Conteúdo</span>
                                     </button>
                                     ${trailer ? `
@@ -106,9 +106,9 @@ class DetailsApp {
                                             href="https://www.youtube.com/embed/${trailer.key}"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            class="flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors w-full sm:w-auto text-sm sm:text-base"
+                                            class="flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white px-3 sm:px-4 lg:px-6 py-2 sm:py-2 lg:py-3 rounded-lg font-semibold transition-colors w-full sm:w-auto text-xs sm:text-sm lg:text-base"
                                         >
-                                            <i data-lucide="play" class="h-5 w-5"></i>
+                                            <i data-lucide="play" class="h-4 w-4 sm:h-5 sm:w-5"></i>
                                             <span>Assistir Trailer</span>
                                         </a>
                                     ` : ''}
@@ -120,7 +120,7 @@ class DetailsApp {
             </div>
 
             <!-- Content Details -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
                 <div class="grid lg:grid-cols-3 gap-8 sm:gap-12">
                     <!-- Main Content -->
                     <div class="lg:col-span-2 space-y-6 sm:space-y-8">
