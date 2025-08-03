@@ -58,11 +58,11 @@ class SearchApp {
         const listBtn = document.getElementById('listView');
         
         if (mode === 'grid') {
-            gridBtn.className = 'p-2 rounded-lg transition-colors bg-blue-600 text-white';
-            listBtn.className = 'p-2 rounded-lg transition-colors text-slate-400 hover:text-white hover:bg-slate-700';
+            gridBtn.className = 'p-2 sm:p-3 rounded-lg transition-colors bg-blue-600 text-white';
+            listBtn.className = 'p-2 sm:p-3 rounded-lg transition-colors text-slate-400 hover:text-white hover:bg-slate-700';
         } else {
-            listBtn.className = 'p-2 rounded-lg transition-colors bg-blue-600 text-white';
-            gridBtn.className = 'p-2 rounded-lg transition-colors text-slate-400 hover:text-white hover:bg-slate-700';
+            listBtn.className = 'p-2 sm:p-3 rounded-lg transition-colors bg-blue-600 text-white';
+            gridBtn.className = 'p-2 sm:p-3 rounded-lg transition-colors text-slate-400 hover:text-white hover:bg-slate-700';
         }
 
         // Re-render results if we have them
@@ -149,7 +149,7 @@ class SearchApp {
 
     getGridHTML(results) {
         return `
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
                 ${results.map(item => this.getGridItemHTML(item)).join('')}
             </div>
         `;
@@ -188,7 +188,7 @@ class SearchApp {
                                 type === 'movie' ? 'bg-blue-600/80 text-white' : 'bg-purple-600/80 text-white'
                             }">
                                 <i data-lucide="${type === 'movie' ? 'film' : 'tv'}" class="h-3 w-3"></i>
-                                <span>${typeLabel}</span>
+                                <span class="hidden sm:inline">${typeLabel}</span>
                             </div>
                         </div>
                         <div class="absolute top-2 right-2">
@@ -198,11 +198,11 @@ class SearchApp {
                             </div>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-white group-hover:text-blue-400 transition-colors line-clamp-2 mb-2">
+                    <div class="p-3 sm:p-4">
+                        <h3 class="text-sm sm:text-base font-semibold text-white group-hover:text-blue-400 transition-colors line-clamp-2 mb-2">
                             ${title}
                         </h3>
-                        <div class="flex items-center space-x-1 text-sm text-slate-400">
+                        <div class="flex items-center space-x-1 text-xs sm:text-sm text-slate-400">
                             <i data-lucide="calendar" class="h-4 w-4"></i>
                             <span>${year}</span>
                         </div>
@@ -224,22 +224,22 @@ class SearchApp {
 
         return `
             <a href="details.php?type=${type}&id=${item.id}" class="block bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-blue-500/50 hover:bg-slate-800/70 transition-all group">
-                <div class="flex gap-4">
+                <div class="flex gap-3 sm:gap-4">
                     <div class="flex-shrink-0">
                         <img
                             src="${posterUrl}"
                             alt="${title}"
-                            class="w-16 h-24 object-cover rounded-lg"
+                            class="w-12 h-18 sm:w-16 sm:h-24 object-cover rounded-lg"
                             onerror="this.src='/assets/images/placeholder-poster.jpg'"
                         />
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-start justify-between">
                             <div>
-                                <h3 class="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+                                <h3 class="text-base sm:text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
                                     ${title}
                                 </h3>
-                                <div class="flex items-center space-x-4 mt-2 text-sm text-slate-400">
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-slate-400">
                                     <div class="flex items-center space-x-1">
                                         <i data-lucide="${type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
                                         <span>${typeLabel}</span>
@@ -256,7 +256,7 @@ class SearchApp {
                             </div>
                         </div>
                         ${item.overview ? `
-                            <p class="text-slate-400 mt-3 line-clamp-2">
+                            <p class="text-slate-400 mt-2 sm:mt-3 line-clamp-2 text-sm sm:text-base hidden sm:block">
                                 ${item.overview}
                             </p>
                         ` : ''}
@@ -268,13 +268,13 @@ class SearchApp {
 
     getNoResultsHTML() {
         return `
-            <div class="text-center py-12">
+            <div class="text-center py-8 sm:py-12">
                 <div class="bg-slate-800/50 rounded-lg p-8 max-w-md mx-auto">
-                    <i data-lucide="search" class="h-12 w-12 text-slate-500 mx-auto mb-4"></i>
-                    <h3 class="text-lg font-medium text-slate-300 mb-2">
+                    <i data-lucide="search" class="h-10 w-10 sm:h-12 sm:w-12 text-slate-500 mx-auto mb-4"></i>
+                    <h3 class="text-base sm:text-lg font-medium text-slate-300 mb-2">
                         Nenhum resultado encontrado
                     </h3>
-                    <p class="text-slate-500">
+                    <p class="text-sm sm:text-base text-slate-500 px-4">
                         Tente pesquisar com termos diferentes ou verifique a ortografia
                     </p>
                 </div>
@@ -285,9 +285,9 @@ class SearchApp {
     showError(message) {
         document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('searchResults').innerHTML = `
-            <div class="text-center py-12">
+            <div class="text-center py-8 sm:py-12">
                 <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-6 max-w-md mx-auto">
-                    <p class="text-red-400 font-medium">${message}</p>
+                    <p class="text-sm sm:text-base text-red-400 font-medium px-4">${message}</p>
                 </div>
             </div>
         `;

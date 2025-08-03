@@ -18,6 +18,14 @@ class DashboardApp {
         document.getElementById('logoutBtn').addEventListener('click', () => {
             this.handleLogout();
         });
+        
+        // Mobile logout button
+        const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+        if (logoutBtnMobile) {
+            logoutBtnMobile.addEventListener('click', () => {
+                this.handleLogout();
+            });
+        }
 
         // Filter changes
         document.getElementById('statusFilter').addEventListener('change', (e) => {
@@ -64,52 +72,52 @@ class DashboardApp {
 
     renderStats(stats) {
         document.getElementById('statsCards').innerHTML = `
-            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-3 sm:p-4">
                 <div class="flex items-center space-x-2 mb-2">
                     <i data-lucide="users" class="h-5 w-5 text-blue-400"></i>
-                    <span class="text-sm text-slate-400">Total</span>
+                    <span class="text-xs sm:text-sm text-slate-400">Total</span>
                 </div>
-                <p class="text-2xl font-bold text-white">${stats.total || 0}</p>
+                <p class="text-xl sm:text-2xl font-bold text-white">${stats.total || 0}</p>
             </div>
             
-            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-3 sm:p-4">
                 <div class="flex items-center space-x-2 mb-2">
                     <i data-lucide="clock" class="h-5 w-5 text-yellow-400"></i>
-                    <span class="text-sm text-slate-400">Pendentes</span>
+                    <span class="text-xs sm:text-sm text-slate-400">Pendentes</span>
                 </div>
-                <p class="text-2xl font-bold text-white">${stats.pending || 0}</p>
+                <p class="text-xl sm:text-2xl font-bold text-white">${stats.pending || 0}</p>
             </div>
             
-            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-3 sm:p-4">
                 <div class="flex items-center space-x-2 mb-2">
                     <i data-lucide="check-circle" class="h-5 w-5 text-green-400"></i>
-                    <span class="text-sm text-slate-400">Aprovadas</span>
+                    <span class="text-xs sm:text-sm text-slate-400">Aprovadas</span>
                 </div>
-                <p class="text-2xl font-bold text-white">${stats.approved || 0}</p>
+                <p class="text-xl sm:text-2xl font-bold text-white">${stats.approved || 0}</p>
             </div>
             
-            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-3 sm:p-4">
                 <div class="flex items-center space-x-2 mb-2">
                     <i data-lucide="x-circle" class="h-5 w-5 text-red-400"></i>
-                    <span class="text-sm text-slate-400">Negadas</span>
+                    <span class="text-xs sm:text-sm text-slate-400">Negadas</span>
                 </div>
-                <p class="text-2xl font-bold text-white">${stats.denied || 0}</p>
+                <p class="text-xl sm:text-2xl font-bold text-white">${stats.denied || 0}</p>
             </div>
             
-            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-3 sm:p-4">
                 <div class="flex items-center space-x-2 mb-2">
                     <i data-lucide="film" class="h-5 w-5 text-purple-400"></i>
-                    <span class="text-sm text-slate-400">Filmes</span>
+                    <span class="text-xs sm:text-sm text-slate-400">Filmes</span>
                 </div>
-                <p class="text-2xl font-bold text-white">${stats.movies || 0}</p>
+                <p class="text-xl sm:text-2xl font-bold text-white">${stats.movies || 0}</p>
             </div>
             
-            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-3 sm:p-4">
                 <div class="flex items-center space-x-2 mb-2">
                     <i data-lucide="tv" class="h-5 w-5 text-indigo-400"></i>
-                    <span class="text-sm text-slate-400">Séries</span>
+                    <span class="text-xs sm:text-sm text-slate-400">Séries</span>
                 </div>
-                <p class="text-2xl font-bold text-white">${stats.tv || 0}</p>
+                <p class="text-xl sm:text-2xl font-bold text-white">${stats.tv || 0}</p>
             </div>
         `;
 
@@ -141,13 +149,13 @@ class DashboardApp {
 
         if (requests.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-12">
+                <div class="text-center py-8 sm:py-12">
                     <div class="bg-slate-800/50 rounded-lg p-8 max-w-md mx-auto">
-                        <i data-lucide="clock" class="h-12 w-12 text-slate-500 mx-auto mb-4"></i>
-                        <h3 class="text-lg font-medium text-slate-300 mb-2">
+                        <i data-lucide="clock" class="h-10 w-10 sm:h-12 sm:w-12 text-slate-500 mx-auto mb-4"></i>
+                        <h3 class="text-base sm:text-lg font-medium text-slate-300 mb-2">
                             Nenhuma solicitação encontrada
                         </h3>
-                        <p class="text-slate-500">
+                        <p class="text-sm sm:text-base text-slate-500 px-4">
                             Não há solicitações que correspondam aos filtros selecionados
                         </p>
                     </div>
@@ -158,7 +166,7 @@ class DashboardApp {
         }
 
         container.innerHTML = `
-            <div class="space-y-4">
+            <div class="space-y-3 sm:space-y-4">
                 ${requests.map(request => this.getRequestHTML(request)).join('')}
             </div>
         `;
@@ -178,15 +186,15 @@ class DashboardApp {
         const statusText = this.getStatusText(request.status);
 
         return `
-            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6 hover:border-slate-600 transition-colors">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 sm:p-6 hover:border-slate-600 transition-colors">
                 <div class="flex items-start justify-between">
-                    <div class="flex items-start space-x-4 flex-1">
+                    <div class="flex items-start space-x-3 sm:space-x-4 flex-1">
                         <!-- Poster -->
                         <div class="flex-shrink-0">
                             <img
                                 src="${posterUrl}"
                                 alt="${request.content_title}"
-                                class="w-16 h-24 object-cover rounded-lg border border-slate-700"
+                                class="w-12 h-18 sm:w-16 sm:h-24 object-cover rounded-lg border border-slate-700"
                                 onerror="this.src='/assets/images/placeholder-poster.jpg'"
                             />
                         </div>
@@ -195,10 +203,10 @@ class DashboardApp {
                         <div class="flex-1 min-w-0">
                             <div class="flex items-start justify-between mb-3">
                                 <div>
-                                    <h3 class="text-lg font-semibold text-white mb-1">
+                                    <h3 class="text-base sm:text-lg font-semibold text-white mb-1">
                                         ${request.content_title}
                                     </h3>
-                                    <div class="flex items-center space-x-4 text-sm text-slate-400">
+                                    <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-400">
                                         <div class="flex items-center space-x-1">
                                             <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
                                             <span>${request.content_type === 'movie' ? 'Filme' : 'Série'}</span>
@@ -208,25 +216,25 @@ class DashboardApp {
                                     </div>
                                 </div>
                                 
-                                <div class="flex items-center space-x-2 px-3 py-1 rounded-full border text-sm font-medium ${statusClass}">
+                                <div class="flex items-center space-x-2 px-2 sm:px-3 py-1 rounded-full border text-xs sm:text-sm font-medium ${statusClass}">
                                     <i data-lucide="${statusIcon}" class="h-4 w-4"></i>
-                                    <span>${statusText}</span>
+                                    <span class="hidden sm:inline">${statusText}</span>
                                 </div>
                             </div>
 
                             <!-- Requester Info -->
-                            <div class="grid md:grid-cols-2 gap-4 mb-4">
-                                <div class="flex items-center space-x-2 text-slate-300">
+                            <div class="grid sm:grid-cols-2 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                                <div class="flex items-center space-x-2 text-slate-300 text-sm sm:text-base">
                                     <i data-lucide="user" class="h-4 w-4 text-slate-400"></i>
-                                    <span>${request.requester_name}</span>
+                                    <span class="truncate">${request.requester_name}</span>
                                 </div>
-                                <div class="flex items-center space-x-2 text-slate-300">
+                                <div class="flex items-center space-x-2 text-slate-300 text-sm sm:text-base">
                                     <i data-lucide="phone" class="h-4 w-4 text-slate-400"></i>
                                     <a 
                                         href="https://wa.me/${request.requester_whatsapp}"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        class="hover:text-green-400 transition-colors"
+                                        class="hover:text-green-400 transition-colors truncate"
                                     >
                                         ${this.formatWhatsApp(request.requester_whatsapp)}
                                     </a>
@@ -234,34 +242,34 @@ class DashboardApp {
                             </div>
 
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-2 text-sm text-slate-400">
+                                <div class="flex items-center space-x-2 text-xs sm:text-sm text-slate-400">
                                     <i data-lucide="calendar" class="h-4 w-4"></i>
                                     <span>${this.formatDate(request.created_at)}</span>
                                 </div>
 
                                 <!-- Actions -->
-                                <div class="flex items-center space-x-2">
+                                <div class="flex items-center space-x-1 sm:space-x-2">
                                     <button
                                         onclick="dashboard.viewRequest(${request.id})"
-                                        class="flex items-center space-x-1 px-3 py-1 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                        class="flex items-center space-x-1 px-2 sm:px-3 py-1 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors text-xs sm:text-sm"
                                     >
                                         <i data-lucide="eye" class="h-4 w-4"></i>
-                                        <span>Ver</span>
+                                        <span class="hidden sm:inline">Ver</span>
                                     </button>
                                     ${request.status === 'pending' ? `
                                         <button
                                             onclick="dashboard.updateStatus(${request.id}, 'approved')"
-                                            class="flex items-center space-x-1 px-3 py-1 text-green-400 hover:text-green-300 hover:bg-green-500/10 rounded-lg transition-colors"
+                                            class="flex items-center space-x-1 px-2 sm:px-3 py-1 text-green-400 hover:text-green-300 hover:bg-green-500/10 rounded-lg transition-colors text-xs sm:text-sm"
                                         >
                                             <i data-lucide="check-circle" class="h-4 w-4"></i>
-                                            <span>Aprovar</span>
+                                            <span class="hidden sm:inline">Aprovar</span>
                                         </button>
                                         <button
                                             onclick="dashboard.updateStatus(${request.id}, 'denied')"
-                                            class="flex items-center space-x-1 px-3 py-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                                            class="flex items-center space-x-1 px-2 sm:px-3 py-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors text-xs sm:text-sm"
                                         >
                                             <i data-lucide="x-circle" class="h-4 w-4"></i>
-                                            <span>Negar</span>
+                                            <span class="hidden sm:inline">Negar</span>
                                         </button>
                                     ` : ''}
                                 </div>
@@ -566,9 +574,9 @@ class DashboardApp {
 
     showError(message) {
         document.getElementById('requestsList').innerHTML = `
-            <div class="text-center py-12">
+            <div class="text-center py-8 sm:py-12">
                 <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-6 max-w-md mx-auto">
-                    <p class="text-red-400 font-medium">${message}</p>
+                    <p class="text-sm sm:text-base text-red-400 font-medium px-4">${message}</p>
                 </div>
             </div>
         `;
