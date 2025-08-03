@@ -1,9 +1,9 @@
 <?php
 class Database {
     private $host = 'localhost';
-    private $db_name = 'movie_requests';
-    private $username = 'root';
-    private $password = '';
+    private $db_name = 'pedidos';
+    private $username = 'pedidos';
+    private $password = 'G01WLes%ejljs_m9';
     private $conn;
 
     public function getConnection() {
