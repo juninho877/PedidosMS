@@ -27,7 +27,31 @@ class TMDBController {
                     $results = $this->tmdbService->searchTVShows($query, $year, $page);
                     break;
                 default:
-                    $results = $this->tmdbService->searchMulti($query, $year, $page);
+                    $results = $this->tmdbService->searchMulti($query, null, $page);
+                    
+                    // Filtrar por ano no lado do servidor se especificado
+                    if ($year && isset($results['results'])) {
+                        $filteredResults = [];
+                        foreach ($results['results'] as $item) {
+                            $itemYear = null;
+                            
+                            // Obter o ano baseado no tipo de mídia
+                            if ($item['media_type'] === 'movie' && !empty($item['release_date'])) {
+                                $itemYear = date('Y', strtotime($item['release_date']));
+                            } elseif ($item['media_type'] === 'tv' && !empty($item['first_air_date'])) {
+                                $itemYear = date('Y', strtotime($item['first_air_date']));
+                            }
+                            
+                            // Incluir apenas se o ano corresponder
+                            if ($itemYear && $itemYear == $year) {
+                                $filteredResults[] = $item;
+                            }
+                        }
+                        
+                        // Substituir os resultados pelos filtrados
+                        $results['results'] = $filteredResults;
+                        $results['total_results'] = count($filteredResults);
+                    }
                     break;
             }
 

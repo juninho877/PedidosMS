@@ -32,9 +32,6 @@ class TMDBService {
 
     public function searchMulti($query, $year = null, $page = 1) {
         $endpoint = '/search/multi?query=' . urlencode($query) . '&page=' . $page . '&language=pt-BR';
-        if ($year) {
-            $endpoint .= '&year=' . $year;
-        }
         return $this->makeRequest($endpoint);
     }
 
