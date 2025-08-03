@@ -4,6 +4,9 @@ define('APP_ROOT', dirname(__DIR__));
 define('BASE_URL', 'http://localhost');
 define('SITE_NAME', 'CineRequest');
 
+// Incluir classe Database
+require_once __DIR__ . '/database.php';
+
 // Configurações da API TMDB
 define('TMDB_API_KEY', 'e9a244e506c28b7144015ccb7efc0a76');
 define('TMDB_BASE_URL', 'https://api.themoviedb.org/3');
