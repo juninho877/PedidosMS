@@ -1,5 +1,6 @@
 <?php
 // Configurações gerais do sistema
+define('APP_ROOT', dirname(__DIR__));
 define('BASE_URL', 'http://localhost');
 define('SITE_NAME', 'CineRequest');
 
@@ -28,10 +29,10 @@ header('X-XSS-Protection: 1; mode=block');
 // Autoload das classes
 spl_autoload_register(function ($class) {
     $paths = [
-        'models/',
-        'controllers/',
-        'services/',
-        'middleware/'
+        APP_ROOT . '/models/',
+        APP_ROOT . '/controllers/',
+        APP_ROOT . '/services/',
+        APP_ROOT . '/middleware/'
     ];
     
     foreach ($paths as $path) {
