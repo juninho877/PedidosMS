@@ -54,19 +54,20 @@ class DetailsApp {
                     </div>
                 `}
                 
-                <div class="absolute bottom-0 left-0 right-0 p-8">
+                <!-- Mobile: Static layout, Desktop: Absolute positioning -->
+                <div class="lg:absolute lg:bottom-0 lg:left-0 lg:right-0 p-4 sm:p-6 lg:p-8 -mt-16 lg:mt-0 relative lg:relative z-10">
                     <div class="max-w-7xl mx-auto px-4 sm:px-0">
                         <div class="flex flex-col lg:flex-row gap-6 sm:gap-8">
                             <div class="flex-shrink-0">
                                 <img
                                     src="${posterUrl}"
                                     alt="${title}"
-                                    class="w-48 h-72 sm:w-56 sm:h-84 lg:w-64 lg:h-96 object-cover rounded-lg shadow-xl border border-slate-700 mx-auto lg:mx-0"
+                                    class="w-32 h-48 sm:w-48 sm:h-72 md:w-56 md:h-84 lg:w-64 lg:h-96 object-cover rounded-lg shadow-xl border border-slate-700 mx-auto lg:mx-0"
                                     onerror="this.src='/assets/images/placeholder-poster.jpg'"
                                 />
                             </div>
                             <div class="flex-1 space-y-3 sm:space-y-4 text-center lg:text-left">
-                                <h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight">${title}</h1>
+                                <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight">${title}</h1>
                                 <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-slate-300 text-sm sm:text-base">
                                     <div class="flex items-center space-x-2">
                                         <i data-lucide="calendar" class="h-5 w-5"></i>
@@ -89,13 +90,13 @@ class DetailsApp {
                                         </div>
                                     ` : ''}
                                 </div>
-                                <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto lg:mx-0">
+                                <p class="text-sm sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto lg:mx-0 line-clamp-3 lg:line-clamp-none">
                                     ${content.overview || 'Sinopse não disponível.'}
                                 </p>
                                 <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
                                     <button
                                         id="requestBtn"
-                                        class="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg w-full sm:w-auto"
+                                        class="flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg w-full sm:w-auto text-sm sm:text-base"
                                     >
                                         <i data-lucide="message-square" class="h-5 w-5"></i>
                                         <span>Solicitar Conteúdo</span>
@@ -105,7 +106,7 @@ class DetailsApp {
                                             href="https://www.youtube.com/embed/${trailer.key}"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            class="flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors w-full sm:w-auto"
+                                            class="flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors w-full sm:w-auto text-sm sm:text-base"
                                         >
                                             <i data-lucide="play" class="h-5 w-5"></i>
                                             <span>Assistir Trailer</span>
