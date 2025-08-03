@@ -287,6 +287,20 @@ class DashboardApp {
                 throw new Error(request.error || 'Erro ao carregar detalhes');
             }
 
+            // Buscar informações adicionais do TMDB
+            try {
+                const tmdbResponse = await fetch(`/api/tmdb.php/${request.content_type}/${request.content_id}`);
+                const tmdbData = await tmdbResponse.json();
+                
+                if (tmdbResponse.ok) {
+                    // Combinar dados da solicitação com dados do TMDB
+                    request.tmdb_data = tmdbData;
+                }
+            } catch (tmdbError) {
+                console.warn('Erro ao buscar dados do TMDB:', tmdbError);
+                // Continuar sem os dados do TMDB
+            }
+            
             this.showRequestModal(request);
         } catch (error) {
             this.showToast(error.message, 'error');
@@ -327,6 +341,16 @@ class DashboardApp {
         const posterUrl = request.poster_path ? 
             `https://image.tmdb.org/t/p/w200${request.poster_path}` : 
             '/assets/images/placeholder-poster.jpg';
+
+        // Extrair informações do TMDB se disponíveis
+        const tmdbData = request.tmdb_data;
+        const releaseDate = tmdbData ? (tmdbData.release_date || tmdbData.first_air_date) : null;
+        const releaseYear = releaseDate ? new Date(releaseDate).getFullYear() : null;
+        const rating = tmdbData ? tmdbData.vote_average : null;
+        const overview = tmdbData ? tmdbData.overview : null;
+        const genres = tmdbData ? tmdbData.genres : null;
+        const runtime = tmdbData ? tmdbData.runtime : null;
+        const numberOfSeasons = tmdbData ? tmdbData.number_of_seasons : null;
 
         modal.innerHTML = `
             <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -439,6 +463,57 @@ class DashboardApp {
                                     <h4 class="text-xl font-semibold text-white mb-2">${request.content_title}</h4>
                                     <p class="text-slate-400">${request.content_type === 'movie' ? 'Filme' : 'Série'}</p>
                                 </div>
+                                    <!-- Informações básicas do TMDB -->
+                                    <div class="bg-slate-700/50 rounded-lg p-4 space-y-3 text-left">
+                                        ${releaseYear ? `
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-slate-400">Ano de Lançamento:</span>
+                                                <span class="text-white font-medium">${releaseYear}</span>
+                                            </div>
+                                        ` : ''}
+                                        ${rating ? `
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-slate-400">Avaliação TMDB:</span>
+                                                <div class="flex items-center space-x-1">
+                                                    <i data-lucide="star" class="h-4 w-4 text-yellow-400"></i>
+                                                    <span class="text-white font-medium">${rating.toFixed(1)}/10</span>
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                        ${runtime ? `
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-slate-400">Duração:</span>
+                                                <span class="text-white font-medium">${runtime} min</span>
+                                            </div>
+                                        ` : ''}
+                                        ${numberOfSeasons ? `
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-slate-400">Temporadas:</span>
+                                                <span class="text-white font-medium">${numberOfSeasons}</span>
+                                            </div>
+                                        ` : ''}
+                                        ${genres && genres.length > 0 ? `
+                                            <div>
+                                                <span class="text-slate-400 block mb-2">Gêneros:</span>
+                                                <div class="flex flex-wrap gap-1">
+                                                    ${genres.slice(0, 3).map(genre => `
+                                                        <span class="bg-slate-600 text-slate-200 px-2 py-1 rounded text-xs">
+                                                            ${genre.name}
+                                                        </span>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    
+                                    ${overview ? `
+                                        <div class="bg-slate-700/50 rounded-lg p-4 mt-4">
+                                            <h5 class="text-sm font-medium text-slate-300 mb-2">Sinopse:</h5>
+                                            <p class="text-slate-400 text-sm leading-relaxed line-clamp-4">
+                                                ${overview}
+                                            </p>
+                                        </div>
+                                    ` : ''}
                             </div>
                         </div>
                     </div>
