@@ -1,6 +1,6 @@
 <?php
 require_once 'config/config.php';
- 
+
 $type = $_GET['type'] ?? '';
 $id = $_GET['id'] ?? '';
 
