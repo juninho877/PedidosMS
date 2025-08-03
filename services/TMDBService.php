@@ -38,7 +38,7 @@ class TMDBService {
     public function searchMovies($query, $year = null, $page = 1) {
         $endpoint = '/search/movie?query=' . urlencode($query) . '&page=' . $page . '&language=pt-BR';
         if ($year) {
-            $endpoint .= '&year=' . $year;
+            $endpoint .= '&primary_release_year=' . $year;
         }
         return $this->makeRequest($endpoint);
     }
