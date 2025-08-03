@@ -360,8 +360,7 @@ class DetailsApp {
                     <div class="bg-slate-700/50 rounded-lg p-4">
                         <p class="text-sm text-slate-400">
                             <strong>Importante:</strong> Ao solicitar este conteúdo, você receberá atualizações sobre o status 
-                            da sua solicitação através do WhatsApp fornecido. Nossa equipe analisará a disponibilidade 
-                            e entrará em contato em até 24 horas.
+                            da sua solicitação através do WhatsApp fornecido. Nossa equipe analisará a disponibilidade.
                         </p>
                     </div>
 
