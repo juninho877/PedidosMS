@@ -31,7 +31,7 @@ class TMDBService {
     }
 
     public function searchMulti($query, $year = null, $page = 1) {
-        $endpoint = '/search/multi?query=' . urlencode($query) . '&page=' . $page;
+        $endpoint = '/search/multi?query=' . urlencode($query) . '&page=' . $page . '&language=pt-BR';
         if ($year) {
             $endpoint .= '&year=' . $year;
         }
@@ -39,7 +39,7 @@ class TMDBService {
     }
 
     public function searchMovies($query, $year = null, $page = 1) {
-        $endpoint = '/search/movie?query=' . urlencode($query) . '&page=' . $page;
+        $endpoint = '/search/movie?query=' . urlencode($query) . '&page=' . $page . '&language=pt-BR';
         if ($year) {
             $endpoint .= '&year=' . $year;
         }
@@ -47,7 +47,7 @@ class TMDBService {
     }
 
     public function searchTVShows($query, $year = null, $page = 1) {
-        $endpoint = '/search/tv?query=' . urlencode($query) . '&page=' . $page;
+        $endpoint = '/search/tv?query=' . urlencode($query) . '&page=' . $page . '&language=pt-BR';
         if ($year) {
             $endpoint .= '&first_air_date_year=' . $year;
         }
@@ -55,12 +55,12 @@ class TMDBService {
     }
 
     public function getMovieDetails($id) {
-        $endpoint = '/movie/' . $id . '?append_to_response=credits,videos';
+        $endpoint = '/movie/' . $id . '?append_to_response=credits,videos&language=pt-BR';
         return $this->makeRequest($endpoint);
     }
 
     public function getTVDetails($id) {
-        $endpoint = '/tv/' . $id . '?append_to_response=credits,videos';
+        $endpoint = '/tv/' . $id . '?append_to_response=credits,videos&language=pt-BR';
         return $this->makeRequest($endpoint);
     }
 
