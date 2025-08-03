@@ -319,8 +319,9 @@ class DetailsApp {
                         <input
                             type="text"
                             id="requesterWhatsapp"
+                            value="55"
                             class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="5511999999999"
+                            placeholder="11999999999"
                             required
                         />
                         <div id="whatsappPreview" class="text-slate-400 text-sm mt-1 hidden"></div>
@@ -410,10 +411,23 @@ class DetailsApp {
 
         // WhatsApp formatting
         whatsappInput.addEventListener('input', (e) => {
-            const value = e.target.value.replace(/\D/g, '');
+            let value = e.target.value.replace(/\D/g, '');
+            
+            // Garantir que sempre comece com 55
+            if (!value.startsWith('55')) {
+                if (value.length === 0) {
+                    value = '55';
+                } else if (value.startsWith('5') && value.length === 1) {
+                    value = '55';
+                } else if (!value.startsWith('55')) {
+                    value = '55' + value;
+                }
+                e.target.value = value;
+            }
+            
             const preview = document.getElementById('whatsappPreview');
             
-            if (value.length > 0) {
+            if (value.length > 2) {
                 const formatted = this.formatWhatsApp(value);
                 preview.textContent = `Visualização: +${formatted}`;
                 preview.classList.remove('hidden');
