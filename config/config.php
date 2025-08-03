@@ -4,6 +4,9 @@ define('APP_ROOT', dirname(__DIR__));
 define('BASE_URL', 'http://localhost');
 define('SITE_NAME', 'CineRequest');
 
+// Incluir autoloader do Composer
+require_once APP_ROOT . '/vendor/autoload.php';
+
 // Incluir classe Database
 require_once __DIR__ . '/database.php';
 
