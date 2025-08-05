@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# Landing Page - Redirect root to landing page
+RewriteRule ^$ landing.php [L]
+RewriteRule ^index\.php$ landing.php [R=301,L]
+
 # Redirect to HTTPS (uncomment in production)
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
