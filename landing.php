@@ -46,7 +46,7 @@
                     <a href="#demo" class="block px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Demo</a>
                     <a href="#contact" class="block px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Contato</a>
                     <button class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                        Começar Grátis
+                        <a href="onboarding.php">Começar Grátis</a>
                     </button>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                 </p>
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                     <button class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all transform hover:scale-105 shadow-lg">
-                        Começar Teste Grátis
+                        <a href="onboarding.php">Começar Teste Grátis</a>
                     </button>
                     <button class="border border-slate-600 hover:border-slate-500 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
                         Ver Demonstração
@@ -208,7 +208,7 @@
                         </li>
                     </ul>
                     <button class="w-full bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg font-semibold transition-colors">
-                        Começar Grátis
+                        <a href="onboarding.php">Começar Grátis</a>
                     </button>
                 </div>
 
@@ -248,7 +248,7 @@
                         </li>
                     </ul>
                     <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors">
-                        Começar Teste
+                        <a href="onboarding.php">Começar Teste</a>
                     </button>
                 </div>
 
