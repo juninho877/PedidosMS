@@ -480,6 +480,13 @@ class TenantsApp {
             if (data.slug && data.slug.length < 2) {
                 errors.slug = 'Slug deve ter pelo menos 2 caracteres';
             }
+            if (!data.password || data.password.length < 6) {
+                errors.password = 'Senha deve ter pelo menos 6 caracteres';
+            }
+        } else {
+            if (data.password && data.password.length < 6) {
+                errors.password = 'Senha deve ter pelo menos 6 caracteres';
+            }
         }
 
         if (data.logo_url && !this.isValidUrl(data.logo_url)) {
