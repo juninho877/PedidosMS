@@ -1,15 +1,8 @@
 <?php
 require_once '../config/config.php';
 
-// Check if already logged in as client
-if (isset($_COOKIE['client_auth_token'])) {
-    $authService = new AuthService();
-    $clientData = $authService->validateClientToken($_COOKIE['client_auth_token']);
-    if ($clientData) {
-        header('Location: /client/dashboard.php');
-        exit;
-    }
-}
+$middleware = new ClientAuthMiddleware();
+$middleware->redirectIfClientAuthenticated();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
