@@ -13,6 +13,7 @@ class Request {
     public $episode;
     public $status;
     public $poster_path;
+    public $tenant_id;
     public $created_at;
 
     public function __construct($db) {
@@ -21,11 +22,12 @@ class Request {
 
     public function create() {
         $query = "INSERT INTO " . $this->table . " 
-                  (content_id, content_type, content_title, requester_name, requester_whatsapp, season, episode, poster_path) 
-                  VALUES (:content_id, :content_type, :content_title, :requester_name, :requester_whatsapp, :season, :episode, :poster_path)";
+                  (tenant_id, content_id, content_type, content_title, requester_name, requester_whatsapp, season, episode, poster_path) 
+                  VALUES (:tenant_id, :content_id, :content_type, :content_title, :requester_name, :requester_whatsapp, :season, :episode, :poster_path)";
         
         $stmt = $this->conn->prepare($query);
         
+        $stmt->bindParam(':tenant_id', $this->tenant_id);
         $stmt->bindParam(':content_id', $this->content_id);
         $stmt->bindParam(':content_type', $this->content_type);
         $stmt->bindParam(':content_title', $this->content_title);
@@ -41,6 +43,12 @@ class Request {
     public function getAll($filters = []) {
         $query = "SELECT * FROM " . $this->table . " WHERE 1=1";
         $params = [];
+
+        // Filtrar por tenant se especificado
+        if (!empty($filters['tenant_id'])) {
+            $query .= " AND tenant_id = :tenant_id";
+            $params[':tenant_id'] = $filters['tenant_id'];
+        }
 
         if (!empty($filters['status'])) {
             $query .= " AND status = :status";
@@ -117,6 +125,7 @@ class Request {
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch();
             $this->id = $row['id'];
+            $this->tenant_id = $row['tenant_id'];
             $this->content_id = $row['content_id'];
             $this->content_type = $row['content_type'];
             $this->content_title = $row['content_title'];

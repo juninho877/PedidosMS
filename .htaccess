@@ -4,6 +4,11 @@ RewriteEngine On
 RewriteRule ^$ landing.php [L]
 RewriteRule ^index\.php$ landing.php [R=301,L]
 
+# Tenant Routes - Must come before API routes
+# Capture tenant slug and route to tenant router
+RewriteRule ^([a-zA-Z0-9\-_]+)/?$ public/tenant_router.php [QSA,L]
+RewriteRule ^([a-zA-Z0-9\-_]+)/(.*)$ public/tenant_router.php [QSA,L]
+
 # Redirect to HTTPS (uncomment in production)
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -13,6 +18,7 @@ RewriteRule ^api/auth/(.*)$ api/auth.php/$1 [QSA,L]
 RewriteRule ^api/requests/(.*)$ api/requests.php/$1 [QSA,L]
 RewriteRule ^api/requests$ api/requests.php [QSA,L]
 RewriteRule ^api/tmdb/(.*)$ api/tmdb.php/$1 [QSA,L]
+RewriteRule ^api/tenant-requests$ api/tenant-requests.php [QSA,L]
 
 # Security Headers
 Header always set X-Content-Type-Options nosniff

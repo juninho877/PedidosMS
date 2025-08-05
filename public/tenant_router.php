@@ -1,0 +1,42 @@
+<?php
+require_once '../config/config.php';
+
+// Extrair o slug do tenant e o caminho da URL
+$request_uri = $_SERVER['REQUEST_URI'];
+$path_parts = explode('/', trim($request_uri, '/'));
+
+// Primeiro segmento é o slug do tenant
+$tenant_slug = $path_parts[0] ?? '';
+
+// Resto do caminho
+$route = $path_parts[1] ?? '';
+$additional_params = array_slice($path_parts, 2);
+
+// Inicializar middleware do tenant
+$tenantMiddleware = new TenantMiddleware();
+$tenant = $tenantMiddleware->requireTenant($tenant_slug);
+
+// Definir rotas disponíveis para tenants
+$routes = [
+    '' => 'home.php',           // Página inicial
+    'home' => 'home.php',       // Página inicial alternativa
+    'search' => 'search.php',   // Página de pesquisa
+    'details' => 'details.php', // Página de detalhes
+];
+
+// Verificar se a rota existe
+if (!array_key_exists($route, $routes)) {
+    http_response_code(404);
+    include '404.php';
+    exit;
+}
+
+// Incluir o arquivo da rota
+$file_path = $routes[$route];
+if (file_exists($file_path)) {
+    include $file_path;
+} else {
+    http_response_code(404);
+    include '404.php';
+}
+?>
