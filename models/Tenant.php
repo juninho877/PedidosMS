@@ -20,6 +20,31 @@ class Tenant {
         $this->conn = $db;
     }
 
+    public function findById($id) {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id AND active = 1 LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch();
+            $this->id = $row['id'];
+            $this->slug = $row['slug'];
+            $this->name = $row['name'];
+            $this->logo_url = $row['logo_url'];
+            $this->favicon_url = $row['favicon_url'];
+            $this->hero_title = $row['hero_title'];
+            $this->hero_subtitle = $row['hero_subtitle'];
+            $this->hero_description = $row['hero_description'];
+            $this->primary_color = $row['primary_color'];
+            $this->secondary_color = $row['secondary_color'];
+            $this->created_at = $row['created_at'];
+            $this->updated_at = $row['updated_at'];
+            return true;
+        }
+        return false;
+    }
+
     public function findBySlug($slug) {
         $query = "SELECT * FROM " . $this->table . " WHERE slug = :slug AND active = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);

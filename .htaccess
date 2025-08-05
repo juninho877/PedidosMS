@@ -4,6 +4,10 @@ RewriteEngine On
 RewriteRule ^$ landing.php [L]
 RewriteRule ^index\.php$ landing.php [R=301,L]
 
+# Client Dashboard Routes
+RewriteRule ^client/login/?$ client/login.php [L]
+RewriteRule ^client/dashboard/?$ client/dashboard.php [L]
+
 # Tenant Routes - Must come before API routes
 # Capture tenant slug and route to tenant router
 RewriteRule ^([a-zA-Z0-9\-_]+)/?$ public/tenant_router.php [QSA,L]
