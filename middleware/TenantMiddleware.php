@@ -37,7 +37,7 @@ class TenantMiddleware {
         if (!$this->identifyTenant($slug)) {
             // Tenant não encontrado - redirecionar para 404 ou página de erro
             http_response_code(404);
-            include 'public/404.php';
+            include '../public/404.php';
             exit;
         }
         

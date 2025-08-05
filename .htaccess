@@ -8,9 +8,15 @@ RewriteRule ^index\.php$ landing.php [R=301,L]
 RewriteRule ^client/login/?$ client/login.php [L]
 RewriteRule ^client/dashboard/?$ client/dashboard.php [L]
 
+# Client Dashboard Routes
+RewriteRule ^client/login/?$ client/login.php [L]
+RewriteRule ^client/dashboard/?$ client/dashboard.php [L]
+
 # Tenant Routes - Must come before API routes
 # Capture tenant slug and route to tenant router
+RewriteCond %{REQUEST_URI} !^/(api|admin|client|assets|vendor)/
 RewriteRule ^([a-zA-Z0-9\-_]+)/?$ public/tenant_router.php [QSA,L]
+RewriteCond %{REQUEST_URI} !^/(api|admin|client|assets|vendor)/
 RewriteRule ^([a-zA-Z0-9\-_]+)/(.*)$ public/tenant_router.php [QSA,L]
 
 # Redirect to HTTPS (uncomment in production)

@@ -97,5 +97,35 @@ class AuthService {
     public function clearClientAuthCookie() {
         setcookie('client_auth_token', '', time() - 3600, '/', '', false, true);
     }
+
+    public function generateClientToken($client_data) {
+        $issued_at = time();
+        $expiration_time = $issued_at + (24 * 60 * 60); // 24 horas
+        
+        $payload = [
+            'iat' => $issued_at,
+            'exp' => $expiration_time,
+            'data' => $client_data
+        ];
+
+        return JWT::encode($payload, $this->secret_key, $this->algorithm);
+    }
+
+    public function validateClientToken($token) {
+        try {
+            $decoded = JWT::decode($token, new Key($this->secret_key, $this->algorithm));
+            return (array) $decoded->data;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function setClientAuthCookie($token) {
+        setcookie('client_auth_token', $token, time() + (24 * 60 * 60), '/', '', false, true);
+    }
+
+    public function clearClientAuthCookie() {
+        setcookie('client_auth_token', '', time() - 3600, '/', '', false, true);
+    }
 }
 ?>
