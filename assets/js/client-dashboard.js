@@ -100,7 +100,7 @@ if (!$tenantConfig) {
                 <p class="text-base sm:text-lg lg:text-xl text-slate-300 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
                     <?php echo htmlspecialchars($tenantConfig['hero_description'] ?: $tenantConfig['site_description']); ?>
                 </p>
-    renderRequestModal(request, tmdbData = null) {
+                <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="inline-flex items-center space-x-2 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
                     <i data-lucide="search" class="h-5 w-5 sm:h-6 sm:w-6"></i>
                     <span>Começar Pesquisa</span>
                 </a>
@@ -113,103 +113,6 @@ if (!$tenantConfig) {
         <div class="text-center mb-12 sm:mb-16">
             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Como Funciona</h2>
             <p class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto px-4">
-        // Informações do TMDB
-        const posterUrl = tmdbData && tmdbData.poster_path ? 
-            `https://image.tmdb.org/t/p/w400${tmdbData.poster_path}` : 
-            '/assets/images/placeholder-poster.jpg';
-        
-        const releaseYear = tmdbData ? 
-            (tmdbData.release_date || tmdbData.first_air_date ? 
-                new Date(tmdbData.release_date || tmdbData.first_air_date).getFullYear() : 'N/A') : 'N/A';
-        
-        const rating = tmdbData ? tmdbData.vote_average?.toFixed(1) || 'N/A' : 'N/A';
-        const overview = tmdbData ? tmdbData.overview || 'Sinopse não disponível.' : 'Carregando informações...';
-        
-        // Gêneros
-        const genres = tmdbData && tmdbData.genres ? 
-            tmdbData.genres.map(genre => `<span class="inline-block bg-blue-600/20 text-blue-300 px-2 py-1 rounded-full text-xs mr-2 mb-2">${genre.name}</span>`).join('') : 
-            '<span class="text-slate-400 text-sm">Não disponível</span>';
-        
-        // Informações específicas por tipo
-        let specificInfo = '';
-        if (tmdbData) {
-            if (request.content_type === 'movie') {
-                const runtime = tmdbData.runtime ? `${tmdbData.runtime} min` : 'N/A';
-                const budget = tmdbData.budget && tmdbData.budget > 0 ? 
-                    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD' }).format(tmdbData.budget) : 'N/A';
-                
-                specificInfo = `
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="text-slate-400">Duração:</span>
-                            <span class="text-white ml-2">${runtime}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400">Orçamento:</span>
-                            <span class="text-white ml-2">${budget}</span>
-                        </div>
-                    </div>
-                `;
-            } else {
-                const seasons = tmdbData.number_of_seasons || 'N/A';
-                const episodes = tmdbData.number_of_episodes || 'N/A';
-                const status = tmdbData.status || 'N/A';
-                
-                specificInfo = `
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="text-slate-400">Temporadas:</span>
-                            <span class="text-white ml-2">${seasons}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400">Episódios:</span>
-                            <span class="text-white ml-2">${episodes}</span>
-                        </div>
-                        <div class="col-span-2">
-                            <span class="text-slate-400">Status:</span>
-                            <span class="text-white ml-2">${status}</span>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-        
-        // Produtoras
-        const productionCompanies = tmdbData && tmdbData.production_companies ? 
-            tmdbData.production_companies.slice(0, 3).map(company => company.name).join(', ') : 'N/A';
-        
-        // Países
-        const countries = tmdbData && tmdbData.production_countries ? 
-            tmdbData.production_countries.map(country => country.name).join(', ') : 'N/A';
-        
-        // Elenco
-        let castSection = '';
-        if (tmdbData && tmdbData.credits && tmdbData.credits.cast) {
-            const cast = tmdbData.credits.cast.slice(0, 8);
-            castSection = `
-                <div class="mb-6">
-                    <h4 class="text-lg font-semibold text-white mb-4">Elenco Principal</h4>
-                    <div class="grid grid-cols-4 gap-4">
-                        ${cast.map(actor => `
-                            <div class="text-center">
-                                <img
-                                    src="${actor.profile_path ? 
-                                        `https://image.tmdb.org/t/p/w200${actor.profile_path}` : 
-                                        '/assets/images/placeholder-person.jpg'
-                                    }"
-                                    alt="${actor.name}"
-                                    class="w-full h-20 object-cover rounded-lg mb-2"
-                                    onerror="this.src='/assets/images/placeholder-person.jpg'"
-                                />
-                                <p class="text-white font-medium text-xs">${actor.name}</p>
-                                <p class="text-slate-400 text-xs">${actor.character}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-        
                 Um processo simples e eficiente para solicitar seus conteúdos favoritos
             </p>
         </div>
@@ -231,63 +134,6 @@ if (!$tenantConfig) {
                 </div>
                 <h3 class="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">2. Solicite</h3>
                 <p class="text-sm sm:text-base text-slate-400">
-                            <!-- Informações do Conteúdo -->
-                            <div class="flex gap-6 mb-8">
-                                <div class="flex-shrink-0">
-                                    <img
-                                        src="${posterUrl}"
-                                        alt="${request.content_title}"
-                                        class="w-32 h-48 object-cover rounded-lg border border-slate-600"
-                                        onerror="this.src='/assets/images/placeholder-poster.jpg'"
-                                    />
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-2xl font-bold text-white mb-2">${request.content_title}</h3>
-                                    <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-slate-300">
-                                        <div class="flex items-center space-x-1">
-                                            <i data-lucide="calendar" class="h-4 w-4"></i>
-                                            <span>${releaseYear}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <i data-lucide="star" class="h-4 w-4 text-yellow-400"></i>
-                                            <span>${rating}/10</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
-                                            <span>${contentType}</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-slate-300 text-sm leading-relaxed mb-4">${overview}</p>
-                                    
-                                    <!-- Informações Específicas -->
-                                    ${specificInfo}
-                                </div>
-                            </div>
-                            
-                            <!-- Gêneros -->
-                            <div class="mb-6">
-                                <h4 class="text-lg font-semibold text-white mb-3">Gêneros</h4>
-                                <div class="flex flex-wrap">
-                                    ${genres}
-                                </div>
-                            </div>
-                            
-                            <!-- Informações de Produção -->
-                            <div class="mb-6">
-                                <h4 class="text-lg font-semibold text-white mb-3">Produção</h4>
-                                <div class="grid grid-cols-1 gap-3 text-sm">
-                                    <div>
-                                        <span class="text-slate-400">Produtoras:</span>
-                                        <span class="text-white ml-2">${productionCompanies}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-slate-400">Países:</span>
-                                        <span class="text-white ml-2">${countries}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            ${castSection}
                     Preencha um formulário simples com seus dados de contato e especificações do conteúdo desejado.
                 </p>
             </div>
@@ -368,6 +214,175 @@ if (!$tenantConfig) {
                 icon.setAttribute('data-lucide', 'x');
             }
             
+            lucide.createIcons();
+        });
+
+        function renderRequestModal(request, tmdbData = null) {
+            // Informações do TMDB
+            const posterUrl = tmdbData && tmdbData.poster_path ? 
+                `https://image.tmdb.org/t/p/w400${tmdbData.poster_path}` : 
+                '/assets/images/placeholder-poster.jpg';
+            
+            const releaseYear = tmdbData ? 
+                (tmdbData.release_date || tmdbData.first_air_date ? 
+                    new Date(tmdbData.release_date || tmdbData.first_air_date).getFullYear() : 'N/A') : 'N/A';
+            
+            const rating = tmdbData ? tmdbData.vote_average?.toFixed(1) || 'N/A' : 'N/A';
+            const overview = tmdbData ? tmdbData.overview || 'Sinopse não disponível.' : 'Carregando informações...';
+            
+            // Gêneros
+            const genres = tmdbData && tmdbData.genres ? 
+                tmdbData.genres.map(genre => `<span class="inline-block bg-blue-600/20 text-blue-300 px-2 py-1 rounded-full text-xs mr-2 mb-2">${genre.name}</span>`).join('') : 
+                '<span class="text-slate-400 text-sm">Não disponível</span>';
+            
+            // Informações específicas por tipo
+            let specificInfo = '';
+            if (tmdbData) {
+                if (request.content_type === 'movie') {
+                    const runtime = tmdbData.runtime ? `${tmdbData.runtime} min` : 'N/A';
+                    const budget = tmdbData.budget && tmdbData.budget > 0 ? 
+                        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD' }).format(tmdbData.budget) : 'N/A';
+                    
+                    specificInfo = `
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-slate-400">Duração:</span>
+                                <span class="text-white ml-2">${runtime}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400">Orçamento:</span>
+                                <span class="text-white ml-2">${budget}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const seasons = tmdbData.number_of_seasons || 'N/A';
+                    const episodes = tmdbData.number_of_episodes || 'N/A';
+                    const status = tmdbData.status || 'N/A';
+                    
+                    specificInfo = `
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-slate-400">Temporadas:</span>
+                                <span class="text-white ml-2">${seasons}</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400">Episódios:</span>
+                                <span class="text-white ml-2">${episodes}</span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="text-slate-400">Status:</span>
+                                <span class="text-white ml-2">${status}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Produtoras
+            const productionCompanies = tmdbData && tmdbData.production_companies ? 
+                tmdbData.production_companies.slice(0, 3).map(company => company.name).join(', ') : 'N/A';
+            
+            // Países
+            const countries = tmdbData && tmdbData.production_countries ? 
+                tmdbData.production_countries.map(country => country.name).join(', ') : 'N/A';
+            
+            // Elenco
+            let castSection = '';
+            if (tmdbData && tmdbData.credits && tmdbData.credits.cast) {
+                const cast = tmdbData.credits.cast.slice(0, 8);
+                castSection = `
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-white mb-4">Elenco Principal</h4>
+                        <div class="grid grid-cols-4 gap-4">
+                            ${cast.map(actor => `
+                                <div class="text-center">
+                                    <img
+                                        src="${actor.profile_path ? 
+                                            `https://image.tmdb.org/t/p/w200${actor.profile_path}` : 
+                                            '/assets/images/placeholder-person.jpg'
+                                        }"
+                                        alt="${actor.name}"
+                                        class="w-full h-20 object-cover rounded-lg mb-2"
+                                        onerror="this.src='/assets/images/placeholder-person.jpg'"
+                                    />
+                                    <p class="text-white font-medium text-xs">${actor.name}</p>
+                                    <p class="text-slate-400 text-xs">${actor.character}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const contentType = request.content_type === 'movie' ? 'Filme' : 'Série';
+            
+            // Render modal content
+            const modalContent = `
+                <!-- Informações do Conteúdo -->
+                <div class="flex gap-6 mb-8">
+                    <div class="flex-shrink-0">
+                        <img
+                            src="${posterUrl}"
+                            alt="${request.content_title}"
+                            class="w-32 h-48 object-cover rounded-lg border border-slate-600"
+                            onerror="this.src='/assets/images/placeholder-poster.jpg'"
+                        />
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-white mb-2">${request.content_title}</h3>
+                        <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-slate-300">
+                            <div class="flex items-center space-x-1">
+                                <i data-lucide="calendar" class="h-4 w-4"></i>
+                                <span>${releaseYear}</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <i data-lucide="star" class="h-4 w-4 text-yellow-400"></i>
+                                <span>${rating}/10</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
+                                <span>${contentType}</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-4">${overview}</p>
+                        
+                        <!-- Informações Específicas -->
+                        ${specificInfo}
+                    </div>
+                </div>
+                
+                <!-- Gêneros -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-white mb-3">Gêneros</h4>
+                    <div class="flex flex-wrap">
+                        ${genres}
+                    </div>
+                </div>
+                
+                <!-- Informações de Produção -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-white mb-3">Produção</h4>
+                    <div class="grid grid-cols-1 gap-3 text-sm">
+                        <div>
+                            <span class="text-slate-400">Produtoras:</span>
+                            <span class="text-white ml-2">${productionCompanies}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400">Países:</span>
+                            <span class="text-white ml-2">${countries}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                ${castSection}
+            `;
+            
+            // Display modal (implementation depends on your modal system)
+            console.log(modalContent);
+        }
+
+        async function loadTmdbData(request) {
             // Buscar informações do TMDB
             let tmdbData = null;
             try {
@@ -379,8 +394,8 @@ if (!$tenantConfig) {
                 console.warn('Erro ao buscar dados do TMDB:', error);
             }
 
-            lucide.createIcons();
             this.renderRequestModal(request, tmdbData);
+        }
 
         lucide.createIcons();
     </script>
