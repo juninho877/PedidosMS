@@ -206,18 +206,17 @@ if (!$tenantConfig) {
             const menu = document.getElementById('mobile-menu');
             const icon = this.querySelector('i');
             
+            menu.classList.toggle('hidden');
+            
             if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                icon.setAttribute('data-lucide', 'x');
-            } else {
-                menu.classList.add('hidden');
                 icon.setAttribute('data-lucide', 'menu');
+            } else {
+                icon.setAttribute('data-lucide', 'x');
             }
             
             lucide.createIcons();
         });
 
-        // Initialize Lucide icons
         lucide.createIcons();
     </script>
 </body>
