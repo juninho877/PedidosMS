@@ -27,6 +27,12 @@ ini_set('session.cookie_secure', 0); // Mude para 1 em HTTPS
 // Timezone
 date_default_timezone_set('America/Sao_Paulo');
 
+// Habilitar relatório de erros para depuração
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', '/tmp/php_errors.log');
+
 // Headers de segurança
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');

@@ -73,13 +73,19 @@ class Tenant {
     }
 
     public function findBySlug($slug) {
+        error_log("TENANT_MODEL: Buscando tenant por slug: " . $slug);
+        
         $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " WHERE slug = :slug AND active = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':slug', $slug);
         $stmt->execute();
 
+        error_log("TENANT_MODEL: Query executada, rowCount: " . $stmt->rowCount());
+
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch();
+            error_log("TENANT_MODEL: Tenant encontrado - ID: " . $row['id'] . ", Nome: " . $row['name']);
+            
             $this->id = $row['id'];
             $this->slug = $row['slug'];
             $this->name = $row['name'];
@@ -95,6 +101,8 @@ class Tenant {
             $this->updated_at = $row['updated_at'];
             return true;
         }
+        
+        error_log("TENANT_MODEL: Nenhum tenant encontrado para slug: " . $slug);
         return false;
     }
 

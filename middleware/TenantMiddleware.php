@@ -12,11 +12,16 @@ class TenantMiddleware {
 
     public function identifyTenant($slug) {
         if (empty($slug)) {
+            error_log("TENANT_MIDDLEWARE: Slug vazio fornecido");
             return false;
         }
 
+        error_log("TENANT_MIDDLEWARE: Tentando identificar tenant com slug: " . $slug);
+
         if ($this->tenant->findBySlug($slug)) {
             self::$currentTenant = $this->tenant;
+            
+            error_log("TENANT_MIDDLEWARE: Tenant encontrado - ID: " . $this->tenant->id . ", Nome: " . $this->tenant->name);
             
             // Define constantes globais para o tenant atual
             define('CURRENT_TENANT_ID', $this->tenant->id);
@@ -26,6 +31,7 @@ class TenantMiddleware {
             return true;
         }
 
+        error_log("TENANT_MIDDLEWARE: Tenant não encontrado para slug: " . $slug);
         return false;
     }
 
@@ -35,6 +41,7 @@ class TenantMiddleware {
 
     public function requireTenant($slug) {
         if (!$this->identifyTenant($slug)) {
+            error_log("TENANT_MIDDLEWARE: Falha ao identificar tenant, redirecionando para 404");
             // Tenant não encontrado - redirecionar para 404 ou página de erro
             http_response_code(404);
             include __DIR__ . '/../public/404.php';
@@ -46,8 +53,11 @@ class TenantMiddleware {
 
     public function getTenantConfig() {
         if (!self::$currentTenant) {
+            error_log("TENANT_MIDDLEWARE: getCurrentTenant é null ao tentar obter config");
             return null;
         }
+
+        error_log("TENANT_MIDDLEWARE: Retornando config para tenant: " . self::$currentTenant->name);
 
         return [
             'id' => self::$currentTenant->id,

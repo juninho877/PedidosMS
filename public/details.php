@@ -1,9 +1,20 @@
 <?php
 // Este arquivo agora é a página de detalhes para tenants
+error_log("DETAILS: Iniciando carregamento da página de detalhes");
+error_log("DETAILS: REQUEST_URI: " . $_SERVER['REQUEST_URI']);
+error_log("DETAILS: SCRIPT_NAME: " . $_SERVER['SCRIPT_NAME']);
+error_log("DETAILS: Working Directory: " . getcwd());
+
 $tenantMiddleware = new TenantMiddleware();
 $tenantConfig = $tenantMiddleware->getTenantConfig();
 
+error_log("DETAILS: TenantConfig obtido: " . ($tenantConfig ? 'SIM' : 'NÃO'));
+if ($tenantConfig) {
+    error_log("DETAILS: Tenant config - Nome: " . $tenantConfig['name'] . ", Slug: " . $tenantConfig['slug']);
+}
+
 if (!$tenantConfig) {
+    error_log("DETAILS: TenantConfig é null, redirecionando para 404");
     http_response_code(404);
     include '404.php';
     exit;
@@ -12,10 +23,15 @@ if (!$tenantConfig) {
 $type = $_GET['type'] ?? '';
 $id = $_GET['id'] ?? '';
 
+error_log("DETAILS: Parâmetros recebidos - type: " . $type . ", id: " . $id);
+
 if (empty($type) || empty($id) || !in_array($type, ['movie', 'tv'])) {
+    error_log("DETAILS: Parâmetros inválidos, redirecionando para search");
     header('Location: /' . urlencode($tenantConfig['slug']) . '/search');
     exit;
 }
+
+error_log("DETAILS: Página de detalhes carregada com sucesso para tenant: " . $tenantConfig['name']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
