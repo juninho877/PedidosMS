@@ -1,13 +1,8 @@
 <?php
-// Este arquivo agora é a página inicial para tenants
-$tenantMiddleware = new TenantMiddleware();
-$tenantConfig = $tenantMiddleware->getTenantConfig();
+require_once '../config/config.php';
 
-if (!$tenantConfig) {
-    http_response_code(404);
-    include '404.php';
-    exit;
-}
+$middleware = new ClientAuthMiddleware();
+$client = $middleware->requireClientAuth();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -17,7 +12,7 @@ if (!$tenantConfig) {
     <title>Painel do Cliente - CineRequest SaaS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body class="bg-slate-900 text-white">
     <!-- Navbar -->
@@ -26,7 +21,7 @@ if (!$tenantConfig) {
             <div class="flex justify-between items-center h-14 sm:h-16">
                 <div class="flex items-center space-x-3">
                     <i data-lucide="building" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-400"></i>
-                    <span class="text-lg sm:text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
+                    <span class="text-lg sm:text-xl font-bold text-white">
                         Painel do Cliente
                     </span>
                 </div>
@@ -41,7 +36,7 @@ if (!$tenantConfig) {
                 <!-- Desktop menu -->
                 <div class="hidden md:flex items-center space-x-4 lg:space-x-6">
                     <span class="text-slate-300 text-sm">
-                        Bem-vindo, <span class="text-white font-medium" id="clientName">Cliente</span>
+                        Bem-vindo, <span class="text-white font-medium"><?php echo htmlspecialchars($client['name'] ?? 'Cliente'); ?></span>
                     </span>
                     <button
                         id="logoutBtn"
@@ -121,17 +116,10 @@ if (!$tenantConfig) {
     <script>
         // Pass client data to JavaScript
         window.CLIENT_DATA = <?php echo json_encode($client); ?>;
+        console.log('Client data loaded:', window.CLIENT_DATA);
     </script>
     <script src="../assets/js/client-dashboard.js"></script>
     <script>
-        // Mobile menu toggle
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', function() {
-                // Mobile menu functionality if needed
-            });
-        }
-
         // Logout functionality
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
