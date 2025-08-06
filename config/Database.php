@@ -3,9 +3,9 @@ error_log("Database.php: Arquivo sendo carregado");
 
 class Database {
     private $host = 'localhost';
-    private $db_name = 'movie_requests';
-    private $username = 'root';
-    private $password = '';
+    private $db_name = 'pedidos';
+    private $username = 'pedidos';
+    private $password = '$n9v2uO18';
     private $conn = null;
 
     public function getConnection() {
