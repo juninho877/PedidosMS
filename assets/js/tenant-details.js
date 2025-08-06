@@ -593,7 +593,7 @@ class TenantDetailsApp {
             <div class="min-h-screen bg-slate-900 flex items-center justify-center p-4">
                 <div class="text-center">
                     <p class="text-sm sm:text-base text-red-400 mb-4">${message}</p>
-                    <a href="/${this.tenantSlug}/search" class="text-primary hover:opacity-80">
+                    <a href="/${encodeURIComponent(this.tenantSlug)}/search" class="text-primary hover:opacity-80">
                         Voltar à pesquisa
                     </a>
                 </div>

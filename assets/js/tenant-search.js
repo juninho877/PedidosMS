@@ -175,7 +175,7 @@ class TenantSearchApp {
             '/assets/images/placeholder-poster.jpg';
 
         return `
-            <a href="/${this.tenantSlug}/details?type=${type}&id=${item.id}" class="group">
+            <a href="/${encodeURIComponent(this.tenantSlug)}/details?type=${encodeURIComponent(type)}&id=${encodeURIComponent(item.id)}" class="group">
                 <div class="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden hover:border-primary/50 hover:bg-slate-800/70 transition-all transform hover:scale-105">
                     <div class="aspect-[2/3] relative overflow-hidden">
                         <img
@@ -224,7 +224,7 @@ class TenantSearchApp {
             '/assets/images/placeholder-poster.jpg';
 
         return `
-            <a href="/${this.tenantSlug}/details?type=${type}&id=${item.id}" class="block bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-primary/50 hover:bg-slate-800/70 transition-all group">
+            <a href="/${encodeURIComponent(this.tenantSlug)}/details?type=${encodeURIComponent(type)}&id=${encodeURIComponent(item.id)}" class="block bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-primary/50 hover:bg-slate-800/70 transition-all group">
                 <div class="flex gap-3 sm:gap-4">
                     <div class="flex-shrink-0">
                         <img

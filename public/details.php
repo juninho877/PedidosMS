@@ -13,7 +13,7 @@ $type = $_GET['type'] ?? '';
 $id = $_GET['id'] ?? '';
 
 if (empty($type) || empty($id) || !in_array($type, ['movie', 'tv'])) {
-    header('Location: /' . $tenantConfig['slug'] . '/search');
+    header('Location: /' . urlencode($tenantConfig['slug']) . '/search');
     exit;
 }
 ?>

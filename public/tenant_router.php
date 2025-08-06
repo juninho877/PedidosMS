@@ -1,14 +1,18 @@
 <?php
 require_once '../config/config.php';
 
-// Extrair o slug do tenant e o caminho da URL
+// Extrair o slug do tenant e o caminho da URL (sem query string)
 $request_uri = $_SERVER['REQUEST_URI'];
+
+// Remover query string da URI para parsing correto
+$uri_without_query = parse_url($request_uri, PHP_URL_PATH);
+
 $path_parts = explode('/', trim($request_uri, '/'));
 
 // Primeiro segmento é o slug do tenant
 $tenant_slug = $path_parts[0] ?? '';
 
-// Resto do caminho
+// Resto do caminho (sem query string)
 $route = $path_parts[1] ?? '';
 $additional_params = array_slice($path_parts, 2);
 
