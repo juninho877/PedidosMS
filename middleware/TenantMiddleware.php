@@ -1,19 +1,21 @@
 <?php
+error_log("TenantMiddleware.php: Arquivo sendo carregado");
+
 class TenantMiddleware {
     private $db;
     private $tenant;
     private $currentTenant = null;
 
     public function __construct() {
-        error_log("TenantMiddleware: Constructor called");
+        error_log("TenantMiddleware: Constructor chamado");
         
         if (!class_exists('Database')) {
-            error_log("TenantMiddleware: ERROR - Database class not found");
+            error_log("TenantMiddleware: ERRO - Classe Database não encontrada");
             throw new Exception("Database class not available");
         }
         
         if (!class_exists('Tenant')) {
-            error_log("TenantMiddleware: ERROR - Tenant class not found");
+            error_log("TenantMiddleware: ERRO - Classe Tenant não encontrada");
             throw new Exception("Tenant class not available");
         }
         
@@ -21,24 +23,24 @@ class TenantMiddleware {
         $this->db = $database->getConnection();
         $this->tenant = new Tenant($this->db);
         
-        error_log("TenantMiddleware: Initialized successfully");
+        error_log("TenantMiddleware: Inicializado com sucesso");
     }
 
     public function identifyTenant($slug) {
-        error_log("TenantMiddleware: Identifying tenant with slug: $slug");
+        error_log("TenantMiddleware: Identificando tenant com slug: $slug");
         
         if (empty($slug)) {
-            error_log("TenantMiddleware: Empty slug provided");
+            error_log("TenantMiddleware: Slug vazio fornecido");
             return false;
         }
 
         if ($this->tenant->findBySlug($slug)) {
             $this->currentTenant = $this->tenant;
-            error_log("TenantMiddleware: Tenant found: " . $this->tenant->name);
+            error_log("TenantMiddleware: Tenant encontrado: " . $this->tenant->name);
             return true;
         }
 
-        error_log("TenantMiddleware: Tenant not found for slug: $slug");
+        error_log("TenantMiddleware: Tenant não encontrado para slug: $slug");
         return false;
     }
 
@@ -47,23 +49,23 @@ class TenantMiddleware {
     }
 
     public function getTenantConfig() {
-        // Extract tenant slug from URL
+        // Extrair slug do tenant da URL
         $requestUri = $_SERVER['REQUEST_URI'] ?? '';
         $path = parse_url($requestUri, PHP_URL_PATH);
         $segments = array_filter(explode('/', $path));
         
         if (empty($segments)) {
-            error_log("TenantMiddleware: No segments in URL path");
+            error_log("TenantMiddleware: Nenhum segmento na URL");
             return null;
         }
 
         $slug = $segments[0];
-        error_log("TenantMiddleware: Extracted slug from URL: $slug");
+        error_log("TenantMiddleware: Slug extraído da URL: $slug");
 
         if ($this->identifyTenant($slug)) {
             $config = $this->currentTenant->toArray();
             
-            // Set default values for missing fields
+            // Definir valores padrão para campos faltantes
             $defaults = [
                 'logo_url' => '/assets/images/placeholder-logo.png',
                 'favicon_url' => '/assets/images/placeholder-favicon.png',
@@ -82,12 +84,14 @@ class TenantMiddleware {
                 }
             }
 
-            error_log("TenantMiddleware: Returning config for tenant: " . $config['name']);
+            error_log("TenantMiddleware: Retornando config para tenant: " . $config['name']);
             return $config;
         }
 
-        error_log("TenantMiddleware: No tenant found for slug: $slug");
+        error_log("TenantMiddleware: Nenhum tenant encontrado para slug: $slug");
         return null;
     }
 }
+
+error_log("TenantMiddleware.php: Classe TenantMiddleware definida com sucesso");
 ?>
