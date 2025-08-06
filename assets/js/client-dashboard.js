@@ -207,14 +207,9 @@ if (!$tenantConfig) {
             const icon = this.querySelector('i');
             
             menu.classList.toggle('hidden');
-                const result = await response.json();
             
-                
-                // Recarregar dados atualizados do servidor
-                await this.reloadClientData();
-                
-                // Recarregar a aba de personalização com dados atualizados
-                this.loadCustomizationTab();
+            if (menu.classList.contains('hidden')) {
+                icon.setAttribute('data-lucide', 'menu');
             } else {
                 icon.setAttribute('data-lucide', 'x');
             }
@@ -222,57 +217,6 @@ if (!$tenantConfig) {
             lucide.createIcons();
         });
 
-    async reloadClientData() {
-        try {
-            console.log('Recarregando dados do cliente...');
-            const response = await fetch('/api/client-auth.php/me');
-            
-            if (response.ok) {
-                const result = await response.json();
-                
-                // Atualizar dados locais
-                this.clientData = result.client;
-                window.CLIENT_DATA = result.client;
-                
-                console.log('Dados do cliente atualizados:', this.clientData);
-                
-                // Atualizar informações na Visão Geral se estiver carregada
-                this.updateOverviewClientInfo();
-                
-            } else {
-                console.error('Erro ao recarregar dados do cliente:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Erro ao recarregar dados do cliente:', error);
-        }
-    }
-
-    updateOverviewClientInfo() {
-        // Atualizar informações do cliente na aba Visão Geral se ela estiver visível
-        const clientInfoSection = document.querySelector('.client-info-section');
-        if (clientInfoSection) {
-            const infoItems = clientInfoSection.querySelectorAll('.info-item');
-            infoItems.forEach(item => {
-                const label = item.querySelector('.info-label').textContent;
-                const valueElement = item.querySelector('.info-value');
-                
-                switch (label) {
-                    case 'Nome:':
-                        valueElement.textContent = this.clientData.name || 'N/A';
-                        break;
-                    case 'Slug:':
-                        valueElement.textContent = this.clientData.slug || 'N/A';
-                        break;
-                    case 'Site:':
-                        valueElement.textContent = this.clientData.site_name || 'N/A';
-                        break;
-                    case 'Email:':
-                        valueElement.textContent = this.clientData.contact_email || 'N/A';
-                        break;
-                }
-            });
-        }
-    }
         lucide.createIcons();
     </script>
 </body>
