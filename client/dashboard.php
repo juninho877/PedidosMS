@@ -1,13 +1,8 @@
 <?php
-// Este arquivo agora é a página inicial para tenants
-$tenantMiddleware = new TenantMiddleware();
-$tenantConfig = $tenantMiddleware->getTenantConfig();
+require_once '../config/config.php';
 
-if (!$tenantConfig) {
-    http_response_code(404);
-    include '404.php';
-    exit;
-}
+$middleware = new ClientAuthMiddleware();
+$client = $middleware->requireClientAuth();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -18,11 +13,11 @@ if (!$tenantConfig) {
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="icon" type="image/x-icon" href="<?php echo htmlspecialchars($client['favicon_url']); ?>">
+    <link rel="icon" type="image/x-icon" href="<?php echo htmlspecialchars($client['favicon_url'] ?? '/assets/images/placeholder-favicon.png'); ?>">
     <style>
         :root {
-            --primary-color: <?php echo htmlspecialchars($client['primary_color']); ?>;
-            --secondary-color: <?php echo htmlspecialchars($client['secondary_color']); ?>;
+            --primary-color: <?php echo htmlspecialchars($client['primary_color'] ?? '#3b82f6'); ?>;
+            --secondary-color: <?php echo htmlspecialchars($client['secondary_color'] ?? '#ef4444'); ?>;
         }
         .bg-primary { background-color: var(--primary-color); }
         .text-primary { color: var(--primary-color); }
@@ -51,13 +46,13 @@ if (!$tenantConfig) {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-14 sm:h-16">
                 <a href="/<?php echo htmlspecialchars($client['slug']); ?>" class="flex items-center space-x-3 group">
-                    <?php if ($client['logo_url']): ?>
+                    <?php if (!empty($client['logo_url'])): ?>
                         <img src="<?php echo htmlspecialchars($client['logo_url']); ?>" alt="Logo" class="h-8 w-8 sm:h-10 sm:w-10 object-contain">
                     <?php else: ?>
                         <i data-lucide="film" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 group-hover:text-blue-300 transition-colors"></i>
                     <?php endif; ?>
                     <span class="text-lg sm:text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
-                        <?php echo htmlspecialchars($client['site_name']); ?> - Dashboard
+                        <?php echo htmlspecialchars($client['site_name'] ?? $client['name']); ?> - Dashboard
                     </span>
                 </a>
 
@@ -82,7 +77,6 @@ if (!$tenantConfig) {
                         <i data-lucide="log-out" class="h-4 w-4"></i>
                         <span class="hidden lg:inline">Sair</span>
                     </button>
-                    </a>
                 </div>
             </div>
 
@@ -100,7 +94,6 @@ if (!$tenantConfig) {
                         <i data-lucide="log-out" class="h-4 w-4"></i>
                         <span>Sair</span>
                     </button>
-                    </a>
                 </div>
             </div>
         </div>
@@ -111,7 +104,7 @@ if (!$tenantConfig) {
             <!-- Header -->
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-white mb-2">
-                    Dashboard - <?php echo htmlspecialchars($client['site_name']); ?>
+                    Dashboard - <?php echo htmlspecialchars($client['site_name'] ?? $client['name']); ?>
                 </h1>
                 <p class="text-slate-400">
                     Bem-vindo ao painel de controle do seu site
@@ -193,7 +186,7 @@ if (!$tenantConfig) {
 
         document.getElementById('logoutBtn').addEventListener('click', handleLogout);
         document.getElementById('logoutBtnMobile').addEventListener('click', handleLogout);
-    <script>
+
         // Mobile menu toggle
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
             const menu = document.getElementById('mobile-menu');
@@ -208,6 +201,8 @@ if (!$tenantConfig) {
             }
             
             lucide.createIcons();
+        });
+
         lucide.createIcons();
     </script>
 </body>
