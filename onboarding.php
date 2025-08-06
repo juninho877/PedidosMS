@@ -1,349 +1,222 @@
+<?php
+// Este arquivo agora é a página inicial para tenants
+$tenantMiddleware = new TenantMiddleware();
+$tenantConfig = $tenantMiddleware->getTenantConfig();
+
+if (!$tenantConfig) {
+    http_response_code(404);
+    include '404.php';
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Conta - CineRequest SaaS</title>
+    <title><?php echo htmlspecialchars($tenantConfig['site_name']); ?> - Sistema de Solicitação de Filmes e Séries</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="<?php echo htmlspecialchars($tenantConfig['favicon_url']); ?>">
+    <style>
+        :root {
+            --primary-color: <?php echo htmlspecialchars($tenantConfig['primary_color']); ?>;
+            --secondary-color: <?php echo htmlspecialchars($tenantConfig['secondary_color']); ?>;
+        }
+        .bg-primary { background-color: var(--primary-color); }
+        .text-primary { color: var(--primary-color); }
+        .border-primary { border-color: var(--primary-color); }
+        .bg-secondary { background-color: var(--secondary-color); }
+        .text-secondary { color: var(--secondary-color); }
+    </style>
 </head>
 <body class="bg-slate-900 text-white">
     <!-- Navbar -->
-    <nav class="bg-slate-800/95 backdrop-blur-sm border-b border-slate-700">
+    <nav class="bg-slate-800/95 backdrop-blur-sm border-b border-slate-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <a href="/" class="flex items-center space-x-3">
-                    <i data-lucide="film" class="h-8 w-8 text-blue-400"></i>
-                    <span class="text-xl font-bold text-white">CineRequest SaaS</span>
+            <div class="flex justify-between items-center h-14 sm:h-16">
+                <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>" class="flex items-center space-x-3 group">
+                    <?php if ($tenantConfig['logo_url']): ?>
+                        <img src="<?php echo htmlspecialchars($tenantConfig['logo_url']); ?>" alt="Logo" class="h-8 w-8 sm:h-10 sm:w-10 object-contain">
+                    <?php else: ?>
+                        <i data-lucide="film" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 group-hover:text-blue-300 transition-colors"></i>
+                    <?php endif; ?>
+                    <span class="text-lg sm:text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
+                        <?php echo htmlspecialchars($tenantConfig['site_name']); ?>
+                    </span>
                 </a>
-                <a href="/" class="text-slate-300 hover:text-white transition-colors">
-                    ← Voltar
-                </a>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-slate-300 hover:text-white p-2">
+                        <i data-lucide="menu" class="h-6 w-6"></i>
+                    </button>
+                </div>
+
+                <!-- Desktop menu -->
+                <div class="hidden md:flex items-center space-x-4 lg:space-x-6">
+                    <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>" class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors bg-primary text-white text-sm lg:text-base">
+                        <i data-lucide="home" class="h-4 w-4"></i>
+                        <span class="hidden lg:inline">Início</span>
+                    </a>
+
+                    <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-slate-300 hover:text-white hover:bg-slate-700 text-sm lg:text-base">
+                        <i data-lucide="search" class="h-4 w-4"></i>
+                        <span class="hidden lg:inline">Pesquisar</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="md:hidden hidden border-t border-slate-700 py-4">
+                <div class="space-y-2">
+                    <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>" class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors bg-primary text-white">
+                        <i data-lucide="home" class="h-4 w-4"></i>
+                        <span>Início</span>
+                    </a>
+                    <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-slate-300 hover:text-white hover:bg-slate-700">
+                        <i data-lucide="search" class="h-4 w-4"></i>
+                        <span>Pesquisar</span>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="min-h-screen bg-slate-900 py-12">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Progress Steps -->
-            <div class="mb-8">
-                <div class="flex items-center justify-center space-x-4">
-                    <div class="flex items-center">
-                        <div id="step1-indicator" class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
-                            1
-                        </div>
-                        <span class="ml-2 text-sm text-white">Plano</span>
-                    </div>
-                    <div class="w-12 h-0.5 bg-slate-700"></div>
-                    <div class="flex items-center">
-                        <div id="step2-indicator" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center text-sm font-semibold">
-                            2
-                        </div>
-                        <span class="ml-2 text-sm text-slate-400">Dados</span>
-                    </div>
-                    <div class="w-12 h-0.5 bg-slate-700"></div>
-                    <div class="flex items-center">
-                        <div id="step3-indicator" class="w-8 h-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center text-sm font-semibold">
-                            3
-                        </div>
-                        <span class="ml-2 text-sm text-slate-400">Pagamento</span>
-                    </div>
+    <!-- Hero Section -->
+    <div class="relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-24 lg:pb-32">
+            <div class="text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+                    <?php echo htmlspecialchars($tenantConfig['hero_title']); ?>
+                </h1>
+                <?php if ($tenantConfig['site_tagline']): ?>
+                <p class="text-xl sm:text-2xl text-blue-300 mb-4 font-medium">
+                    <?php echo htmlspecialchars($tenantConfig['site_tagline']); ?>
+                </p>
+                <?php endif; ?>
+                <p class="text-base sm:text-lg lg:text-xl text-slate-300 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
+                    <?php echo htmlspecialchars($tenantConfig['site_description'] ?: $tenantConfig['hero_description']); ?>
+                </p>
+                <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="inline-flex items-center space-x-2 bg-primary hover:opacity-90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    <i data-lucide="search" class="h-5 w-5 sm:h-6 sm:w-6"></i>
+                    <span>Começar Pesquisa</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div class="text-center mb-12 sm:mb-16">
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Como Funciona</h2>
+            <p class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto px-4">
+                Um processo simples e eficiente para solicitar seus conteúdos favoritos
+            </p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div class="bg-slate-800/50 backdrop-blur-sm p-8 rounded-xl border border-slate-700 hover:border-primary/50 transition-all group">
+                <div class="bg-primary w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="search" class="h-6 w-6 sm:h-8 sm:w-8 text-white"></i>
                 </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">1. Pesquise</h3>
+                <p class="text-sm sm:text-base text-slate-400">
+                    Use nossa interface integrada com TMDB para encontrar filmes e séries com informações detalhadas e precisas.
+                </p>
             </div>
 
-            <!-- Step 1: Plan Selection -->
-            <div id="step1" class="bg-slate-800/50 border border-slate-700 rounded-xl p-8">
-                <h2 class="text-2xl font-bold text-white mb-6 text-center">Escolha seu Plano</h2>
-                
-                <div class="grid md:grid-cols-3 gap-6">
-                    <!-- Starter Plan -->
-                    <div class="plan-card border border-slate-700 rounded-xl p-6 cursor-pointer hover:border-blue-500 transition-colors" data-plan="starter">
-                        <h3 class="text-xl font-bold text-white mb-2">Starter</h3>
-                        <p class="text-slate-400 mb-4">Perfeito para começar</p>
-                        <div class="mb-6">
-                            <span class="text-3xl font-bold text-white">R$ 49</span>
-                            <span class="text-slate-400">/mês</span>
-                        </div>
-                        <ul class="space-y-2 mb-6">
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">Até 100 solicitações/mês</span>
-                            </li>
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">Personalização básica</span>
-                            </li>
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">Suporte por email</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Professional Plan -->
-                    <div class="plan-card border-2 border-blue-500 rounded-xl p-6 cursor-pointer relative" data-plan="professional">
-                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                Mais Popular
-                            </span>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Professional</h3>
-                        <p class="text-slate-400 mb-4">Para negócios em crescimento</p>
-                        <div class="mb-6">
-                            <span class="text-3xl font-bold text-white">R$ 99</span>
-                            <span class="text-slate-400">/mês</span>
-                        </div>
-                        <ul class="space-y-2 mb-6">
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">Até 500 solicitações/mês</span>
-                            </li>
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">Personalização completa</span>
-                            </li>
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">Suporte prioritário</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Enterprise Plan -->
-                    <div class="plan-card border border-slate-700 rounded-xl p-6 cursor-pointer hover:border-blue-500 transition-colors" data-plan="enterprise">
-                        <h3 class="text-xl font-bold text-white mb-2">Enterprise</h3>
-                        <p class="text-slate-400 mb-4">Para grandes operações</p>
-                        <div class="mb-6">
-                            <span class="text-3xl font-bold text-white">R$ 199</span>
-                            <span class="text-slate-400">/mês</span>
-                        </div>
-                        <ul class="space-y-2 mb-6">
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">Solicitações ilimitadas</span>
-                            </li>
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">White-label completo</span>
-                            </li>
-                            <li class="flex items-center space-x-2">
-                                <i data-lucide="check" class="h-4 w-4 text-green-400"></i>
-                                <span class="text-slate-300 text-sm">Suporte 24/7</span>
-                            </li>
-                        </ul>
-                    </div>
+            <div class="bg-slate-800/50 backdrop-blur-sm p-8 rounded-xl border border-slate-700 hover:border-purple-500/50 transition-all group">
+                <div class="bg-purple-600 w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="film" class="h-6 w-6 sm:h-8 sm:w-8 text-white"></i>
                 </div>
-
-                <div class="text-center mt-8">
-                    <button
-                        id="continueStep1"
-                        class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-                        disabled
-                    >
-                        Continuar
-                    </button>
-                </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">2. Solicite</h3>
+                <p class="text-sm sm:text-base text-slate-400">
+                    Preencha um formulário simples com seus dados de contato e especificações do conteúdo desejado.
+                </p>
             </div>
 
-            <!-- Step 2: Company Data -->
-            <div id="step2" class="bg-slate-800/50 border border-slate-700 rounded-xl p-8 hidden">
-                <h2 class="text-2xl font-bold text-white mb-6 text-center">Dados da Empresa</h2>
-                
-                <form id="companyForm" class="space-y-6 max-w-2xl mx-auto">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">
-                                Nome da Empresa *
-                                <span class="text-xs text-slate-500 block">Nome interno para identificação</span>
-                            </label>
-                            <input
-                                type="text"
-                                id="companyName"
-                                class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Minha Empresa Ltda"
-                                required
-                            />
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">
-                                Slug da URL *
-                                <span class="text-xs text-slate-500 block">Endereço único do site</span>
-                            </label>
-                            <div class="flex items-center">
-                                <span class="text-slate-400 text-sm mr-2">site.com/</span>
-                                <input
-                                    type="text"
-                                    id="companySlug"
-                                    class="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="minha-empresa"
-                                    pattern="[a-zA-Z0-9\\-]+"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">
-                            Nome do Site *
-                            <span class="text-xs text-slate-500 block">Nome que aparece no site público</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="siteName"
-                            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="CineMania"
-                            required
-                        />
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">
-                            Slogan/Tagline
-                            <span class="text-xs text-slate-500 block">Frase de efeito do site</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="siteTagline"
-                            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Seu entretenimento, nossa paixão"
-                        />
-                    </div>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">
-                                Email *
-                                <span class="text-xs text-slate-500 block">Email de contato da empresa</span>
-                            </label>
-                            <input
-                                type="email"
-                                id="companyEmail"
-                                class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="contato@minhaempresa.com"
-                                required
-                            />
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">
-                                WhatsApp
-                                <span class="text-xs text-slate-500 block">Formato: 5511999999999</span>
-                            </label>
-                            <input
-                                type="text"
-                                id="companyPhone"
-                                class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="5511999999999"
-                            />
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">
-                            Descrição do Site
-                            <span class="text-xs text-slate-500 block">Descrição principal na página inicial</span>
-                        </label>
-                        <textarea
-                            id="siteDescription"
-                            rows="3"
-                            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Encontre e solicite seus filmes e séries favoritos de forma rápida e fácil"
-                        ></textarea>
-                    </div>
-                </form>
-
-                <div class="flex justify-between mt-8">
-                    <button
-                        id="backStep2"
-                        class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                    >
-                        Voltar
-                    </button>
-                    <button
-                        id="continueStep2"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-                    >
-                        Continuar
-                    </button>
+            <div class="bg-slate-800/50 backdrop-blur-sm p-8 rounded-xl border border-slate-700 hover:border-green-500/50 transition-all group sm:col-span-2 lg:col-span-1">
+                <div class="bg-green-600 w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="users" class="h-6 w-6 sm:h-8 sm:w-8 text-white"></i>
                 </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">3. Acompanhe</h3>
+                <p class="text-sm sm:text-base text-slate-400">
+                    Nossa equipe analisa sua solicitação e você recebe atualizações sobre o status através do WhatsApp.
+                </p>
             </div>
+        </div>
+    </div>
 
-            <!-- Step 3: Payment -->
-            <div id="step3" class="bg-slate-800/50 border border-slate-700 rounded-xl p-8 hidden">
-                <h2 class="text-2xl font-bold text-white mb-6 text-center">Pagamento</h2>
-                
-                <div class="max-w-2xl mx-auto">
-                    <div id="selectedPlanSummary" class="bg-slate-700/50 rounded-lg p-6 mb-8">
-                        <!-- Plan summary will be populated by JavaScript -->
+    <!-- Stats Section -->
+    <div class="bg-slate-800/30 border-y border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
+                <div>
+                    <div class="flex items-center justify-center mb-4">
+                        <i data-lucide="film" class="h-6 w-6 sm:h-8 sm:w-8 text-primary"></i>
                     </div>
-                    
-                    <div id="pixPayment" class="text-center">
-                        <div class="bg-slate-700/50 rounded-lg p-8">
-                            <i data-lucide="qr-code" class="h-16 w-16 text-blue-400 mx-auto mb-4"></i>
-                            <h3 class="text-xl font-semibold text-white mb-4">Pagamento via PIX</h3>
-                            <p class="text-slate-400 mb-6">
-                                Após clicar em "Gerar PIX", você receberá o QR Code e o código para pagamento.
-                            </p>
-                            
-                            <button
-                                id="generatePixBtn"
-                                class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-                            >
-                                Gerar PIX
-                            </button>
-                        </div>
-                        
-                        <div id="pixDetails" class="hidden mt-8">
-                            <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-6">
-                                <h4 class="text-lg font-semibold text-white mb-4">PIX Gerado com Sucesso!</h4>
-                                
-                                <div id="qrCodeContainer" class="mb-6">
-                                    <!-- QR Code will be displayed here -->
-                                </div>
-                                
-                                <div class="bg-slate-700 rounded-lg p-4 mb-4">
-                                    <p class="text-sm text-slate-300 mb-2">Código PIX (Copia e Cola):</p>
-                                    <div class="flex items-center space-x-2">
-                                        <input
-                                            type="text"
-                                            id="pixCode"
-                                            class="flex-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm"
-                                            readonly
-                                        />
-                                        <button
-                                            onclick="copyPixCode()"
-                                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm transition-colors"
-                                        >
-                                            Copiar
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <p class="text-sm text-slate-400">
-                                    Após o pagamento, sua conta será ativada automaticamente em até 5 minutos.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-white mb-2">10K+</div>
+                    <div class="text-sm sm:text-base text-slate-400">Filmes no Catálogo</div>
                 </div>
-
-                <div class="flex justify-between mt-8">
-                    <button
-                        id="backStep3"
-                        class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                    >
-                        Voltar
-                    </button>
+                <div>
+                    <div class="flex items-center justify-center mb-4">
+                        <i data-lucide="tv" class="h-6 w-6 sm:h-8 sm:w-8 text-purple-400"></i>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-white mb-2">5K+</div>
+                    <div class="text-sm sm:text-base text-slate-400">Séries Disponíveis</div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-center mb-4">
+                        <i data-lucide="trending-up" class="h-6 w-6 sm:h-8 sm:w-8 text-green-400"></i>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-white mb-2">98%</div>
+                    <div class="text-sm sm:text-base text-slate-400">Taxa de Satisfação</div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-center mb-4">
+                        <i data-lucide="star" class="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400"></i>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-white mb-2">24h</div>
+                    <div class="text-sm sm:text-base text-slate-400">Tempo Médio de Resposta</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="assets/js/onboarding.js"></script>
+    <!-- CTA Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 sm:mb-6">
+            Pronto para solicitar seu conteúdo?
+        </h2>
+        <p class="text-base sm:text-lg lg:text-xl text-slate-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+            Junte-se a milhares de usuários que já encontraram seus filmes e séries favoritos através do nosso sistema.
+        </p>
+        <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="inline-flex items-center space-x-2 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+            <i data-lucide="search" class="h-5 w-5 sm:h-6 sm:w-6"></i>
+            <span>Iniciar Pesquisa</span>
+        </a>
+    </div>
+
     <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = this.querySelector('i');
+            
+            menu.classList.toggle('hidden');
+            
+            if (menu.classList.contains('hidden')) {
+                icon.setAttribute('data-lucide', 'menu');
+            } else {
+                icon.setAttribute('data-lucide', 'x');
+            }
+            
+            lucide.createIcons();
+        });
+
         lucide.createIcons();
     </script>
 </body>
