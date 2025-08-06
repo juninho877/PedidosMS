@@ -8,6 +8,25 @@ if (!$tenantConfig) {
     include '404.php';
     exit;
 }
+
+function isValidImagePath($path) {
+    // Aceitar URLs completas (http/https)
+    if (filter_var($path, FILTER_VALIDATE_URL)) {
+        return true;
+    }
+    
+    // Aceitar caminhos locais que começam com /assets/uploads/
+    if (strpos($path, '/assets/uploads/') === 0) {
+        return true;
+    }
+    
+    // Aceitar caminhos locais que começam com /assets/images/
+    if (strpos($path, '/assets/images/') === 0) {
+        return true;
+    }
+    
+    return false;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
