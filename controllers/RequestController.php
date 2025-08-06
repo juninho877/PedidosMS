@@ -1,15 +1,29 @@
 <?php
+error_log("RequestController.php: Arquivo sendo carregado");
+
 class RequestController {
     private $db;
     private $request;
 
     public function __construct() {
+        if (!class_exists('Database')) {
+            throw new Exception("Database class not available");
+        }
+        
+        if (!class_exists('Request')) {
+            throw new Exception("Request class not available");
+        }
+        
         $database = new Database();
         $this->db = $database->getConnection();
         $this->request = new Request($this->db);
+        
+        error_log("RequestController: Inicializado com sucesso");
     }
 
     public function getAll() {
+        error_log("RequestController: getAll() chamado");
+        
         // Admin only sees requests with tenant_id = NULL (main site requests)
         $filters = [
             'tenant_id' => null, // Only main site requests
@@ -24,12 +38,15 @@ class RequestController {
             $requests = $this->request->getAll($filters);
             echo json_encode($requests);
         } catch (Exception $e) {
+            error_log("RequestController: Erro ao buscar solicitações - " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erro ao buscar solicitações: ' . $e->getMessage()]);
         }
     }
 
     public function create() {
+        error_log("RequestController: create() chamado");
+        
         $input = json_decode(file_get_contents('php://input'), true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -65,23 +82,29 @@ class RequestController {
                 echo json_encode(['error' => 'Erro ao criar solicitação']);
             }
         } catch (Exception $e) {
+            error_log("RequestController: Erro ao criar solicitação - " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erro ao criar solicitação: ' . $e->getMessage()]);
         }
     }
 
     public function getStats() {
+        error_log("RequestController: getStats() chamado");
+        
         try {
             // Admin only sees stats for requests with tenant_id = NULL
             $stats = $this->request->getStats(null);
             echo json_encode($stats);
         } catch (Exception $e) {
+            error_log("RequestController: Erro ao buscar estatísticas - " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erro ao buscar estatísticas: ' . $e->getMessage()]);
         }
     }
 
     public function updateStatus() {
+        error_log("RequestController: updateStatus() chamado");
+        
         $input = json_decode(file_get_contents('php://input'), true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -114,12 +137,15 @@ class RequestController {
                 echo json_encode(['error' => 'Solicitação não encontrada ou não autorizada']);
             }
         } catch (Exception $e) {
+            error_log("RequestController: Erro ao atualizar status - " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erro ao atualizar status: ' . $e->getMessage()]);
         }
     }
 
     public function getById($id) {
+        error_log("RequestController: getById() chamado para ID: $id");
+        
         try {
             $requestData = $this->request->findById($id);
             if ($requestData) {
@@ -136,6 +162,7 @@ class RequestController {
                 echo json_encode(['error' => 'Solicitação não encontrada']);
             }
         } catch (Exception $e) {
+            error_log("RequestController: Erro ao buscar solicitação - " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erro ao buscar solicitação: ' . $e->getMessage()]);
         }
@@ -167,4 +194,6 @@ class RequestController {
         return $errors;
     }
 }
+
+error_log("RequestController.php: Classe RequestController definida com sucesso");
 ?>
