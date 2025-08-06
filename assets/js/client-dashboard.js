@@ -2,23 +2,23 @@ class ClientDashboardApp {
     constructor() {
         this.currentTab = 'overview';
         this.clientData = window.CLIENT_DATA || {};
+        console.log('ClientDashboardApp: Inicializando com dados:', this.clientData);
         this.init();
     }
 
     init() {
-        console.log('ClientDashboardApp: Inicializando...');
-        console.log('ClientDashboardApp: Dados do cliente:', this.clientData);
+        console.log('ClientDashboardApp: Iniciando aplicação...');
         
+        // Verificar se temos dados do cliente
+        if (!this.clientData || !this.clientData.id) {
+            console.error('ClientDashboardApp: Dados do cliente não encontrados');
+            this.showError('Dados do cliente não encontrados. Faça login novamente.');
+            return;
+        }
+
         // Load initial tab
         this.switchTab('overview');
-        
-        // Setup event listeners
-        this.setupEventListeners();
-    }
-
-    setupEventListeners() {
-        // Tab click handlers are already set in HTML onclick attributes
-        console.log('ClientDashboardApp: Event listeners configurados');
+        console.log('ClientDashboardApp: Aplicação inicializada com sucesso');
     }
 
     switchTab(tabName) {
@@ -47,7 +47,7 @@ class ClientDashboardApp {
         tabContent.innerHTML = `
             <div class="text-center py-8">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
-                <p class="text-slate-400">Carregando...</p>
+                <p class="text-slate-400">Carregando ${this.getTabLabel(tabName)}...</p>
             </div>
         `;
 
@@ -72,28 +72,44 @@ class ClientDashboardApp {
             console.error(`Erro ao carregar aba ${tabName}:`, error);
             tabContent.innerHTML = `
                 <div class="text-center py-8">
-                    <p class="text-red-400">Erro ao carregar conteúdo: ${error.message}</p>
-                    <button onclick="clientDashboard.loadTabContent('${tabName}')" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    <i data-lucide="alert-circle" class="h-12 w-12 text-red-400 mx-auto mb-4"></i>
+                    <p class="text-red-400 mb-4">Erro ao carregar conteúdo: ${error.message}</p>
+                    <button onclick="window.clientDashboard.loadTabContent('${tabName}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                         Tentar Novamente
                     </button>
                 </div>
             `;
+            lucide.createIcons();
         }
+    }
+
+    getTabLabel(tabName) {
+        const labels = {
+            'overview': 'Visão Geral',
+            'requests': 'Solicitações',
+            'customization': 'Personalização',
+            'analytics': 'Analytics'
+        };
+        return labels[tabName] || tabName;
     }
 
     async loadOverview() {
         console.log('ClientDashboardApp: Carregando visão geral...');
         
         try {
-            // Load stats
-            const statsResponse = await fetch('/api/client-requests.php/stats');
+            // Load stats with fallback
             let stats = { total: 0, pending: 0, approved: 0, denied: 0, movies: 0, tv: 0 };
             
-            if (statsResponse.ok) {
-                stats = await statsResponse.json();
-                console.log('Stats carregadas:', stats);
-            } else {
-                console.warn('Erro ao carregar stats, usando valores padrão');
+            try {
+                const statsResponse = await fetch('/api/client-requests.php/stats');
+                if (statsResponse.ok) {
+                    stats = await statsResponse.json();
+                    console.log('Stats carregadas:', stats);
+                } else {
+                    console.warn('Erro ao carregar stats, usando valores padrão');
+                }
+            } catch (error) {
+                console.warn('Erro na API de stats:', error);
             }
 
             const tabContent = document.getElementById('tabContent');
@@ -103,21 +119,21 @@ class ClientDashboardApp {
                     <div class="bg-slate-700/50 rounded-lg p-6">
                         <h3 class="text-lg font-semibold text-white mb-4">Informações do Cliente</h3>
                         <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-slate-400">Nome da Empresa</p>
-                                <p class="text-white font-medium">${this.clientData.name || 'N/A'}</p>
+                            <div class="info-item">
+                                <p class="text-sm text-slate-400 info-label">Nome da Empresa</p>
+                                <p class="text-white font-medium info-value" data-field="name">${this.clientData.name || 'N/A'}</p>
                             </div>
-                            <div>
-                                <p class="text-sm text-slate-400">Slug do Site</p>
-                                <p class="text-white font-medium">${this.clientData.slug || 'N/A'}</p>
+                            <div class="info-item">
+                                <p class="text-sm text-slate-400 info-label">Slug do Site</p>
+                                <p class="text-white font-medium info-value" data-field="slug">${this.clientData.slug || 'N/A'}</p>
                             </div>
-                            <div>
-                                <p class="text-sm text-slate-400">Nome do Site</p>
-                                <p class="text-white font-medium">${this.clientData.site_name || 'N/A'}</p>
+                            <div class="info-item">
+                                <p class="text-sm text-slate-400 info-label">Nome do Site</p>
+                                <p class="text-white font-medium info-value" data-field="site_name">${this.clientData.site_name || 'N/A'}</p>
                             </div>
-                            <div>
-                                <p class="text-sm text-slate-400">Email de Contato</p>
-                                <p class="text-white font-medium">${this.clientData.contact_email || 'N/A'}</p>
+                            <div class="info-item">
+                                <p class="text-sm text-slate-400 info-label">Email de Contato</p>
+                                <p class="text-white font-medium info-value" data-field="contact_email">${this.clientData.contact_email || 'N/A'}</p>
                             </div>
                         </div>
                         <div class="mt-4 flex flex-wrap gap-2">
@@ -125,9 +141,13 @@ class ClientDashboardApp {
                                 <i data-lucide="external-link" class="h-4 w-4 inline mr-2"></i>
                                 Ver Site
                             </a>
-                            <button onclick="clientDashboard.switchTab('customization')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
+                            <button onclick="window.clientDashboard.switchTab('customization')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
                                 <i data-lucide="palette" class="h-4 w-4 inline mr-2"></i>
                                 Personalizar
+                            </button>
+                            <button onclick="window.clientDashboard.switchTab('requests')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
+                                <i data-lucide="list" class="h-4 w-4 inline mr-2"></i>
+                                Ver Solicitações
                             </button>
                         </div>
                     </div>
@@ -179,15 +199,15 @@ class ClientDashboardApp {
                     <div class="bg-slate-700/50 rounded-lg p-6">
                         <h3 class="text-lg font-semibold text-white mb-4">Ações Rápidas</h3>
                         <div class="flex flex-wrap gap-3">
-                            <button onclick="clientDashboard.switchTab('requests')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                            <button onclick="window.clientDashboard.switchTab('requests')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
                                 <i data-lucide="list" class="h-4 w-4 inline mr-2"></i>
                                 Ver Solicitações
                             </button>
-                            <button onclick="clientDashboard.switchTab('analytics')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
+                            <button onclick="window.clientDashboard.switchTab('analytics')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">
                                 <i data-lucide="trending-up" class="h-4 w-4 inline mr-2"></i>
                                 Ver Analytics
                             </button>
-                            <button onclick="clientDashboard.switchTab('customization')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
+                            <button onclick="window.clientDashboard.switchTab('customization')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
                                 <i data-lucide="palette" class="h-4 w-4 inline mr-2"></i>
                                 Personalizar Site
                             </button>
@@ -209,14 +229,18 @@ class ClientDashboardApp {
         console.log('ClientDashboardApp: Carregando solicitações...');
         
         try {
-            const response = await fetch('/api/client-requests.php');
             let requests = [];
             
-            if (response.ok) {
-                requests = await response.json();
-                console.log('Solicitações carregadas:', requests);
-            } else {
-                console.warn('Erro ao carregar solicitações, usando lista vazia');
+            try {
+                const response = await fetch('/api/client-requests.php');
+                if (response.ok) {
+                    requests = await response.json();
+                    console.log('Solicitações carregadas:', requests);
+                } else {
+                    console.warn('Erro ao carregar solicitações, usando lista vazia');
+                }
+            } catch (error) {
+                console.warn('Erro na API de requests:', error);
             }
 
             const tabContent = document.getElementById('tabContent');
@@ -236,7 +260,7 @@ class ClientDashboardApp {
                                 <option value="movie">Filmes</option>
                                 <option value="tv">Séries</option>
                             </select>
-                            <button onclick="clientDashboard.filterRequests()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                            <button onclick="window.clientDashboard.filterRequests()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
                                 Filtrar
                             </button>
                         </div>
@@ -255,106 +279,6 @@ class ClientDashboardApp {
         } catch (error) {
             console.error('Erro ao carregar solicitações:', error);
             throw error;
-        }
-    }
-
-    renderRequestsList(requests) {
-        if (!requests || requests.length === 0) {
-            return `
-                <div class="text-center py-8">
-                    <i data-lucide="inbox" class="h-12 w-12 text-slate-500 mx-auto mb-4"></i>
-                    <p class="text-slate-400">Nenhuma solicitação encontrada</p>
-                </div>
-            `;
-        }
-
-        return `
-            <div class="space-y-4">
-                ${requests.map(request => `
-                    <div class="bg-slate-700/50 rounded-lg p-4">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <h4 class="text-lg font-semibold text-white">${request.content_title}</h4>
-                                <div class="flex items-center space-x-4 mt-2 text-sm text-slate-400">
-                                    <span class="flex items-center space-x-1">
-                                        <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
-                                        <span>${request.content_type === 'movie' ? 'Filme' : 'Série'}</span>
-                                    </span>
-                                    <span class="flex items-center space-x-1">
-                                        <i data-lucide="user" class="h-4 w-4"></i>
-                                        <span>${request.requester_name}</span>
-                                    </span>
-                                    <span class="flex items-center space-x-1">
-                                        <i data-lucide="calendar" class="h-4 w-4"></i>
-                                        <span>${new Date(request.created_at).toLocaleDateString('pt-BR')}</span>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="px-2 py-1 rounded-full text-xs font-medium ${this.getStatusClass(request.status)}">
-                                    ${this.getStatusLabel(request.status)}
-                                </span>
-                                <div class="flex space-x-1">
-                                    ${request.status === 'pending' ? `
-                                        <button onclick="clientDashboard.updateRequestStatus(${request.id}, 'approved')" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg text-xs">
-                                            <i data-lucide="check" class="h-4 w-4"></i>
-                                        </button>
-                                        <button onclick="clientDashboard.updateRequestStatus(${request.id}, 'denied')" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-xs">
-                                            <i data-lucide="x" class="h-4 w-4"></i>
-                                        </button>
-                                    ` : ''}
-                                    <a href="https://wa.me/${request.requester_whatsapp}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg text-xs">
-                                        <i data-lucide="message-circle" class="h-4 w-4"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-
-    getStatusClass(status) {
-        switch (status) {
-            case 'pending': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
-            case 'approved': return 'bg-green-500/20 text-green-400 border border-green-500/30';
-            case 'denied': return 'bg-red-500/20 text-red-400 border border-red-500/30';
-            default: return 'bg-slate-500/20 text-slate-400 border border-slate-500/30';
-        }
-    }
-
-    getStatusLabel(status) {
-        switch (status) {
-            case 'pending': return 'Pendente';
-            case 'approved': return 'Aprovado';
-            case 'denied': return 'Negado';
-            default: return 'Desconhecido';
-        }
-    }
-
-    async updateRequestStatus(requestId, status) {
-        try {
-            const response = await fetch('/api/client-requests.php/update-status', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: requestId,
-                    status: status
-                })
-            });
-
-            if (response.ok) {
-                this.showToast(`Solicitação ${status === 'approved' ? 'aprovada' : 'negada'} com sucesso!`, 'success');
-                this.loadRequests(); // Reload the requests list
-            } else {
-                throw new Error('Erro ao atualizar status');
-            }
-        } catch (error) {
-            console.error('Erro ao atualizar status:', error);
-            this.showToast('Erro ao atualizar status da solicitação', 'error');
         }
     }
 
@@ -424,7 +348,7 @@ class ClientDashboardApp {
 
                     <!-- Save Button -->
                     <div class="flex justify-end">
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+                        <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white px-6 py-3 rounded-lg font-semibold">
                             <i data-lucide="save" class="h-4 w-4 inline mr-2"></i>
                             Salvar Alterações
                         </button>
@@ -443,57 +367,11 @@ class ClientDashboardApp {
         lucide.createIcons();
     }
 
-    async saveCustomization() {
-        try {
-            const formData = {
-                name: document.getElementById('name').value,
-                site_name: document.getElementById('site_name').value,
-                site_tagline: document.getElementById('site_tagline').value,
-                contact_email: document.getElementById('contact_email').value,
-                hero_title: document.getElementById('hero_title').value,
-                hero_subtitle: document.getElementById('hero_subtitle').value,
-                hero_description: document.getElementById('hero_description').value,
-                primary_color: document.getElementById('primary_color').value,
-                secondary_color: document.getElementById('secondary_color').value
-            };
-
-            const response = await fetch(`/api/client-tenants.php/${this.clientData.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                
-                // Update client data with new values
-                Object.assign(this.clientData, formData);
-                window.CLIENT_DATA = this.clientData;
-                
-                this.showToast('Configurações salvas com sucesso!', 'success');
-                
-                // Reload overview if it's visible
-                if (this.currentTab === 'overview') {
-                    this.loadOverview();
-                }
-            } else {
-                const error = await response.json();
-                throw new Error(error.error || 'Erro ao salvar configurações');
-            }
-        } catch (error) {
-            console.error('Erro ao salvar personalização:', error);
-            this.showToast('Erro ao salvar configurações: ' + error.message, 'error');
-        }
-    }
-
     async loadAnalytics() {
         console.log('ClientDashboardApp: Carregando analytics...');
         
         try {
-            // Load analytics data
-            const response = await fetch('/api/client-analytics.php');
+            // Load analytics data with fallback
             let analytics = {
                 daily_requests: [],
                 approval_rate: 0,
@@ -501,11 +379,16 @@ class ClientDashboardApp {
                 most_requested_type: 'N/A'
             };
             
-            if (response.ok) {
-                analytics = await response.json();
-                console.log('Analytics carregadas:', analytics);
-            } else {
-                console.warn('Erro ao carregar analytics, usando valores padrão');
+            try {
+                const response = await fetch('/api/client-analytics.php');
+                if (response.ok) {
+                    analytics = await response.json();
+                    console.log('Analytics carregadas:', analytics);
+                } else {
+                    console.warn('Erro ao carregar analytics, usando valores padrão');
+                }
+            } catch (error) {
+                console.warn('Erro na API de analytics:', error);
             }
 
             const tabContent = document.getElementById('tabContent');
@@ -547,17 +430,24 @@ class ClientDashboardApp {
                     <!-- Chart -->
                     <div class="bg-slate-700/50 rounded-lg p-6">
                         <h3 class="text-lg font-semibold text-white mb-4">Atividade dos Últimos 30 Dias</h3>
-                        <div class="space-y-2">
-                            ${analytics.daily_requests.map(day => `
-                                <div class="flex items-center space-x-3">
-                                    <span class="text-sm text-slate-400 w-20">${new Date(day.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })}</span>
-                                    <div class="flex-1 bg-slate-600 rounded-full h-4 relative">
-                                        <div class="bg-blue-500 h-4 rounded-full" style="width: ${Math.min(100, (day.count / Math.max(...analytics.daily_requests.map(d => d.count), 1)) * 100)}%"></div>
+                        ${analytics.daily_requests.length > 0 ? `
+                            <div class="space-y-2">
+                                ${analytics.daily_requests.map(day => `
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-sm text-slate-400 w-20">${new Date(day.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })}</span>
+                                        <div class="flex-1 bg-slate-600 rounded-full h-4 relative">
+                                            <div class="bg-blue-500 h-4 rounded-full" style="width: ${Math.min(100, (day.count / Math.max(...analytics.daily_requests.map(d => d.count), 1)) * 100)}%"></div>
+                                        </div>
+                                        <span class="text-sm text-white w-8">${day.count}</span>
                                     </div>
-                                    <span class="text-sm text-white w-8">${day.count}</span>
-                                </div>
-                            `).join('')}
-                        </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="text-center py-8">
+                                <i data-lucide="bar-chart-3" class="h-12 w-12 text-slate-500 mx-auto mb-4"></i>
+                                <p class="text-slate-400">Nenhum dado de atividade disponível</p>
+                            </div>
+                        `}
                     </div>
                 </div>
             `;
@@ -571,9 +461,202 @@ class ClientDashboardApp {
         }
     }
 
+    renderRequestsList(requests) {
+        if (!requests || requests.length === 0) {
+            return `
+                <div class="text-center py-8">
+                    <i data-lucide="inbox" class="h-12 w-12 text-slate-500 mx-auto mb-4"></i>
+                    <p class="text-slate-400">Nenhuma solicitação encontrada</p>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="space-y-4">
+                ${requests.map(request => `
+                    <div class="bg-slate-700/50 rounded-lg p-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">${request.content_title}</h4>
+                                <div class="flex items-center space-x-4 mt-2 text-sm text-slate-400">
+                                    <span class="flex items-center space-x-1">
+                                        <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
+                                        <span>${request.content_type === 'movie' ? 'Filme' : 'Série'}</span>
+                                    </span>
+                                    <span class="flex items-center space-x-1">
+                                        <i data-lucide="user" class="h-4 w-4"></i>
+                                        <span>${request.requester_name}</span>
+                                    </span>
+                                    <span class="flex items-center space-x-1">
+                                        <i data-lucide="calendar" class="h-4 w-4"></i>
+                                        <span>${new Date(request.created_at).toLocaleDateString('pt-BR')}</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${this.getStatusClass(request.status)}">
+                                    ${this.getStatusLabel(request.status)}
+                                </span>
+                                <div class="flex space-x-1">
+                                    ${request.status === 'pending' ? `
+                                        <button onclick="window.clientDashboard.updateRequestStatus(${request.id}, 'approved')" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg text-xs">
+                                            <i data-lucide="check" class="h-4 w-4"></i>
+                                        </button>
+                                        <button onclick="window.clientDashboard.updateRequestStatus(${request.id}, 'denied')" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg text-xs">
+                                            <i data-lucide="x" class="h-4 w-4"></i>
+                                        </button>
+                                    ` : ''}
+                                    <a href="https://wa.me/${request.requester_whatsapp}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg text-xs">
+                                        <i data-lucide="message-circle" class="h-4 w-4"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    getStatusClass(status) {
+        switch (status) {
+            case 'pending': return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+            case 'approved': return 'bg-green-500/20 text-green-400 border border-green-500/30';
+            case 'denied': return 'bg-red-500/20 text-red-400 border border-red-500/30';
+            default: return 'bg-slate-500/20 text-slate-400 border border-slate-500/30';
+        }
+    }
+
+    getStatusLabel(status) {
+        switch (status) {
+            case 'pending': return 'Pendente';
+            case 'approved': return 'Aprovado';
+            case 'denied': return 'Negado';
+            default: return 'Desconhecido';
+        }
+    }
+
+    async updateRequestStatus(requestId, status) {
+        try {
+            const response = await fetch('/api/client-requests.php/update-status', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: requestId,
+                    status: status
+                })
+            });
+
+            if (response.ok) {
+                this.showToast(`Solicitação ${status === 'approved' ? 'aprovada' : 'negada'} com sucesso!`, 'success');
+                this.loadRequests(); // Reload the requests list
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Erro ao atualizar status');
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar status:', error);
+            this.showToast('Erro ao atualizar status da solicitação', 'error');
+        }
+    }
+
+    async filterRequests() {
+        const statusFilter = document.getElementById('statusFilter').value;
+        const typeFilter = document.getElementById('typeFilter').value;
+        
+        try {
+            const params = new URLSearchParams();
+            if (statusFilter) params.append('status', statusFilter);
+            if (typeFilter) params.append('content_type', typeFilter);
+            
+            const response = await fetch(`/api/client-requests.php?${params}`);
+            if (response.ok) {
+                const requests = await response.json();
+                document.getElementById('requestsList').innerHTML = this.renderRequestsList(requests);
+                lucide.createIcons();
+            } else {
+                throw new Error('Erro ao filtrar solicitações');
+            }
+        } catch (error) {
+            console.error('Erro ao filtrar:', error);
+            this.showToast('Erro ao aplicar filtros', 'error');
+        }
+    }
+
+    async saveCustomization() {
+        const saveBtn = document.getElementById('saveBtn');
+        const originalText = saveBtn.innerHTML;
+        
+        try {
+            // Show loading
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline mr-2"></div>
+                Salvando...
+            `;
+
+            const formData = {
+                name: document.getElementById('name').value,
+                site_name: document.getElementById('site_name').value,
+                site_tagline: document.getElementById('site_tagline').value,
+                contact_email: document.getElementById('contact_email').value,
+                hero_title: document.getElementById('hero_title').value,
+                hero_subtitle: document.getElementById('hero_subtitle').value,
+                hero_description: document.getElementById('hero_description').value,
+                primary_color: document.getElementById('primary_color').value,
+                secondary_color: document.getElementById('secondary_color').value
+            };
+
+            const response = await fetch(`/api/client-tenants.php/${this.clientData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                
+                // Update client data with new values
+                Object.assign(this.clientData, formData);
+                window.CLIENT_DATA = this.clientData;
+                
+                // Update overview if it's visible
+                this.updateOverviewClientInfo();
+                
+                this.showToast('Configurações salvas com sucesso!', 'success');
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Erro ao salvar configurações');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar personalização:', error);
+            this.showToast('Erro ao salvar configurações: ' + error.message, 'error');
+        } finally {
+            // Reset button
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+            lucide.createIcons();
+        }
+    }
+
+    updateOverviewClientInfo() {
+        // Update client info in overview tab if it's currently visible
+        const infoValues = document.querySelectorAll('.info-value');
+        infoValues.forEach(element => {
+            const field = element.getAttribute('data-field');
+            if (field && this.clientData[field]) {
+                element.textContent = this.clientData[field];
+            }
+        });
+    }
+
     showToast(message, type = 'info') {
         const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-white font-medium ${
+        toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-white font-medium transform transition-transform duration-300 translate-x-full ${
             type === 'success' ? 'bg-green-600' : 
             type === 'error' ? 'bg-red-600' : 'bg-blue-600'
         }`;
@@ -581,17 +664,41 @@ class ClientDashboardApp {
         
         document.body.appendChild(toast);
         
+        // Animate in
         setTimeout(() => {
-            toast.remove();
+            toast.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Animate out and remove
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
         }, 3000);
+    }
+
+    showError(message) {
+        const tabContent = document.getElementById('tabContent');
+        tabContent.innerHTML = `
+            <div class="text-center py-8">
+                <i data-lucide="alert-circle" class="h-12 w-12 text-red-400 mx-auto mb-4"></i>
+                <p class="text-red-400 mb-4">${message}</p>
+                <button onclick="window.location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    Recarregar Página
+                </button>
+            </div>
+        `;
+        lucide.createIcons();
     }
 }
 
 // Initialize the app and make it globally available
-let clientDashboard;
-
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM carregado, inicializando ClientDashboardApp...');
-    clientDashboard = new ClientDashboardApp();
-    window.clientDashboard = clientDashboard; // Make it globally available
+    console.log('CLIENT_DATA disponível:', window.CLIENT_DATA);
+    
+    window.clientDashboard = new ClientDashboardApp();
 });
