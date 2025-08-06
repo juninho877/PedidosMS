@@ -159,18 +159,10 @@ if (!$tenantConfig) {
                         <i data-lucide="film" class="h-6 w-6 sm:h-8 sm:w-8 text-primary"></i>
                     </div>
                     <div class="text-2xl sm:text-3xl font-bold text-white mb-2">10K+</div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">Descrição do Site</label>
-                                <input type="text" id="site_description" value="${this.clientData.site_description || ''}" class="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-white">
-                            </div>
                     <div class="text-sm sm:text-base text-slate-400">Filmes no Catálogo</div>
                 </div>
                 <div>
                     <div class="flex items-center justify-center mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">WhatsApp (formato: 5511999999999)</label>
-                                <input type="text" id="contact_whatsapp" value="${this.clientData.contact_whatsapp || ''}" class="w-full bg-slate-600 border border-slate-500 rounded-lg px-3 py-2 text-white" placeholder="5511999999999">
-                            </div>
                         <i data-lucide="tv" class="h-6 w-6 sm:h-8 sm:w-8 text-purple-400"></i>
                     </div>
                     <div class="text-2xl sm:text-3xl font-bold text-white mb-2">5K+</div>
@@ -225,24 +217,6 @@ if (!$tenantConfig) {
             lucide.createIcons();
         });
 
-        // Setup WhatsApp formatting
-        const whatsappInput = document.getElementById('contact_whatsapp');
-        if (whatsappInput) {
-            whatsappInput.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                
-                // Garantir que sempre comece com 55
-                if (!value.startsWith('55') && value.length > 0) {
-                    if (value.startsWith('5') && value.length === 1) {
-                        value = '55';
-                    } else if (!value.startsWith('55')) {
-                        value = '55' + value;
-                    }
-                }
-                
-                e.target.value = value;
-            });
-        }
         lucide.createIcons();
     </script>
 </body>
