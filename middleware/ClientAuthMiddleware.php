@@ -1,4 +1,5 @@
 <?php
+            error_log("ClientAuthMiddleware: Cliente já autenticado, redirecionando");
 // Este arquivo agora é a página inicial para tenants
 $tenantMiddleware = new TenantMiddleware();
 $tenantConfig = $tenantMiddleware->getTenantConfig();
@@ -9,12 +10,17 @@ if (!$tenantConfig) {
     exit;
 }
 ?>
+
+error_log("ClientAuthMiddleware.php: Classe ClientAuthMiddleware definida com sucesso");
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($tenantConfig['site_name']); ?> - Sistema de Solicitação de Filmes e Séries</title>
+            throw new Exception("AuthService class not available");
+        }
+        
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="/assets/css/style.css">
@@ -200,12 +206,15 @@ if (!$tenantConfig) {
         </a>
     </div>
 
+        error_log("ClientAuthMiddleware: Inicializado com sucesso");
     <script>
         // Mobile menu toggle
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+        error_log("ClientAuthMiddleware: requireClientAuth() chamado");
             const menu = document.getElementById('mobile-menu');
             const icon = this.querySelector('i');
             
+            error_log("ClientAuthMiddleware: Cliente não autenticado");
             menu.classList.toggle('hidden');
             
             if (menu.classList.contains('hidden')) {
@@ -217,7 +226,9 @@ if (!$tenantConfig) {
             lucide.createIcons();
         });
 
+        error_log("ClientAuthMiddleware: Cliente autenticado: " . $client['name']);
         lucide.createIcons();
+        error_log("ClientAuthMiddleware: redirectIfClientAuthenticated() chamado");
     </script>
 </body>
 </html>

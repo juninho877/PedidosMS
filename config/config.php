@@ -22,7 +22,6 @@ if (!$tenantConfig) {
     <style>
         :root {
             --primary-color: <?php echo htmlspecialchars($tenantConfig['primary_color']); ?>;
-            error_log("Autoloader: Classe $class carregada com sucesso");
             --secondary-color: <?php echo htmlspecialchars($tenantConfig['secondary_color']); ?>;
         }
         .bg-primary { background-color: var(--primary-color); }
@@ -198,6 +197,10 @@ if (!$tenantConfig) {
         <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="inline-flex items-center space-x-2 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
             <i data-lucide="search" class="h-5 w-5 sm:h-6 sm:w-6"></i>
             <span>Iniciar Pesquisa</span>
+        APP_ROOT . '/models/',      // Depois models
+        APP_ROOT . '/services/',    // Depois services
+        APP_ROOT . '/middleware/',  // Depois middleware
+        APP_ROOT . '/controllers/'  // Por último controllers
         </a>
     </div>
 

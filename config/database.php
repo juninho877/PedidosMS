@@ -8,8 +8,6 @@ if (!$tenantConfig) {
     include '404.php';
     exit;
 }
-
-error_log("Database.php: Classe Database definida com sucesso");
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -24,16 +22,14 @@ error_log("Database.php: Classe Database definida com sucesso");
     <style>
         :root {
             --primary-color: <?php echo htmlspecialchars($tenantConfig['primary_color']); ?>;
-            // Em desenvolvimento, mostrar erro detalhado
-            if (defined('APP_DEBUG') && APP_DEBUG) {
-                throw new Exception("Erro de conexão com o banco de dados: " . $e->getMessage());
-            } else {
-                throw new Exception("Erro de conexão com o banco de dados. Verifique as configurações.");
-            }
+            --secondary-color: <?php echo htmlspecialchars($tenantConfig['secondary_color']); ?>;
         }
+        error_log("Database: Retornando conexão existente");
         .bg-primary { background-color: var(--primary-color); }
         .text-primary { color: var(--primary-color); }
         .border-primary { border-color: var(--primary-color); }
+
+error_log("Database.php: Classe Database definida com sucesso");
         .bg-secondary { background-color: var(--secondary-color); }
         .text-secondary { color: var(--secondary-color); }
     </style>
@@ -207,12 +203,15 @@ error_log("Database.php: Classe Database definida com sucesso");
         </a>
     </div>
 
+            error_log("Database: Criando nova conexão");
     <script>
         // Mobile menu toggle
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
             const menu = document.getElementById('mobile-menu');
             const icon = this.querySelector('i');
+                error_log("Database: Conexão estabelecida com sucesso");
             
+                error_log("Database: ERRO na conexão - " . $e->getMessage());
             menu.classList.toggle('hidden');
             
             if (menu.classList.contains('hidden')) {

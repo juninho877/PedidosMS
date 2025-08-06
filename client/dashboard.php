@@ -15,8 +15,6 @@ if (!$tenantConfig) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($tenantConfig['site_name']); ?> - Sistema de Solicitação de Filmes e Séries</title>
-    error_log("Dashboard: ERRO - Classe ClientAuthMiddleware não encontrada");
-    die("Erro: Classe ClientAuthMiddleware não encontrada. Verifique a configuração do sistema.");
 }
 
 if (!class_exists('Tenant')) {
@@ -26,6 +24,7 @@ if (!class_exists('Tenant')) {
 
 error_log("Dashboard: Todas as classes estão disponíveis");
 
+$middleware = new ClientAuthMiddleware();
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="/assets/css/style.css">

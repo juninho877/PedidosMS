@@ -1,29 +1,35 @@
 <?php
 // Este arquivo agora é a página inicial para tenants
+        error_log("AuthService: clearAuthCookie() chamado");
 $tenantMiddleware = new TenantMiddleware();
 $tenantConfig = $tenantMiddleware->getTenantConfig();
 
 if (!$tenantConfig) {
     http_response_code(404);
     include '404.php';
+        error_log("AuthService: generateClientToken() chamado para cliente: " . ($client_data['name'] ?? 'unknown'));
     exit;
 }
-
-error_log("AuthService.php: Classe AuthService definida com sucesso");
 ?>
+        error_log("AuthService: clearClientAuthCookie() chamado");
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($tenantConfig['site_name']); ?> - Sistema de Solicitação de Filmes e Séries</title>
+        error_log("AuthService: generateToken() chamado para usuário: " . ($user_data['email'] ?? 'unknown'));
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+error_log("AuthService.php: Classe AuthService definida com sucesso");
     <link rel="stylesheet" href="/assets/css/style.css">
+        error_log("AuthService: verifyToken() chamado");
     <link rel="icon" type="image/x-icon" href="<?php echo htmlspecialchars($tenantConfig['favicon_url']); ?>">
     <style>
         :root {
             --primary-color: <?php echo htmlspecialchars($tenantConfig['primary_color']); ?>;
+            error_log("AuthService: Erro ao verificar token - " . $e->getMessage());
             --secondary-color: <?php echo htmlspecialchars($tenantConfig['secondary_color']); ?>;
         }
         .bg-primary { background-color: var(--primary-color); }
@@ -165,44 +171,53 @@ error_log("AuthService.php: Classe AuthService definida com sucesso");
                 </div>
                 <div>
                     <div class="flex items-center justify-center mb-4">
+        error_log("AuthService: getCurrentUser() chamado");
                         <i data-lucide="tv" class="h-6 w-6 sm:h-8 sm:w-8 text-purple-400"></i>
                     </div>
                     <div class="text-2xl sm:text-3xl font-bold text-white mb-2">5K+</div>
                     <div class="text-sm sm:text-base text-slate-400">Séries Disponíveis</div>
+            error_log("AuthService: Token não encontrado nos cookies");
                 </div>
                 <div>
                     <div class="flex items-center justify-center mb-4">
                         <i data-lucide="trending-up" class="h-6 w-6 sm:h-8 sm:w-8 text-green-400"></i>
                     </div>
                     <div class="text-2xl sm:text-3xl font-bold text-white mb-2">98%</div>
+            error_log("AuthService: Usuário encontrado: " . ($decoded['data']['email'] ?? 'unknown'));
                     <div class="text-sm sm:text-base text-slate-400">Taxa de Satisfação</div>
                 </div>
                 <div>
                     <div class="flex items-center justify-center mb-4">
+        error_log("AuthService: Token inválido ou expirado");
                         <i data-lucide="star" class="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400"></i>
                     </div>
                     <div class="text-2xl sm:text-3xl font-bold text-white mb-2">24h</div>
                     <div class="text-sm sm:text-base text-slate-400">Tempo Médio de Resposta</div>
                 </div>
+        error_log("AuthService: getCurrentClient() chamado");
             </div>
         </div>
     </div>
 
+            error_log("AuthService: Token de cliente não encontrado nos cookies");
     <!-- CTA Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
         <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 sm:mb-6">
             Pronto para solicitar seu conteúdo?
         </h2>
         <p class="text-base sm:text-lg lg:text-xl text-slate-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+            error_log("AuthService: Cliente encontrado: " . ($decoded['data']['name'] ?? 'unknown'));
             Junte-se a milhares de usuários que já encontraram seus filmes e séries favoritos através do nosso sistema.
         </p>
         <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="inline-flex items-center space-x-2 bg-gradient-to-r from-primary to-purple-600 hover:opacity-90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
             <i data-lucide="search" class="h-5 w-5 sm:h-6 sm:w-6"></i>
+        error_log("AuthService: Token de cliente inválido ou expirado");
             <span>Iniciar Pesquisa</span>
         </a>
     </div>
 
     <script>
+        error_log("AuthService: setAuthCookie() chamado");
         // Mobile menu toggle
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
             const menu = document.getElementById('mobile-menu');
@@ -214,6 +229,7 @@ error_log("AuthService.php: Classe AuthService definida com sucesso");
                 icon.setAttribute('data-lucide', 'menu');
             } else {
                 icon.setAttribute('data-lucide', 'x');
+        error_log("AuthService: setClientAuthCookie() chamado");
             }
             
             lucide.createIcons();
