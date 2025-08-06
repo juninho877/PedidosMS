@@ -78,7 +78,8 @@ class TenantsApp {
                             onerror="this.src='/assets/images/default-logo.png'"
                         />
                         <div>
-                            <h3 class="text-lg font-semibold text-white">${tenant.name}</h3>
+                            <h3 class="text-lg font-semibold text-white">${tenant.site_name || tenant.name}</h3>
+                            <p class="text-sm text-slate-500">${tenant.name}</p>
                             <p class="text-sm text-slate-400">/${tenant.slug}</p>
                         </div>
                     </div>
@@ -93,10 +94,18 @@ class TenantsApp {
                 </div>
 
                 <div class="space-y-2 mb-4">
-                    <div class="flex items-center space-x-2 text-sm text-slate-400">
-                        <i data-lucide="palette" class="h-4 w-4"></i>
-                        <span>Cores: ${tenant.primary_color}, ${tenant.secondary_color}</span>
-                    </div>
+                    ${tenant.site_tagline ? `
+                        <div class="flex items-center space-x-2 text-sm text-slate-400">
+                            <i data-lucide="tag" class="h-4 w-4"></i>
+                            <span>${tenant.site_tagline}</span>
+                        </div>
+                    ` : ''}
+                    ${tenant.contact_email ? `
+                        <div class="flex items-center space-x-2 text-sm text-slate-400">
+                            <i data-lucide="mail" class="h-4 w-4"></i>
+                            <span>${tenant.contact_email}</span>
+                        </div>
+                    ` : ''}
                     <div class="flex items-center space-x-2 text-sm text-slate-400">
                         <i data-lucide="calendar" class="h-4 w-4"></i>
                         <span>Criado: ${this.formatDate(tenant.created_at)}</span>
@@ -161,147 +170,285 @@ class TenantsApp {
 
                 <!-- Form -->
                 <form id="tenantForm" class="p-6 space-y-6">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Basic Info -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-semibold text-white">Informações Básicas</h3>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">
-                                    Nome do Cliente *
-                                </label>
-                                <input
-                                    type="text"
-                                    id="tenantName"
-                                    value="${tenant?.name || ''}"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Ex: Minha Empresa"
-                                    required
-                                />
-                                <div id="nameError" class="text-red-400 text-sm mt-1 hidden"></div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">
-                                    Slug da URL * (apenas letras, números e hífen)
-                                </label>
-                                <div class="flex items-center">
-                                    <span class="text-slate-400 text-sm mr-2">site.com/</span>
+                    <!-- Company Information -->
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                                <i data-lucide="building" class="h-5 w-5 text-blue-400"></i>
+                                <span>Informações da Empresa</span>
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Nome da Empresa *
+                                        <span class="text-xs text-slate-500 block">Nome interno para identificação</span>
+                                    </label>
                                     <input
                                         type="text"
-                                        id="tenantSlug"
-                                        value="${tenant?.slug || ''}"
-                                        class="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="minha-empresa"
-                                        pattern="[a-zA-Z0-9\\-]+"
+                                        id="tenantName"
+                                        value="${tenant?.name || ''}"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ex: Minha Empresa Ltda"
                                         required
-                                        ${isEdit ? 'readonly' : ''}
                                     />
+                                    <div id="nameError" class="text-red-400 text-sm mt-1 hidden"></div>
                                 </div>
-                                <div id="slugError" class="text-red-400 text-sm mt-1 hidden"></div>
-                                <p class="text-xs text-slate-500 mt-1">
-                                    ${isEdit ? 'O slug não pode ser alterado após a criação' : 'Este será o endereço do site do cliente'}
-                                </p>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Slug da URL * (apenas letras, números e hífen)
+                                        <span class="text-xs text-slate-500 block">Endereço único do site</span>
+                                    </label>
+                                    <div class="flex items-center">
+                                        <span class="text-slate-400 text-sm mr-2">site.com/</span>
+                                        <input
+                                            type="text"
+                                            id="tenantSlug"
+                                            value="${tenant?.slug || ''}"
+                                            class="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="minha-empresa"
+                                            pattern="[a-zA-Z0-9\\-]+"
+                                            required
+                                            ${isEdit ? 'readonly' : ''}
+                                        />
+                                    </div>
+                                    <div id="slugError" class="text-red-400 text-sm mt-1 hidden"></div>
+                                    <p class="text-xs text-slate-500 mt-1">
+                                        ${isEdit ? 'O slug não pode ser alterado após a criação' : 'Este será o endereço do site do cliente'}
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Customization -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-semibold text-white">Personalização</h3>
+                        <!-- Site Branding -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                                <i data-lucide="globe" class="h-5 w-5 text-green-400"></i>
+                                <span>Identidade Visual do Site</span>
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Nome do Site *
+                                        <span class="text-xs text-slate-500 block">Nome que aparece no site público</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="siteName"
+                                        value="${tenant?.site_name || ''}"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ex: CineMania"
+                                        required
+                                    />
+                                    <div id="siteNameError" class="text-red-400 text-sm mt-1 hidden"></div>
+                                </div>
+                            
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Slogan/Tagline
+                                        <span class="text-xs text-slate-500 block">Frase de efeito do site</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="siteTagline"
+                                        value="${tenant?.site_tagline || ''}"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ex: Seu entretenimento, nossa paixão"
+                                    />
+                                </div>
+                            </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-slate-300 mb-2">
-                                    URL do Logo
+                                    Descrição do Site
+                                    <span class="text-xs text-slate-500 block">Descrição principal que aparece na página inicial</span>
                                 </label>
-                                <input
-                                    type="url"
-                                    id="logoUrl"
-                                    value="${tenant?.logo_url || ''}"
+                                <textarea
+                                    id="siteDescription"
+                                    rows="3"
                                     class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="https://exemplo.com/logo.png"
-                                />
+                                    placeholder="Ex: Encontre e solicite seus filmes e séries favoritos de forma rápida e fácil"
+                                >${tenant?.site_description || ''}</textarea>
                             </div>
+                        </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">
-                                    URL do Favicon
-                                </label>
-                                <input
-                                    type="url"
-                                    id="faviconUrl"
-                                    value="${tenant?.favicon_url || ''}"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="https://exemplo.com/favicon.ico"
-                                />
+                        <!-- Visual Assets -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                                <i data-lucide="image" class="h-5 w-5 text-purple-400"></i>
+                                <span>Recursos Visuais</span>
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        URL do Logo
+                                        <span class="text-xs text-slate-500 block">Logo principal do site (PNG/JPG recomendado)</span>
+                                    </label>
+                                    <input
+                                        type="url"
+                                        id="logoUrl"
+                                        value="${tenant?.logo_url || ''}"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://exemplo.com/logo.png"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        URL do Favicon
+                                        <span class="text-xs text-slate-500 block">Ícone da aba do navegador (ICO/PNG)</span>
+                                    </label>
+                                    <input
+                                        type="url"
+                                        id="faviconUrl"
+                                        value="${tenant?.favicon_url || ''}"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://exemplo.com/favicon.ico"
+                                    />
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                        <!-- Color Scheme -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                                <i data-lucide="palette" class="h-5 w-5 text-pink-400"></i>
+                                <span>Esquema de Cores</span>
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-slate-300 mb-2">
                                         Cor Primária
+                                        <span class="text-xs text-slate-500 block">Botões principais, links, destaques</span>
                                     </label>
-                                    <input
-                                        type="color"
-                                        id="primaryColor"
-                                        value="${tenant?.primary_color || '#1E40AF'}"
-                                        class="w-full h-12 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer"
-                                    />
+                                    <div class="flex items-center space-x-3">
+                                        <input
+                                            type="color"
+                                            id="primaryColor"
+                                            value="${tenant?.primary_color || '#1E40AF'}"
+                                            class="w-16 h-12 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer"
+                                        />
+                                        <input
+                                            type="text"
+                                            id="primaryColorText"
+                                            value="${tenant?.primary_color || '#1E40AF'}"
+                                            class="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                            pattern="^#[0-9A-Fa-f]{6}$"
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-300 mb-2">
                                         Cor Secundária
+                                        <span class="text-xs text-slate-500 block">Botões de ação, CTAs, elementos de destaque</span>
+                                    </label>
+                                    <div class="flex items-center space-x-3">
+                                        <input
+                                            type="color"
+                                            id="secondaryColor"
+                                            value="${tenant?.secondary_color || '#DC2626'}"
+                                            class="w-16 h-12 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer"
+                                        />
+                                        <input
+                                            type="text"
+                                            id="secondaryColorText"
+                                            value="${tenant?.secondary_color || '#DC2626'}"
+                                            class="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                            pattern="^#[0-9A-Fa-f]{6}$"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                                <i data-lucide="phone" class="h-5 w-5 text-green-400"></i>
+                                <span>Informações de Contato</span>
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Email de Contato
+                                        <span class="text-xs text-slate-500 block">Email para suporte e comunicação</span>
                                     </label>
                                     <input
-                                        type="color"
-                                        id="secondaryColor"
-                                        value="${tenant?.secondary_color || '#DC2626'}"
-                                        class="w-full h-12 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer"
+                                        type="email"
+                                        id="contactEmail"
+                                        value="${tenant?.contact_email || ''}"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="contato@minhaempresa.com"
                                     />
+                                    <div id="contactEmailError" class="text-red-400 text-sm mt-1 hidden"></div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        WhatsApp de Contato
+                                        <span class="text-xs text-slate-500 block">Formato: 5511999999999</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="contactWhatsapp"
+                                        value="${tenant?.contact_whatsapp || ''}"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="5511999999999"
+                                    />
+                                    <div id="contactWhatsappError" class="text-red-400 text-sm mt-1 hidden"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Hero Section -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold text-white">Textos da Página Inicial</h3>
+                    <!-- Content Customization -->
+                    <div class="border-t border-slate-700 pt-6">
+                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                            <i data-lucide="type" class="h-5 w-5 text-yellow-400"></i>
+                            <span>Conteúdo da Página Inicial</span>
+                        </h3>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">
-                                Título Principal
-                            </label>
-                            <input
-                                type="text"
-                                id="heroTitle"
-                                value="${tenant?.hero_title || 'Solicite seus Filmes e Séries favoritos'}"
-                                class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Título que aparece na página inicial"
-                            />
-                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">
+                                    Título Principal (Hero)
+                                    <span class="text-xs text-slate-500 block">Título grande que aparece no topo da página</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="heroTitle"
+                                    value="${tenant?.hero_title || 'Solicite seus Filmes e Séries favoritos'}"
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Ex: Encontre seus filmes favoritos aqui"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">
+                                    Subtítulo (Hero)
+                                    <span class="text-xs text-slate-500 block">Texto secundário abaixo do título principal</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="heroSubtitle"
+                                    value="${tenant?.hero_subtitle || 'Sistema profissional de gerenciamento de solicitações'}"
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Ex: Sistema profissional de entretenimento"
+                                />
+                            </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">
-                                Subtítulo
-                            </label>
-                            <input
-                                type="text"
-                                id="heroSubtitle"
-                                value="${tenant?.hero_subtitle || 'Sistema profissional de gerenciamento de solicitações'}"
-                                class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Subtítulo da página inicial"
-                            />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">
-                                Descrição
-                            </label>
-                            <textarea
-                                id="heroDescription"
-                                rows="3"
-                                class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Descrição detalhada que aparece na página inicial"
-                            >${tenant?.hero_description || 'Pesquise, solicite e acompanhe suas preferências de entretenimento.'}</textarea>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">
+                                    Descrição Detalhada (Hero)
+                                    <span class="text-xs text-slate-500 block">Texto explicativo na seção principal</span>
+                                </label>
+                                <textarea
+                                    id="heroDescription"
+                                    rows="3"
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Ex: Pesquise, solicite e acompanhe suas preferências de entretenimento de forma simples e eficiente"
+                                >${tenant?.hero_description || 'Pesquise, solicite e acompanhe suas preferências de entretenimento.'}</textarea>
+                            </div>
                         </div>
                     </div>
 
@@ -339,6 +486,10 @@ class TenantsApp {
         const form = document.getElementById('tenantForm');
         const slugInput = document.getElementById('tenantSlug');
         const nameInput = document.getElementById('tenantName');
+        const primaryColorInput = document.getElementById('primaryColor');
+        const primaryColorText = document.getElementById('primaryColorText');
+        const secondaryColorInput = document.getElementById('secondaryColor');
+        const secondaryColorText = document.getElementById('secondaryColorText');
 
         // Auto-generate slug from name (only for new tenants)
         if (!tenant) {
@@ -353,6 +504,26 @@ class TenantsApp {
             });
         }
 
+        // Sync color picker with text input
+        primaryColorInput.addEventListener('input', (e) => {
+            primaryColorText.value = e.target.value;
+        });
+        
+        primaryColorText.addEventListener('input', (e) => {
+            if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                primaryColorInput.value = e.target.value;
+            }
+        });
+        
+        secondaryColorInput.addEventListener('input', (e) => {
+            secondaryColorText.value = e.target.value;
+        });
+        
+        secondaryColorText.addEventListener('input', (e) => {
+            if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                secondaryColorInput.value = e.target.value;
+            }
+        });
         // Form submission
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -368,8 +539,13 @@ class TenantsApp {
         const formData = {
             name: document.getElementById('tenantName').value.trim(),
             slug: document.getElementById('tenantSlug').value.trim(),
+            site_name: document.getElementById('siteName').value.trim(),
+            site_tagline: document.getElementById('siteTagline').value.trim(),
+            site_description: document.getElementById('siteDescription').value.trim(),
             logo_url: document.getElementById('logoUrl').value.trim(),
             favicon_url: document.getElementById('faviconUrl').value.trim(),
+            contact_email: document.getElementById('contactEmail').value.trim(),
+            contact_whatsapp: document.getElementById('contactWhatsapp').value.replace(/\D/g, ''),
             primary_color: document.getElementById('primaryColor').value,
             secondary_color: document.getElementById('secondaryColor').value,
             hero_title: document.getElementById('heroTitle').value.trim(),
@@ -470,7 +646,11 @@ class TenantsApp {
         const errors = {};
 
         if (!data.name || data.name.length < 2) {
-            errors.name = 'Nome deve ter pelo menos 2 caracteres';
+            errors.name = 'Nome da empresa deve ter pelo menos 2 caracteres';
+        }
+        
+        if (!data.site_name || data.site_name.length < 2) {
+            errors.site_name = 'Nome do site deve ter pelo menos 2 caracteres';
         }
 
         if (!isEdit) {
@@ -480,13 +660,6 @@ class TenantsApp {
             if (data.slug && data.slug.length < 2) {
                 errors.slug = 'Slug deve ter pelo menos 2 caracteres';
             }
-            if (!data.password || data.password.length < 6) {
-                errors.password = 'Senha deve ter pelo menos 6 caracteres';
-            }
-        } else {
-            if (data.password && data.password.length < 6) {
-                errors.password = 'Senha deve ter pelo menos 6 caracteres';
-            }
         }
 
         if (data.logo_url && !this.isValidUrl(data.logo_url)) {
@@ -495,6 +668,14 @@ class TenantsApp {
 
         if (data.favicon_url && !this.isValidUrl(data.favicon_url)) {
             errors.favicon_url = 'URL do favicon inválida';
+        }
+        
+        if (data.contact_email && !this.isValidEmail(data.contact_email)) {
+            errors.contact_email = 'Email de contato inválido';
+        }
+        
+        if (data.contact_whatsapp && !/^55\d{10,11}$/.test(data.contact_whatsapp)) {
+            errors.contact_whatsapp = 'WhatsApp deve estar no formato: 5511999999999';
         }
 
         return errors;
@@ -508,6 +689,11 @@ class TenantsApp {
             return false;
         }
     }
+    
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
 
     showFormErrors(errors) {
         Object.keys(errors).forEach(field => {
@@ -520,7 +706,7 @@ class TenantsApp {
     }
 
     clearFormErrors() {
-        const errorElements = ['nameError', 'slugError'];
+        const errorElements = ['nameError', 'slugError', 'siteNameError', 'contactEmailError', 'contactWhatsappError'];
         errorElements.forEach(id => {
             const element = document.getElementById(id);
             if (element) {

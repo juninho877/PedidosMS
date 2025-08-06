@@ -43,7 +43,7 @@ if (!$tenantConfig) {
                         <i data-lucide="film" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 group-hover:text-blue-300 transition-colors"></i>
                     <?php endif; ?>
                     <span class="text-lg sm:text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
-                        <?php echo htmlspecialchars($tenantConfig['name']); ?>
+                        <?php echo htmlspecialchars($tenantConfig['site_name']); ?>
                     </span>
                 </a>
 
@@ -92,8 +92,13 @@ if (!$tenantConfig) {
                 <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
                     <?php echo htmlspecialchars($tenantConfig['hero_title']); ?>
                 </h1>
+                <?php if ($tenantConfig['site_tagline']): ?>
+                <p class="text-xl sm:text-2xl text-blue-300 mb-4 font-medium">
+                    <?php echo htmlspecialchars($tenantConfig['site_tagline']); ?>
+                </p>
+                <?php endif; ?>
                 <p class="text-base sm:text-lg lg:text-xl text-slate-300 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
-                    <?php echo htmlspecialchars($tenantConfig['hero_description']); ?>
+                    <?php echo htmlspecialchars($tenantConfig['site_description'] ?: $tenantConfig['hero_description']); ?>
                 </p>
                 <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="inline-flex items-center space-x-2 bg-primary hover:opacity-90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
                     <i data-lucide="search" class="h-5 w-5 sm:h-6 sm:w-6"></i>

@@ -150,7 +150,11 @@ function validateTenantData($data, $isUpdate = false) {
     $errors = [];
     
     if (empty($data['name']) || strlen($data['name']) < 2) {
-        $errors['name'] = 'Nome deve ter pelo menos 2 caracteres';
+        $errors['name'] = 'Nome da empresa deve ter pelo menos 2 caracteres';
+    }
+    
+    if (empty($data['site_name']) || strlen($data['site_name']) < 2) {
+        $errors['site_name'] = 'Nome do site deve ter pelo menos 2 caracteres';
     }
     
     if (!$isUpdate) {
@@ -168,6 +172,14 @@ function validateTenantData($data, $isUpdate = false) {
     
     if (!empty($data['favicon_url']) && !filter_var($data['favicon_url'], FILTER_VALIDATE_URL)) {
         $errors['favicon_url'] = 'URL do favicon inválida';
+    }
+    
+    if (!empty($data['contact_email']) && !filter_var($data['contact_email'], FILTER_VALIDATE_EMAIL)) {
+        $errors['contact_email'] = 'Email de contato inválido';
+    }
+    
+    if (!empty($data['contact_whatsapp']) && !preg_match('/^55\d{10,11}$/', $data['contact_whatsapp'])) {
+        $errors['contact_whatsapp'] = 'WhatsApp deve estar no formato: 5511999999999';
     }
     
     if (!empty($data['primary_color']) && !preg_match('/^#[0-9A-Fa-f]{6}$/', $data['primary_color'])) {

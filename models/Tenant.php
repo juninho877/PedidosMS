@@ -12,6 +12,11 @@ class Tenant {
     public $hero_title;
     public $hero_subtitle;
     public $hero_description;
+    public $site_name;
+    public $site_tagline;
+    public $site_description;
+    public $contact_email;
+    public $contact_whatsapp;
     public $primary_color;
     public $secondary_color;
     public $active;
@@ -23,7 +28,7 @@ class Tenant {
     }
 
     public function login($slug, $password) {
-        $query = "SELECT id, slug, name, password, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color FROM " . $this->table . " WHERE slug = :slug AND active = 1 LIMIT 1";
+        $query = "SELECT id, slug, name, password, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, site_name, site_tagline, site_description, contact_email, contact_whatsapp, primary_color, secondary_color FROM " . $this->table . " WHERE slug = :slug AND active = 1 LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':slug', $slug);
         $stmt->execute();
@@ -39,6 +44,11 @@ class Tenant {
                 $this->hero_title = $row['hero_title'];
                 $this->hero_subtitle = $row['hero_subtitle'];
                 $this->hero_description = $row['hero_description'];
+                $this->site_name = $row['site_name'];
+                $this->site_tagline = $row['site_tagline'];
+                $this->site_description = $row['site_description'];
+                $this->contact_email = $row['contact_email'];
+                $this->contact_whatsapp = $row['contact_whatsapp'];
                 $this->primary_color = $row['primary_color'];
                 $this->secondary_color = $row['secondary_color'];
                 return true;
@@ -47,7 +57,7 @@ class Tenant {
         return false;
     }
     public function findById($id) {
-        $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " WHERE id = :id LIMIT 1";
+        $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, site_name, site_tagline, site_description, contact_email, contact_whatsapp, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " WHERE id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
@@ -62,6 +72,11 @@ class Tenant {
             $this->hero_title = $row['hero_title'];
             $this->hero_subtitle = $row['hero_subtitle'];
             $this->hero_description = $row['hero_description'];
+            $this->site_name = $row['site_name'];
+            $this->site_tagline = $row['site_tagline'];
+            $this->site_description = $row['site_description'];
+            $this->contact_email = $row['contact_email'];
+            $this->contact_whatsapp = $row['contact_whatsapp'];
             $this->primary_color = $row['primary_color'];
             $this->secondary_color = $row['secondary_color'];
             $this->active = $row['active'];
@@ -77,7 +92,7 @@ class Tenant {
         error_log("TENANT_MODEL: Slug recebido: '" . $slug . "'");
         error_log("TENANT_MODEL: Tabela: " . $this->table);
         
-        $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " WHERE slug = :slug AND active = 1 LIMIT 1";
+        $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, site_name, site_tagline, site_description, contact_email, contact_whatsapp, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " WHERE slug = :slug AND active = 1 LIMIT 1";
         error_log("TENANT_MODEL: Query: " . $query);
         
         $stmt = $this->conn->prepare($query);
@@ -104,6 +119,11 @@ class Tenant {
             $this->hero_title = $row['hero_title'];
             $this->hero_subtitle = $row['hero_subtitle'];
             $this->hero_description = $row['hero_description'];
+            $this->site_name = $row['site_name'];
+            $this->site_tagline = $row['site_tagline'];
+            $this->site_description = $row['site_description'];
+            $this->contact_email = $row['contact_email'];
+            $this->contact_whatsapp = $row['contact_whatsapp'];
             $this->primary_color = $row['primary_color'];
             $this->secondary_color = $row['secondary_color'];
             $this->active = $row['active'];
@@ -138,8 +158,8 @@ class Tenant {
 
     public function create($data) {
         $query = "INSERT INTO " . $this->table . " 
-                  (slug, name, password, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color) 
-                  VALUES (:slug, :name, :password, :logo_url, :favicon_url, :hero_title, :hero_subtitle, :hero_description, :primary_color, :secondary_color)";
+                  (slug, name, password, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, site_name, site_tagline, site_description, contact_email, contact_whatsapp, primary_color, secondary_color) 
+                  VALUES (:slug, :name, :password, :logo_url, :favicon_url, :hero_title, :hero_subtitle, :hero_description, :site_name, :site_tagline, :site_description, :contact_email, :contact_whatsapp, :primary_color, :secondary_color)";
         
         $stmt = $this->conn->prepare($query);
         
@@ -154,6 +174,11 @@ class Tenant {
         $stmt->bindParam(':hero_title', $data['hero_title']);
         $stmt->bindParam(':hero_subtitle', $data['hero_subtitle']);
         $stmt->bindParam(':hero_description', $data['hero_description']);
+        $stmt->bindParam(':site_name', $data['site_name']);
+        $stmt->bindParam(':site_tagline', $data['site_tagline']);
+        $stmt->bindParam(':site_description', $data['site_description']);
+        $stmt->bindParam(':contact_email', $data['contact_email']);
+        $stmt->bindParam(':contact_whatsapp', $data['contact_whatsapp']);
         $stmt->bindParam(':primary_color', $data['primary_color']);
         $stmt->bindParam(':secondary_color', $data['secondary_color']);
 
@@ -169,8 +194,11 @@ class Tenant {
         $query = "UPDATE " . $this->table . " 
                   SET name = :name, logo_url = :logo_url, favicon_url = :favicon_url, 
                       hero_title = :hero_title, hero_subtitle = :hero_subtitle, 
-                      hero_description = :hero_description, primary_color = :primary_color, 
-                      secondary_color = :secondary_color, updated_at = CURRENT_TIMESTAMP" . $passwordUpdate . "
+                      hero_description = :hero_description, site_name = :site_name, 
+                      site_tagline = :site_tagline, site_description = :site_description,
+                      contact_email = :contact_email, contact_whatsapp = :contact_whatsapp,
+                      primary_color = :primary_color, secondary_color = :secondary_color, 
+                      updated_at = CURRENT_TIMESTAMP" . $passwordUpdate . "
                   WHERE id = :id";
         
         $stmt = $this->conn->prepare($query);
@@ -182,6 +210,11 @@ class Tenant {
         $stmt->bindParam(':hero_title', $data['hero_title']);
         $stmt->bindParam(':hero_subtitle', $data['hero_subtitle']);
         $stmt->bindParam(':hero_description', $data['hero_description']);
+        $stmt->bindParam(':site_name', $data['site_name']);
+        $stmt->bindParam(':site_tagline', $data['site_tagline']);
+        $stmt->bindParam(':site_description', $data['site_description']);
+        $stmt->bindParam(':contact_email', $data['contact_email']);
+        $stmt->bindParam(':contact_whatsapp', $data['contact_whatsapp']);
         $stmt->bindParam(':primary_color', $data['primary_color']);
         $stmt->bindParam(':secondary_color', $data['secondary_color']);
         
@@ -194,7 +227,7 @@ class Tenant {
     }
 
     public function getAll() {
-        $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " ORDER BY created_at DESC";
+        $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, site_name, site_tagline, site_description, contact_email, contact_whatsapp, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " ORDER BY created_at DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll();
@@ -233,6 +266,11 @@ class Tenant {
             'hero_title' => $this->hero_title,
             'hero_subtitle' => $this->hero_subtitle,
             'hero_description' => $this->hero_description,
+            'site_name' => $this->site_name,
+            'site_tagline' => $this->site_tagline,
+            'site_description' => $this->site_description,
+            'contact_email' => $this->contact_email,
+            'contact_whatsapp' => $this->contact_whatsapp,
             'primary_color' => $this->primary_color,
             'secondary_color' => $this->secondary_color,
             'active' => $this->active,

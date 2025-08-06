@@ -422,8 +422,14 @@ class ClientDashboardApp {
         const saveBtn = document.getElementById('saveCustomization');
         
         const formData = {
-            name: document.getElementById('siteName').value.trim(),
+            name: document.getElementById('companyName').value.trim(),
+            site_name: document.getElementById('siteName').value.trim(),
+            site_tagline: document.getElementById('siteTagline').value.trim(),
+            site_description: document.getElementById('siteDescription').value.trim(),
             logo_url: document.getElementById('logoUrl').value.trim(),
+            favicon_url: document.getElementById('faviconUrl').value.trim(),
+            contact_email: document.getElementById('contactEmail').value.trim(),
+            contact_whatsapp: document.getElementById('contactWhatsapp').value.replace(/\D/g, ''),
             primary_color: document.getElementById('primaryColor').value,
             secondary_color: document.getElementById('secondaryColor').value,
             hero_title: document.getElementById('heroTitle').value.trim(),

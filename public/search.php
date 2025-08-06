@@ -15,6 +15,7 @@ if (!$tenantConfig) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pesquisar - <?php echo htmlspecialchars($tenantConfig['name']); ?></title>
+    <meta name="description" content="Pesquise filmes e séries em <?php echo htmlspecialchars($tenantConfig['site_name']); ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="/assets/css/style.css">
@@ -43,7 +44,7 @@ if (!$tenantConfig) {
                         <i data-lucide="film" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 group-hover:text-blue-300 transition-colors"></i>
                     <?php endif; ?>
                     <span class="text-lg sm:text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
-                        <?php echo htmlspecialchars($tenantConfig['name']); ?>
+                        <?php echo htmlspecialchars($tenantConfig['site_name']); ?>
                     </span>
                 </a>
 

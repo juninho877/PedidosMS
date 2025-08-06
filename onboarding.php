@@ -155,6 +155,7 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-2">
                                 Nome da Empresa *
+                                <span class="text-xs text-slate-500 block">Nome interno para identificação</span>
                             </label>
                             <input
                                 type="text"
@@ -168,6 +169,7 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-2">
                                 Slug da URL *
+                                <span class="text-xs text-slate-500 block">Endereço único do site</span>
                             </label>
                             <div class="flex items-center">
                                 <span class="text-slate-400 text-sm mr-2">site.com/</span>
@@ -183,10 +185,38 @@
                         </div>
                     </div>
                     
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            Nome do Site *
+                            <span class="text-xs text-slate-500 block">Nome que aparece no site público</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="siteName"
+                            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="CineMania"
+                            required
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">
+                            Slogan/Tagline
+                            <span class="text-xs text-slate-500 block">Frase de efeito do site</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="siteTagline"
+                            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Seu entretenimento, nossa paixão"
+                        />
+                    </div>
+                    
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-2">
                                 Email *
+                                <span class="text-xs text-slate-500 block">Email de contato da empresa</span>
                             </label>
                             <input
                                 type="email"
@@ -199,27 +229,29 @@
                         
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-2">
-                                Telefone
+                                WhatsApp
+                                <span class="text-xs text-slate-500 block">Formato: 5511999999999</span>
                             </label>
                             <input
-                                type="tel"
+                                type="text"
                                 id="companyPhone"
                                 class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="(11) 99999-9999"
+                                placeholder="5511999999999"
                             />
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-2">
-                            Título da Página Inicial
+                            Descrição do Site
+                            <span class="text-xs text-slate-500 block">Descrição principal na página inicial</span>
                         </label>
-                        <input
-                            type="text"
-                            id="heroTitle"
+                        <textarea
+                            id="siteDescription"
+                            rows="3"
                             class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Solicite seus Filmes e Séries favoritos"
-                        />
+                            placeholder="Encontre e solicite seus filmes e séries favoritos de forma rápida e fácil"
+                        ></textarea>
                     </div>
                 </form>
 

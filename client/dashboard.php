@@ -163,7 +163,11 @@ $client = $middleware->requireClientAuth();
                                     <span class="text-white font-mono text-sm">site.com/<?php echo htmlspecialchars($client['slug']); ?></span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-slate-400">Nome:</span>
+                                    <span class="text-slate-400">Nome do Site:</span>
+                                    <span class="text-white"><?php echo htmlspecialchars($client['site_name'] ?: $client['name']); ?></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Empresa:</span>
                                     <span class="text-white"><?php echo htmlspecialchars($client['name']); ?></span>
                                 </div>
                                 <div class="flex justify-between">
@@ -209,21 +213,81 @@ $client = $middleware->requireClientAuth();
                 <!-- Customization Tab -->
                 <div id="customization-tab" class="tab-content hidden">
                     <form id="customizationForm" class="space-y-8">
-                        <!-- Basic Info -->
+                        <!-- Company Information -->
                         <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-                            <h3 class="text-lg font-semibold text-white mb-6">Informações Básicas</h3>
+                            <h3 class="text-lg font-semibold text-white mb-6 flex items-center space-x-2">
+                                <i data-lucide="building" class="h-5 w-5 text-blue-400"></i>
+                                <span>Informações da Empresa</span>
+                            </h3>
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome do Site</label>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Nome da Empresa
+                                        <span class="text-xs text-slate-500 block">Nome interno para identificação</span>
+                                    </label>
                                     <input
                                         type="text"
-                                        id="siteName"
+                                        id="companyName"
                                         value="<?php echo htmlspecialchars($client['name']); ?>"
                                         class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="Ex: Minha Empresa Ltda"
                                     />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-300 mb-2">URL do Logo</label>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Nome do Site
+                                        <span class="text-xs text-slate-500 block">Nome que aparece no site público</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="siteName"
+                                        value="<?php echo htmlspecialchars($client['site_name'] ?? ''); ?>"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="Ex: CineMania"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <label class="block text-sm font-medium text-slate-300 mb-2">
+                                    Slogan/Tagline do Site
+                                    <span class="text-xs text-slate-500 block">Frase de efeito que aparece no site</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="siteTagline"
+                                    value="<?php echo htmlspecialchars($client['site_tagline'] ?? ''); ?>"
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="Ex: Seu entretenimento, nossa paixão"
+                                />
+                            </div>
+                            
+                            <div class="mt-6">
+                                <label class="block text-sm font-medium text-slate-300 mb-2">
+                                    Descrição do Site
+                                    <span class="text-xs text-slate-500 block">Descrição principal na página inicial</span>
+                                </label>
+                                <textarea
+                                    id="siteDescription"
+                                    rows="3"
+                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="Ex: Encontre e solicite seus filmes e séries favoritos de forma rápida e fácil"
+                                ><?php echo htmlspecialchars($client['site_description'] ?? ''); ?></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Visual Assets -->
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                            <h3 class="text-lg font-semibold text-white mb-6 flex items-center space-x-2">
+                                <i data-lucide="image" class="h-5 w-5 text-purple-400"></i>
+                                <span>Recursos Visuais</span>
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        URL do Logo
+                                        <span class="text-xs text-slate-500 block">Logo principal do site (PNG/JPG recomendado)</span>
+                                    </label>
                                     <input
                                         type="url"
                                         id="logoUrl"
@@ -232,15 +296,70 @@ $client = $middleware->requireClientAuth();
                                         placeholder="https://exemplo.com/logo.png"
                                     />
                                 </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        URL do Favicon
+                                        <span class="text-xs text-slate-500 block">Ícone da aba do navegador (ICO/PNG)</span>
+                                    </label>
+                                    <input
+                                        type="url"
+                                        id="faviconUrl"
+                                        value="<?php echo htmlspecialchars($client['favicon_url'] ?? ''); ?>"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="https://exemplo.com/favicon.ico"
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Colors -->
+                        <!-- Contact Information -->
                         <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-                            <h3 class="text-lg font-semibold text-white mb-6">Cores do Site</h3>
+                            <h3 class="text-lg font-semibold text-white mb-6 flex items-center space-x-2">
+                                <i data-lucide="phone" class="h-5 w-5 text-green-400"></i>
+                                <span>Informações de Contato</span>
+                            </h3>
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-300 mb-2">Cor Primária</label>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Email de Contato
+                                        <span class="text-xs text-slate-500 block">Email para suporte e comunicação</span>
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="contactEmail"
+                                        value="<?php echo htmlspecialchars($client['contact_email'] ?? ''); ?>"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="contato@minhaempresa.com"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        WhatsApp de Contato
+                                        <span class="text-xs text-slate-500 block">Formato: 5511999999999</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="contactWhatsapp"
+                                        value="<?php echo htmlspecialchars($client['contact_whatsapp'] ?? ''); ?>"
+                                        class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="5511999999999"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Color Scheme -->
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                            <h3 class="text-lg font-semibold text-white mb-6 flex items-center space-x-2">
+                                <i data-lucide="palette" class="h-5 w-5 text-pink-400"></i>
+                                <span>Esquema de Cores</span>
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Cor Primária
+                                        <span class="text-xs text-slate-500 block">Botões principais, links, destaques</span>
+                                    </label>
                                     <input
                                         type="color"
                                         id="primaryColor"
@@ -249,7 +368,10 @@ $client = $middleware->requireClientAuth();
                                     />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-300 mb-2">Cor Secundária</label>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Cor Secundária
+                                        <span class="text-xs text-slate-500 block">Botões de ação, CTAs, elementos de destaque</span>
+                                    </label>
                                     <input
                                         type="color"
                                         id="secondaryColor"
@@ -260,37 +382,49 @@ $client = $middleware->requireClientAuth();
                             </div>
                         </div>
 
-                        <!-- Hero Section -->
+                        <!-- Page Content -->
                         <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
-                            <h3 class="text-lg font-semibold text-white mb-6">Textos da Página Inicial</h3>
+                            <h3 class="text-lg font-semibold text-white mb-6 flex items-center space-x-2">
+                                <i data-lucide="type" class="h-5 w-5 text-yellow-400"></i>
+                                <span>Conteúdo da Página Inicial</span>
+                            </h3>
                             <div class="space-y-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-300 mb-2">Título Principal</label>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Título Principal (Hero)
+                                        <span class="text-xs text-slate-500 block">Título grande que aparece no topo da página</span>
+                                    </label>
                                     <input
                                         type="text"
                                         id="heroTitle"
                                         value="<?php echo htmlspecialchars($client['hero_title'] ?? ''); ?>"
                                         class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="Solicite seus Filmes e Séries favoritos"
+                                        placeholder="Ex: Encontre seus filmes favoritos aqui"
                                     />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-300 mb-2">Subtítulo</label>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Subtítulo (Hero)
+                                        <span class="text-xs text-slate-500 block">Texto secundário abaixo do título principal</span>
+                                    </label>
                                     <input
                                         type="text"
                                         id="heroSubtitle"
                                         value="<?php echo htmlspecialchars($client['hero_subtitle'] ?? ''); ?>"
                                         class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="Sistema profissional de gerenciamento"
+                                        placeholder="Ex: Sistema profissional de entretenimento"
                                     />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-300 mb-2">Descrição</label>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">
+                                        Descrição Detalhada (Hero)
+                                        <span class="text-xs text-slate-500 block">Texto explicativo na seção principal</span>
+                                    </label>
                                     <textarea
                                         id="heroDescription"
                                         rows="3"
                                         class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="Pesquise, solicite e acompanhe suas preferências de entretenimento."
+                                        placeholder="Ex: Pesquise, solicite e acompanhe suas preferências de entretenimento de forma simples e eficiente"
                                     ><?php echo htmlspecialchars($client['hero_description'] ?? ''); ?></textarea>
                                 </div>
                             </div>

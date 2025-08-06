@@ -108,9 +108,14 @@ class OnboardingApp {
         this.companyData = {
             name: name,
             slug: slug,
+            site_name: document.getElementById('siteName').value.trim(),
+            site_tagline: document.getElementById('siteTagline').value.trim(),
+            site_description: document.getElementById('siteDescription').value.trim(),
             email: email,
-            phone: document.getElementById('companyPhone').value.trim(),
-            hero_title: document.getElementById('heroTitle').value.trim() || 'Solicite seus Filmes e Séries favoritos'
+            contact_whatsapp: document.getElementById('companyPhone').value.replace(/\D/g, ''),
+            hero_title: 'Solicite seus Filmes e Séries favoritos',
+            hero_subtitle: 'Sistema profissional de gerenciamento de solicitações',
+            hero_description: document.getElementById('siteDescription').value.trim() || 'Pesquise, solicite e acompanhe suas preferências de entretenimento.'
         };
 
         return true;
