@@ -13,8 +13,16 @@ if (!$tenantConfig) {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+                        ${tenant.site_tagline ? `
+                            <div>
+                                <span class="text-slate-400">Slogan:</span>
+                                <span class="text-white ml-2">${tenant.site_tagline}</span>
+                            </div>
+                        ` : ''}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($tenantConfig['site_name']); ?> - Sistema de Solicitação de Filmes e Séries</title>
+                            <span class="text-white ml-2">${tenant.site_name || tenant.name}</span>
+                        </div>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="/assets/css/style.css">
