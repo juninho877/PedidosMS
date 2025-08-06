@@ -29,32 +29,35 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 // Autoloader customizado - DEVE vir ANTES do Composer
 spl_autoload_register(function ($class) {
     $paths = [
+        APP_ROOT . '/config/',
         APP_ROOT . '/models/',
         APP_ROOT . '/controllers/',
         APP_ROOT . '/services/',
-        APP_ROOT . '/middleware/',
-        APP_ROOT . '/config/'
+        APP_ROOT . '/middleware/'
     ];
     
     foreach ($paths as $path) {
         $file = $path . $class . '.php';
         if (file_exists($file)) {
+            error_log("Autoloader: Loading class $class from $file");
             require_once $file;
             return;
         }
     }
+    
+    error_log("Autoloader: Class $class not found in any path");
 });
 
 // Composer autoloader (para dependências como JWT)
 if (file_exists(APP_ROOT . '/vendor/autoload.php')) {
     require_once APP_ROOT . '/vendor/autoload.php';
+    error_log("Composer autoloader loaded");
 }
-
-// Incluir configuração do banco de dados
-require_once APP_ROOT . '/config/database.php';
 
 // Configurações de sessão
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+error_log("Config.php loaded successfully");
 ?>

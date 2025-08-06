@@ -134,6 +134,13 @@ if ($tenant->findById($client['id'])) {
     <!-- Toast Container -->
     <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
+    <!-- Request Details Modal -->
+    <div id="requestDetailsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto mx-4">
+            <!-- Modal content will be populated by JavaScript -->
+        </div>
+    </div>
+
     <!-- Pass client data to JavaScript -->
     <script>
         window.CLIENT_DATA = <?php echo json_encode($clientData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
