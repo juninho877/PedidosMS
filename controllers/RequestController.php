@@ -97,20 +97,9 @@ class RequestController {
         $middleware = new AuthMiddleware();
         $middleware->requireAuth();
 
-        if ($this->request->findById($id)) {
-            echo json_encode([
-                'id' => $this->request->id,
-                'content_id' => $this->request->content_id,
-                'content_type' => $this->request->content_type,
-                'content_title' => $this->request->content_title,
-                'requester_name' => $this->request->requester_name,
-                'requester_whatsapp' => $this->request->requester_whatsapp,
-                'season' => $this->request->season,
-                'episode' => $this->request->episode,
-                'status' => $this->request->status,
-                'poster_path' => $this->request->poster_path,
-                'created_at' => $this->request->created_at
-            ]);
+        $requestData = $this->request->findById($id);
+        if ($requestData) {
+            echo json_encode($requestData);
         } else {
             http_response_code(404);
             echo json_encode(['error' => 'Solicitação não encontrada']);

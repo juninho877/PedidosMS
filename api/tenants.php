@@ -91,13 +91,9 @@ function createTenant($tenant) {
 
 function getTenantById($tenant, $id) {
     try {
-        $query = "SELECT * FROM tenants WHERE id = :id LIMIT 1";
-        $stmt = $tenant->conn->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
+        $tenantData = $tenant->findById($id);
         
-        if ($stmt->rowCount() > 0) {
-            $tenantData = $stmt->fetch();
+        if ($tenantData) {
             echo json_encode($tenantData);
         } else {
             http_response_code(404);

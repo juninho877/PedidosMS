@@ -47,7 +47,7 @@ class Tenant {
         return false;
     }
     public function findById($id) {
-        $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " WHERE id = :id AND active = 1 LIMIT 1";
+        $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " WHERE id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
@@ -67,7 +67,7 @@ class Tenant {
             $this->active = $row['active'];
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'];
-            return true;
+            return $row;
         }
         return false;
     }
@@ -183,6 +183,24 @@ class Tenant {
         
         $stmt->execute();
         return $stmt->rowCount() > 0;
+    }
+
+    public function toArray() {
+        return [
+            'id' => $this->id,
+            'slug' => $this->slug,
+            'name' => $this->name,
+            'logo_url' => $this->logo_url,
+            'favicon_url' => $this->favicon_url,
+            'hero_title' => $this->hero_title,
+            'hero_subtitle' => $this->hero_subtitle,
+            'hero_description' => $this->hero_description,
+            'primary_color' => $this->primary_color,
+            'secondary_color' => $this->secondary_color,
+            'active' => $this->active,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at
+        ];
     }
 }
 ?>

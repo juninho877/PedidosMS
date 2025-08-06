@@ -136,7 +136,7 @@ class Request {
             $this->status = $row['status'];
             $this->poster_path = $row['poster_path'];
             $this->created_at = $row['created_at'];
-            return true;
+            return $row;
         }
         return false;
     }

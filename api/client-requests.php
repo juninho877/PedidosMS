@@ -96,27 +96,16 @@ function getClientStats($request, $client) {
 
 function getClientRequestById($request, $client, $id) {
     try {
-        if ($request->findById($id)) {
+        $requestData = $request->findById($id);
+        if ($requestData) {
             // Verify that the request belongs to this client
-            if ($request->tenant_id != $client['id']) {
+            if ($requestData['tenant_id'] != $client['id']) {
                 http_response_code(403);
                 echo json_encode(['error' => 'Acesso negado']);
                 return;
             }
             
-            echo json_encode([
-                'id' => $request->id,
-                'content_id' => $request->content_id,
-                'content_type' => $request->content_type,
-                'content_title' => $request->content_title,
-                'requester_name' => $request->requester_name,
-                'requester_whatsapp' => $request->requester_whatsapp,
-                'season' => $request->season,
-                'episode' => $request->episode,
-                'status' => $request->status,
-                'poster_path' => $request->poster_path,
-                'created_at' => $request->created_at
-            ]);
+            echo json_encode($requestData);
         } else {
             http_response_code(404);
             echo json_encode(['error' => 'Solicitação não encontrada']);
