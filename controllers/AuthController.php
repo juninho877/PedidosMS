@@ -1,17 +1,35 @@
 <?php
+error_log("AuthController.php: Arquivo sendo carregado");
+
 class AuthController {
     private $db;
     private $user;
     private $authService;
 
     public function __construct() {
+        if (!class_exists('Database')) {
+            throw new Exception("Database class not available");
+        }
+        
+        if (!class_exists('User')) {
+            throw new Exception("User class not available");
+        }
+        
+        if (!class_exists('AuthService')) {
+            throw new Exception("AuthService class not available");
+        }
+        
         $database = new Database();
         $this->db = $database->getConnection();
         $this->user = new User($this->db);
         $this->authService = new AuthService();
+        
+        error_log("AuthController: Inicializado com sucesso");
     }
 
     public function login() {
+        error_log("AuthController: login() chamado");
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $input = json_decode(file_get_contents('php://input'), true);
             
@@ -48,11 +66,13 @@ class AuthController {
     }
 
     public function logout() {
+        error_log("AuthController: logout() chamado");
         $this->authService->clearAuthCookie();
         echo json_encode(['success' => true]);
     }
 
     public function me() {
+        error_log("AuthController: me() chamado");
         $user = $this->authService->getCurrentUser();
         if ($user) {
             echo json_encode(['user' => $user]);
@@ -62,4 +82,6 @@ class AuthController {
         }
     }
 }
+
+error_log("AuthController.php: Classe AuthController definida com sucesso");
 ?>

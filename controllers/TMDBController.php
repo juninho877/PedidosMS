@@ -1,12 +1,21 @@
 <?php
+error_log("TMDBController.php: Arquivo sendo carregado");
+
 class TMDBController {
     private $tmdbService;
 
     public function __construct() {
+        if (!class_exists('TMDBService')) {
+            throw new Exception("TMDBService class not available");
+        }
+        
         $this->tmdbService = new TMDBService();
+        error_log("TMDBController: Inicializado com sucesso");
     }
 
     public function search() {
+        error_log("TMDBController: search() chamado");
+        
         $query = $_GET['query'] ?? '';
         $type = $_GET['type'] ?? 'all';
         $year = $_GET['year'] ?? null;
@@ -57,29 +66,38 @@ class TMDBController {
 
             echo json_encode($results);
         } catch (Exception $e) {
+            error_log("TMDBController: Erro na busca - " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erro ao buscar conteúdo: ' . $e->getMessage()]);
         }
     }
 
     public function getMovieDetails($id) {
+        error_log("TMDBController: getMovieDetails() chamado para ID: $id");
+        
         try {
             $details = $this->tmdbService->getMovieDetails($id);
             echo json_encode($details);
         } catch (Exception $e) {
+            error_log("TMDBController: Erro ao buscar filme - " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erro ao buscar detalhes do filme: ' . $e->getMessage()]);
         }
     }
 
     public function getTVDetails($id) {
+        error_log("TMDBController: getTVDetails() chamado para ID: $id");
+        
         try {
             $details = $this->tmdbService->getTVDetails($id);
             echo json_encode($details);
         } catch (Exception $e) {
+            error_log("TMDBController: Erro ao buscar série - " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erro ao buscar detalhes da série: ' . $e->getMessage()]);
         }
     }
 }
+
+error_log("TMDBController.php: Classe TMDBController definida com sucesso");
 ?>
