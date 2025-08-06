@@ -73,18 +73,28 @@ class Tenant {
     }
 
     public function findBySlug($slug) {
-        error_log("TENANT_MODEL: Buscando tenant por slug: " . $slug);
+        error_log("TENANT_MODEL: === FINDBYSLUG START ===");
+        error_log("TENANT_MODEL: Slug recebido: '" . $slug . "'");
+        error_log("TENANT_MODEL: Tabela: " . $this->table);
         
         $query = "SELECT id, slug, name, logo_url, favicon_url, hero_title, hero_subtitle, hero_description, primary_color, secondary_color, active, created_at, updated_at FROM " . $this->table . " WHERE slug = :slug AND active = 1 LIMIT 1";
+        error_log("TENANT_MODEL: Query: " . $query);
+        
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':slug', $slug);
         $stmt->execute();
 
-        error_log("TENANT_MODEL: Query executada, rowCount: " . $stmt->rowCount());
+        $rowCount = $stmt->rowCount();
+        error_log("TENANT_MODEL: Query executada com sucesso");
+        error_log("TENANT_MODEL: Número de linhas encontradas: " . $rowCount);
 
-        if ($stmt->rowCount() > 0) {
+        if ($rowCount > 0) {
             $row = $stmt->fetch();
-            error_log("TENANT_MODEL: Tenant encontrado - ID: " . $row['id'] . ", Nome: " . $row['name']);
+            error_log("TENANT_MODEL: SUCCESS - Tenant encontrado!");
+            error_log("TENANT_MODEL: - ID: " . $row['id']);
+            error_log("TENANT_MODEL: - Nome: " . $row['name']);
+            error_log("TENANT_MODEL: - Slug: " . $row['slug']);
+            error_log("TENANT_MODEL: - Ativo: " . ($row['active'] ? 'SIM' : 'NÃO'));
             
             $this->id = $row['id'];
             $this->slug = $row['slug'];
@@ -99,10 +109,30 @@ class Tenant {
             $this->active = $row['active'];
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'];
+            
+            error_log("TENANT_MODEL: Propriedades do objeto definidas com sucesso");
+            error_log("TENANT_MODEL: === FINDBYSLUG END - SUCCESS ===");
             return true;
         }
         
-        error_log("TENANT_MODEL: Nenhum tenant encontrado para slug: " . $slug);
+        error_log("TENANT_MODEL: ERROR - Nenhum tenant encontrado para slug: '" . $slug . "'");
+        
+        // Debug adicional - listar todos os tenants
+        try {
+            $debugQuery = "SELECT slug, name, active FROM " . $this->table;
+            $debugStmt = $this->conn->prepare($debugQuery);
+            $debugStmt->execute();
+            $allTenants = $debugStmt->fetchAll();
+            
+            error_log("TENANT_MODEL: Tenants disponíveis no banco:");
+            foreach ($allTenants as $tenant) {
+                error_log("TENANT_MODEL: - Slug: '" . $tenant['slug'] . "', Nome: '" . $tenant['name'] . "', Ativo: " . ($tenant['active'] ? 'SIM' : 'NÃO'));
+            }
+        } catch (Exception $e) {
+            error_log("TENANT_MODEL: Erro ao buscar tenants para debug: " . $e->getMessage());
+        }
+        
+        error_log("TENANT_MODEL: === FINDBYSLUG END - FAILED ===");
         return false;
     }
 

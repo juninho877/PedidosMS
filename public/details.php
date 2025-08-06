@@ -1,20 +1,48 @@
 <?php
 // Este arquivo agora é a página de detalhes para tenants
-error_log("DETAILS: Iniciando carregamento da página de detalhes");
+error_log("=== DETAILS.PHP DEBUG START ===");
 error_log("DETAILS: REQUEST_URI: " . $_SERVER['REQUEST_URI']);
 error_log("DETAILS: SCRIPT_NAME: " . $_SERVER['SCRIPT_NAME']);
 error_log("DETAILS: Working Directory: " . getcwd());
+error_log("DETAILS: GET params: " . json_encode($_GET));
 
+// Verificar se o TenantMiddleware já foi inicializado
 $tenantMiddleware = new TenantMiddleware();
-$tenantConfig = $tenantMiddleware->getTenantConfig();
+error_log("DETAILS: TenantMiddleware criado");
 
-error_log("DETAILS: TenantConfig obtido: " . ($tenantConfig ? 'SIM' : 'NÃO'));
+// Debug do estado atual
+$tenantMiddleware->debugCurrentState();
+
+$tenantConfig = $tenantMiddleware->getTenantConfig();
+error_log("DETAILS: getTenantConfig() retornou: " . ($tenantConfig ? 'DADOS' : 'NULL'));
+
 if ($tenantConfig) {
-    error_log("DETAILS: Tenant config - Nome: " . $tenantConfig['name'] . ", Slug: " . $tenantConfig['slug']);
+    error_log("DETAILS: TenantConfig - Nome: " . $tenantConfig['name'] . ", Slug: " . $tenantConfig['slug']);
+} else {
+    error_log("DETAILS: ERROR - TenantConfig é null!");
+    
+    // Tentar identificar novamente com base na URL atual
+    $current_uri = $_SERVER['REQUEST_URI'];
+    $uri_path = parse_url($current_uri, PHP_URL_PATH);
+    $path_parts = explode('/', trim($uri_path, '/'));
+    $slug_from_url = $path_parts[0] ?? '';
+    
+    error_log("DETAILS: Tentando re-identificar tenant com slug da URL: " . $slug_from_url);
+    
+    if (!empty($slug_from_url)) {
+        $reidentified = $tenantMiddleware->identifyTenant($slug_from_url);
+        error_log("DETAILS: Re-identificação: " . ($reidentified ? 'SUCESSO' : 'FALHOU'));
+        
+        if ($reidentified) {
+            $tenantConfig = $tenantMiddleware->getTenantConfig();
+            error_log("DETAILS: TenantConfig após re-identificação: " . ($tenantConfig ? 'DADOS' : 'NULL'));
+        }
+    }
 }
 
 if (!$tenantConfig) {
-    error_log("DETAILS: TenantConfig é null, redirecionando para 404");
+    error_log("DETAILS: FINAL ERROR - TenantConfig ainda é null, redirecionando para 404");
+    error_log("=== DETAILS.PHP DEBUG END - FAILED ===");
     http_response_code(404);
     include '404.php';
     exit;
@@ -23,7 +51,7 @@ if (!$tenantConfig) {
 $type = $_GET['type'] ?? '';
 $id = $_GET['id'] ?? '';
 
-error_log("DETAILS: Parâmetros recebidos - type: " . $type . ", id: " . $id);
+error_log("DETAILS: Parâmetros recebidos - type: '" . $type . "', id: '" . $id . "'");
 
 if (empty($type) || empty($id) || !in_array($type, ['movie', 'tv'])) {
     error_log("DETAILS: Parâmetros inválidos, redirecionando para search");
@@ -31,7 +59,8 @@ if (empty($type) || empty($id) || !in_array($type, ['movie', 'tv'])) {
     exit;
 }
 
-error_log("DETAILS: Página de detalhes carregada com sucesso para tenant: " . $tenantConfig['name']);
+error_log("DETAILS: SUCCESS - Página de detalhes carregada para tenant: " . $tenantConfig['name']);
+error_log("=== DETAILS.PHP DEBUG END - SUCCESS ===");
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -125,6 +154,7 @@ error_log("DETAILS: Página de detalhes carregada com sucesso para tenant: " . $
     <script>
         // Set tenant slug for JavaScript
         window.TENANT_SLUG = '<?php echo htmlspecialchars($tenantConfig['slug']); ?>';
+        console.log('DETAILS JS: Tenant slug definido:', window.TENANT_SLUG);
     </script>
     <script src="/assets/js/tenant-details.js"></script>
     <script>
@@ -145,6 +175,7 @@ error_log("DETAILS: Página de detalhes carregada com sucesso para tenant: " . $
         });
 
         // Initialize the app with PHP values
+        console.log('DETAILS JS: Inicializando TenantDetailsApp com:', '<?php echo $type; ?>', '<?php echo $id; ?>');
         new TenantDetailsApp('<?php echo $type; ?>', '<?php echo $id; ?>');
     </script>
     <script>
