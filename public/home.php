@@ -94,11 +94,11 @@ if (!$tenantConfig) {
                 </h1>
                 <?php if ($tenantConfig['site_tagline']): ?>
                 <p class="text-xl sm:text-2xl text-blue-300 mb-4 font-medium">
-                    <?php echo htmlspecialchars($tenantConfig['site_tagline']); ?>
+                    <?php echo htmlspecialchars($tenantConfig['hero_subtitle']); ?>
                 </p>
                 <?php endif; ?>
                 <p class="text-base sm:text-lg lg:text-xl text-slate-300 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
-                    <?php echo htmlspecialchars($tenantConfig['site_description'] ?: $tenantConfig['hero_description']); ?>
+                    <?php echo htmlspecialchars($tenantConfig['hero_description'] ?: $tenantConfig['site_description']); ?>
                 </p>
                 <a href="/<?php echo htmlspecialchars($tenantConfig['slug']); ?>/search" class="inline-flex items-center space-x-2 bg-primary hover:opacity-90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
                     <i data-lucide="search" class="h-5 w-5 sm:h-6 sm:w-6"></i>
