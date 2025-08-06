@@ -1,94 +1,64 @@
 class ClientDashboardApp {
     constructor() {
         this.currentTab = 'overview';
-        this.client = window.CLIENT_DATA || {};
+        this.clientData = window.CLIENT_DATA || {};
         this.init();
     }
 
     init() {
-        console.log('ClientDashboardApp: Inicializando...', this.client);
-        this.setupEventListeners();
+        console.log('ClientDashboardApp: Inicializando...', this.clientData);
+        this.setupTabNavigation();
         this.loadTabContent('overview');
     }
 
-    setupEventListeners() {
-        // Tab buttons
-        const tabButtons = ['overviewTab', 'requestsTab', 'settingsTab', 'analyticsTab'];
-        tabButtons.forEach(tabId => {
-            const button = document.getElementById(tabId);
-            if (button) {
-                button.addEventListener('click', () => {
-                    const tab = tabId.replace('Tab', '');
-                    this.switchTab(tab);
-                });
-            }
-        });
-
-        // Modal close
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'requestModal' || e.target.closest('#closeRequestModal')) {
-                this.closeModal();
-            }
+    setupTabNavigation() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.getAttribute('data-tab');
+                this.switchTab(tabName);
+            });
         });
     }
 
-    switchTab(tab) {
-        console.log('Switching to tab:', tab);
+    switchTab(tabName) {
+        console.log('ClientDashboardApp: Mudando para aba:', tabName);
         
-        // Update tab buttons
-        const tabs = ['overview', 'requests', 'settings', 'analytics'];
-        tabs.forEach(t => {
-            const button = document.getElementById(t + 'Tab');
-            if (button) {
-                if (t === tab) {
-                    button.className = 'tab-button flex items-center space-x-2 px-4 sm:px-6 py-3 sm:py-4 font-medium transition-colors active';
-                } else {
-                    button.className = 'tab-button flex items-center space-x-2 px-4 sm:px-6 py-3 sm:py-4 font-medium transition-colors';
-                }
-            }
+        // Update active tab button
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
         });
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 
-        this.currentTab = tab;
-        this.loadTabContent(tab);
+        // Load tab content
+        this.currentTab = tabName;
+        this.loadTabContent(tabName);
     }
 
-    async loadTabContent(tab) {
-        const content = document.getElementById('tabContent');
+    loadTabContent(tabName) {
+        const contentDiv = document.getElementById('tabContent');
         
         // Show loading
-        content.innerHTML = `
+        contentDiv.innerHTML = `
             <div class="flex items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
             </div>
         `;
 
-        try {
-            switch (tab) {
-                case 'overview':
-                    await this.loadOverviewTab();
-                    break;
-                case 'requests':
-                    await this.loadRequestsTab();
-                    break;
-                case 'settings':
-                    await this.loadSettingsTab();
-                    break;
-                case 'analytics':
-                    await this.loadAnalyticsTab();
-                    break;
-                default:
-                    content.innerHTML = '<div class="text-center py-20 text-slate-400">Aba não encontrada</div>';
-            }
-        } catch (error) {
-            console.error('Error loading tab content:', error);
-            content.innerHTML = `
-                <div class="text-center py-20">
-                    <div class="text-red-400 mb-4">Erro ao carregar conteúdo</div>
-                    <button onclick="clientDashboard.loadTabContent('${tab}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                        Tentar Novamente
-                    </button>
-                </div>
-            `;
+        // Load content based on tab
+        switch (tabName) {
+            case 'overview':
+                this.loadOverviewTab();
+                break;
+            case 'requests':
+                this.loadRequestsTab();
+                break;
+            case 'settings':
+                this.loadSettingsTab();
+                break;
+            case 'analytics':
+                this.loadAnalyticsTab();
+                break;
         }
     }
 
@@ -102,126 +72,124 @@ class ClientDashboardApp {
             const requestsResponse = await fetch('/api/client-requests.php?limit=5');
             const recentRequests = await requestsResponse.json();
 
-            const content = document.getElementById('tabContent');
-            content.innerHTML = `
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 sm:p-6">
-                        <div class="flex items-center space-x-3">
-                            <i data-lucide="file-text" class="h-8 w-8 text-blue-400"></i>
-                            <div>
-                                <p class="text-2xl font-bold text-white">${stats.total || 0}</p>
-                                <p class="text-sm text-slate-400">Total</p>
+            const content = `
+                <div class="space-y-8">
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="list" class="h-8 w-8 text-blue-400"></i>
+                                <div>
+                                    <p class="text-2xl font-bold text-white">${stats.total || 0}</p>
+                                    <p class="text-sm text-slate-400">Total de Solicitações</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 sm:p-6">
-                        <div class="flex items-center space-x-3">
-                            <i data-lucide="clock" class="h-8 w-8 text-yellow-400"></i>
-                            <div>
-                                <p class="text-2xl font-bold text-white">${stats.pending || 0}</p>
-                                <p class="text-sm text-slate-400">Pendentes</p>
+                        
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="clock" class="h-8 w-8 text-yellow-400"></i>
+                                <div>
+                                    <p class="text-2xl font-bold text-white">${stats.pending || 0}</p>
+                                    <p class="text-sm text-slate-400">Pendentes</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 sm:p-6">
-                        <div class="flex items-center space-x-3">
-                            <i data-lucide="check-circle" class="h-8 w-8 text-green-400"></i>
-                            <div>
-                                <p class="text-2xl font-bold text-white">${stats.approved || 0}</p>
-                                <p class="text-sm text-slate-400">Aprovadas</p>
+                        
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check-circle" class="h-8 w-8 text-green-400"></i>
+                                <div>
+                                    <p class="text-2xl font-bold text-white">${stats.approved || 0}</p>
+                                    <p class="text-sm text-slate-400">Aprovadas</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 sm:p-6">
-                        <div class="flex items-center space-x-3">
-                            <i data-lucide="x-circle" class="h-8 w-8 text-red-400"></i>
-                            <div>
-                                <p class="text-2xl font-bold text-white">${stats.denied || 0}</p>
-                                <p class="text-sm text-slate-400">Negadas</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6 hover:border-blue-500/50 transition-all group cursor-pointer" onclick="window.open('/${this.client.slug}/search', '_blank')">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-blue-600 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i data-lucide="search" class="h-6 w-6 text-white"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-white">Ver Site Público</h3>
-                                <p class="text-sm text-slate-400">Visualizar como os usuários veem</p>
+                        
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="x-circle" class="h-8 w-8 text-red-400"></i>
+                                <div>
+                                    <p class="text-2xl font-bold text-white">${stats.denied || 0}</p>
+                                    <p class="text-sm text-slate-400">Negadas</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6 hover:border-purple-500/50 transition-all group cursor-pointer" onclick="clientDashboard.switchTab('requests')">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-purple-600 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i data-lucide="file-text" class="h-6 w-6 text-white"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-white">Gerenciar Solicitações</h3>
-                                <p class="text-sm text-slate-400">Aprovar ou negar pedidos</p>
-                            </div>
+                    <!-- Quick Actions -->
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-4">Ações Rápidas</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <a href="/${this.clientData.slug}" target="_blank" class="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
+                                <i data-lucide="external-link" class="h-6 w-6 text-blue-400"></i>
+                                <div>
+                                    <p class="font-medium text-white">Ver Meu Site</p>
+                                    <p class="text-sm text-slate-400">Visualizar site público</p>
+                                </div>
+                            </a>
+                            <button onclick="clientDashboard.switchTab('requests')" class="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-left">
+                                <i data-lucide="list" class="h-6 w-6 text-purple-400"></i>
+                                <div>
+                                    <p class="font-medium text-white">Ver Solicitações</p>
+                                    <p class="text-sm text-slate-400">Gerenciar pedidos</p>
+                                </div>
+                            </button>
+                            <button onclick="clientDashboard.switchTab('settings')" class="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-left">
+                                <i data-lucide="settings" class="h-6 w-6 text-green-400"></i>
+                                <div>
+                                    <p class="font-medium text-white">Configurações</p>
+                                    <p class="text-sm text-slate-400">Personalizar site</p>
+                                </div>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6 hover:border-green-500/50 transition-all group cursor-pointer" onclick="clientDashboard.switchTab('settings')">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-green-600 w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i data-lucide="settings" class="h-6 w-6 text-white"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-white">Configurações</h3>
-                                <p class="text-sm text-slate-400">Personalizar seu site</p>
-                            </div>
+                    <!-- Recent Requests -->
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-white">Atividade Recente</h3>
+                            <button onclick="clientDashboard.switchTab('requests')" class="text-blue-400 hover:text-blue-300 text-sm">
+                                Ver todas
+                            </button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-6">Atividade Recente</h3>
-                    ${recentRequests.length > 0 ? `
-                        <div class="space-y-4">
-                            ${recentRequests.slice(0, 5).map(request => `
-                                <div class="flex items-center space-x-4 p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700/70 transition-colors cursor-pointer" onclick="clientDashboard.showRequestDetails(${request.id})">
+                        <div class="space-y-3">
+                            ${recentRequests.length > 0 ? recentRequests.map(request => `
+                                <div class="flex items-center space-x-4 p-3 bg-slate-700/30 rounded-lg">
                                     <img
-                                        src="${request.poster_path ? `https://image.tmdb.org/t/p/w92${request.poster_path}` : '/assets/images/placeholder-poster.jpg'}"
+                                        src="${request.poster_path ? 
+                                            `https://image.tmdb.org/t/p/w92${request.poster_path}` : 
+                                            '/assets/images/placeholder-poster.jpg'
+                                        }"
                                         alt="${request.content_title}"
                                         class="w-12 h-18 object-cover rounded"
                                         onerror="this.src='/assets/images/placeholder-poster.jpg'"
                                     />
                                     <div class="flex-1">
-                                        <h4 class="font-semibold text-white">${request.content_title}</h4>
-                                        <p class="text-sm text-slate-400">${request.requester_name} • ${this.formatDate(request.created_at)}</p>
+                                        <p class="font-medium text-white">${request.content_title}</p>
+                                        <p class="text-sm text-slate-400">${request.requester_name}</p>
                                     </div>
-                                    <span class="status-${request.status} px-3 py-1 rounded-full text-xs font-medium">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${this.getStatusClass(request.status)}">
                                         ${this.getStatusText(request.status)}
                                     </span>
                                 </div>
-                            `).join('')}
+                            `).join('') : `
+                                <div class="text-center py-8">
+                                    <i data-lucide="inbox" class="h-12 w-12 text-slate-600 mx-auto mb-4"></i>
+                                    <p class="text-slate-400">Nenhuma solicitação ainda</p>
+                                </div>
+                            `}
                         </div>
-                    ` : `
-                        <div class="text-center py-8 text-slate-400">
-                            <i data-lucide="inbox" class="h-12 w-12 mx-auto mb-4 text-slate-600"></i>
-                            <p>Nenhuma solicitação ainda</p>
-                        </div>
-                    `}
+                    </div>
                 </div>
             `;
 
+            document.getElementById('tabContent').innerHTML = content;
             lucide.createIcons();
+
         } catch (error) {
-            console.error('Error loading overview:', error);
-            throw error;
+            console.error('Erro ao carregar overview:', error);
+            this.showError('Erro ao carregar dados da visão geral');
         }
     }
 
@@ -230,36 +198,33 @@ class ClientDashboardApp {
             const response = await fetch('/api/client-requests.php');
             const requests = await response.json();
 
-            const content = document.getElementById('tabContent');
-            content.innerHTML = `
-                <!-- Filters -->
-                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 sm:p-6 mb-6">
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <select id="statusFilter" class="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white">
-                            <option value="">Todos os Status</option>
-                            <option value="pending">Pendentes</option>
-                            <option value="approved">Aprovadas</option>
-                            <option value="denied">Negadas</option>
-                        </select>
-                        
-                        <select id="typeFilter" class="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white">
-                            <option value="">Todos os Tipos</option>
-                            <option value="movie">Filmes</option>
-                            <option value="tv">Séries</option>
-                        </select>
-                        
-                        <input
-                            type="text"
-                            id="searchFilter"
-                            placeholder="Buscar por título..."
-                            class="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
-                        />
+            const content = `
+                <div class="space-y-6">
+                    <!-- Filters -->
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <select id="statusFilter" class="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white">
+                                <option value="">Todos os status</option>
+                                <option value="pending">Pendentes</option>
+                                <option value="approved">Aprovadas</option>
+                                <option value="denied">Negadas</option>
+                            </select>
+                            <select id="typeFilter" class="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white">
+                                <option value="">Todos os tipos</option>
+                                <option value="movie">Filmes</option>
+                                <option value="tv">Séries</option>
+                            </select>
+                            <input
+                                type="text"
+                                id="searchFilter"
+                                placeholder="Buscar por título ou solicitante..."
+                                class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                <!-- Requests Table -->
-                <div class="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
-                    ${requests.length > 0 ? `
+                    <!-- Requests Table -->
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="bg-slate-700/50">
@@ -272,232 +237,283 @@ class ClientDashboardApp {
                                         <th class="px-4 py-3 text-left text-sm font-medium text-slate-300">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-700">
-                                    ${requests.map(request => `
+                                <tbody id="requestsTableBody" class="divide-y divide-slate-700">
+                                    ${requests.length > 0 ? requests.map(request => `
                                         <tr class="hover:bg-slate-700/30 transition-colors">
-                                            <td class="px-4 py-4">
+                                            <td class="px-4 py-3">
                                                 <div class="flex items-center space-x-3">
                                                     <img
-                                                        src="${request.poster_path ? `https://image.tmdb.org/t/p/w92${request.poster_path}` : '/assets/images/placeholder-poster.jpg'}"
+                                                        src="${request.poster_path ? 
+                                                            `https://image.tmdb.org/t/p/w92${request.poster_path}` : 
+                                                            '/assets/images/placeholder-poster.jpg'
+                                                        }"
                                                         alt="${request.content_title}"
                                                         class="w-10 h-15 object-cover rounded"
                                                         onerror="this.src='/assets/images/placeholder-poster.jpg'"
                                                     />
                                                     <div>
                                                         <p class="font-medium text-white">${request.content_title}</p>
-                                                        ${request.season ? `<p class="text-xs text-slate-400">T${request.season}${request.episode ? ` E${request.episode}` : ''}</p>` : ''}
+                                                        ${request.season ? `<p class="text-sm text-slate-400">T${request.season}${request.episode ? ` E${request.episode}` : ''}</p>` : ''}
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="px-4 py-4">
-                                                <div>
-                                                    <p class="text-white">${request.requester_name}</p>
-                                                    <p class="text-xs text-slate-400">${this.formatWhatsApp(request.requester_whatsapp)}</p>
-                                                </div>
+                                            <td class="px-4 py-3">
+                                                <p class="text-white">${request.requester_name}</p>
+                                                <p class="text-sm text-slate-400">${this.formatWhatsApp(request.requester_whatsapp)}</p>
                                             </td>
-                                            <td class="px-4 py-4">
+                                            <td class="px-4 py-3">
                                                 <span class="inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                                    request.content_type === 'movie' ? 'bg-blue-600/20 text-blue-300' : 'bg-purple-600/20 text-purple-300'
+                                                    request.content_type === 'movie' ? 'bg-blue-600/20 text-blue-400' : 'bg-purple-600/20 text-purple-400'
                                                 }">
                                                     <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-3 w-3"></i>
                                                     <span>${request.content_type === 'movie' ? 'Filme' : 'Série'}</span>
                                                 </span>
                                             </td>
-                                            <td class="px-4 py-4">
-                                                <span class="status-${request.status} px-3 py-1 rounded-full text-xs font-medium">
+                                            <td class="px-4 py-3">
+                                                <span class="px-2 py-1 rounded-full text-xs font-medium ${this.getStatusClass(request.status)}">
                                                     ${this.getStatusText(request.status)}
                                                 </span>
                                             </td>
-                                            <td class="px-4 py-4 text-sm text-slate-400">
-                                                ${this.formatDate(request.created_at)}
+                                            <td class="px-4 py-3 text-sm text-slate-400">
+                                                ${new Date(request.created_at).toLocaleDateString('pt-BR')}
                                             </td>
-                                            <td class="px-4 py-4">
+                                            <td class="px-4 py-3">
                                                 <button
-                                                    onclick="clientDashboard.showRequestDetails(${request.id})"
-                                                    class="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                                                    onclick="clientDashboard.openRequestModal(${request.id})"
+                                                    class="text-blue-400 hover:text-blue-300 text-sm"
                                                 >
                                                     Ver Detalhes
                                                 </button>
                                             </td>
                                         </tr>
-                                    `).join('')}
+                                    `).join('') : `
+                                        <tr>
+                                            <td colspan="6" class="px-4 py-8 text-center">
+                                                <i data-lucide="inbox" class="h-12 w-12 text-slate-600 mx-auto mb-4"></i>
+                                                <p class="text-slate-400">Nenhuma solicitação encontrada</p>
+                                            </td>
+                                        </tr>
+                                    `}
                                 </tbody>
                             </table>
                         </div>
-                    ` : `
-                        <div class="text-center py-12">
-                            <i data-lucide="inbox" class="h-16 w-16 text-slate-600 mx-auto mb-4"></i>
-                            <h3 class="text-lg font-medium text-slate-300 mb-2">Nenhuma solicitação ainda</h3>
-                            <p class="text-slate-500 mb-6">Quando os usuários fizerem solicitações, elas aparecerão aqui.</p>
-                            <a href="/${this.client.slug}/search" target="_blank" class="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                                <i data-lucide="external-link" class="h-4 w-4"></i>
-                                <span>Ver Site Público</span>
-                            </a>
-                        </div>
-                    `}
+                    </div>
                 </div>
             `;
 
+            document.getElementById('tabContent').innerHTML = content;
+            this.setupRequestFilters();
             lucide.createIcons();
+
         } catch (error) {
-            console.error('Error loading overview:', error);
-            throw error;
+            console.error('Erro ao carregar solicitações:', error);
+            this.showError('Erro ao carregar solicitações');
         }
     }
 
     async loadSettingsTab() {
-        const content = document.getElementById('tabContent');
-        content.innerHTML = `
+        const content = `
             <div class="max-w-4xl">
                 <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
                     <h3 class="text-xl font-semibold text-white mb-6">Configurações do Site</h3>
                     
                     <form id="settingsForm" class="space-y-6">
-                        <!-- Basic Info -->
-                        <div class="grid sm:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Basic Info -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-300 mb-2">Nome da Empresa</label>
                                 <input
                                     type="text"
                                     id="name"
-                                    value="${this.client.name || ''}"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                    value="${this.clientData.name || ''}"
+                                    class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
                                     required
                                 />
                             </div>
+                            
                             <div>
                                 <label class="block text-sm font-medium text-slate-300 mb-2">Nome do Site</label>
                                 <input
                                     type="text"
                                     id="site_name"
-                                    value="${this.client.site_name || ''}"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                    value="${this.clientData.site_name || ''}"
+                                    class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
                                     required
                                 />
                             </div>
                         </div>
 
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Slogan do Site</label>
+                            <input
+                                type="text"
+                                id="site_tagline"
+                                value="${this.clientData.site_tagline || ''}"
+                                class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                            />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Descrição do Site</label>
+                            <textarea
+                                id="site_description"
+                                rows="3"
+                                class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                            >${this.clientData.site_description || ''}</textarea>
+                        </div>
+
                         <!-- Hero Section -->
-                        <div class="space-y-4">
-                            <h4 class="text-lg font-medium text-white">Seção Principal</h4>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">Título Principal</label>
-                                <input
-                                    type="text"
-                                    id="hero_title"
-                                    value="${this.client.hero_title || ''}"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">Subtítulo</label>
-                                <input
-                                    type="text"
-                                    id="hero_subtitle"
-                                    value="${this.client.hero_subtitle || ''}"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">Descrição</label>
-                                <textarea
-                                    id="hero_description"
-                                    rows="3"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                                >${this.client.hero_description || ''}</textarea>
+                        <div class="border-t border-slate-700 pt-6">
+                            <h4 class="text-lg font-medium text-white mb-4">Seção Principal (Hero)</h4>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Título Principal</label>
+                                    <input
+                                        type="text"
+                                        id="hero_title"
+                                        value="${this.clientData.hero_title || ''}"
+                                        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Subtítulo</label>
+                                    <input
+                                        type="text"
+                                        id="hero_subtitle"
+                                        value="${this.clientData.hero_subtitle || ''}"
+                                        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Descrição</label>
+                                    <textarea
+                                        id="hero_description"
+                                        rows="3"
+                                        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                    >${this.clientData.hero_description || ''}</textarea>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Contact Info -->
-                        <div class="grid sm:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">Email de Contato</label>
-                                <input
-                                    type="email"
-                                    id="contact_email"
-                                    value="${this.client.contact_email || ''}"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">WhatsApp</label>
-                                <input
-                                    type="text"
-                                    id="contact_whatsapp"
-                                    value="${this.client.contact_whatsapp || ''}"
-                                    placeholder="5511999999999"
-                                    class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                                />
+                        <div class="border-t border-slate-700 pt-6">
+                            <h4 class="text-lg font-medium text-white mb-4">Informações de Contato</h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Email de Contato</label>
+                                    <input
+                                        type="email"
+                                        id="contact_email"
+                                        value="${this.clientData.contact_email || ''}"
+                                        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">WhatsApp</label>
+                                    <input
+                                        type="text"
+                                        id="contact_whatsapp"
+                                        value="${this.clientData.contact_whatsapp || ''}"
+                                        placeholder="5511999999999"
+                                        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                    />
+                                </div>
                             </div>
                         </div>
 
                         <!-- Colors -->
-                        <div class="grid sm:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">Cor Primária</label>
-                                <div class="flex space-x-3">
-                                    <input
-                                        type="color"
-                                        id="primary_color"
-                                        value="${this.client.primary_color || '#3b82f6'}"
-                                        class="w-12 h-12 rounded-lg border border-slate-600"
-                                    />
-                                    <input
-                                        type="text"
-                                        id="primary_color_text"
-                                        value="${this.client.primary_color || '#3b82f6'}"
-                                        class="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                                    />
+                        <div class="border-t border-slate-700 pt-6">
+                            <h4 class="text-lg font-medium text-white mb-4">Cores do Site</h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Cor Primária</label>
+                                    <div class="flex space-x-2">
+                                        <input
+                                            type="color"
+                                            id="primary_color_picker"
+                                            value="${this.clientData.primary_color || '#3b82f6'}"
+                                            class="w-12 h-10 rounded border border-slate-600"
+                                        />
+                                        <input
+                                            type="text"
+                                            id="primary_color"
+                                            value="${this.clientData.primary_color || '#3b82f6'}"
+                                            class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Cor Secundária</label>
+                                    <div class="flex space-x-2">
+                                        <input
+                                            type="color"
+                                            id="secondary_color_picker"
+                                            value="${this.clientData.secondary_color || '#8b5cf6'}"
+                                            class="w-12 h-10 rounded border border-slate-600"
+                                        />
+                                        <input
+                                            type="text"
+                                            id="secondary_color"
+                                            value="${this.clientData.secondary_color || '#8b5cf6'}"
+                                            class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-300 mb-2">Cor Secundária</label>
-                                <div class="flex space-x-3">
+                        </div>
+
+                        <!-- Images -->
+                        <div class="border-t border-slate-700 pt-6">
+                            <h4 class="text-lg font-medium text-white mb-4">Imagens</h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">URL do Logo</label>
                                     <input
-                                        type="color"
-                                        id="secondary_color"
-                                        value="${this.client.secondary_color || '#ef4444'}"
-                                        class="w-12 h-12 rounded-lg border border-slate-600"
+                                        type="url"
+                                        id="logo_url"
+                                        value="${this.clientData.logo_url || ''}"
+                                        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                        placeholder="https://exemplo.com/logo.png"
                                     />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">URL do Favicon</label>
                                     <input
-                                        type="text"
-                                        id="secondary_color_text"
-                                        value="${this.client.secondary_color || '#ef4444'}"
-                                        class="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                        type="url"
+                                        id="favicon_url"
+                                        value="${this.clientData.favicon_url || ''}"
+                                        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                                        placeholder="https://exemplo.com/favicon.ico"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Actions -->
-                        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
+                        <div class="flex justify-end">
                             <button
                                 type="submit"
-                                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
                             >
-                                Salvar Alterações
+                                Salvar Configurações
                             </button>
-                            <a
-                                href="/${this.client.slug}"
-                                target="_blank"
-                                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg font-semibold transition-colors text-center"
-                            >
-                                Visualizar Site
-                            </a>
                         </div>
                     </form>
                 </div>
             </div>
         `;
 
-        // Setup color sync
-        this.setupColorSync();
-        
-        // Setup form submission
-        document.getElementById('settingsForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveSettings();
-        });
+        document.getElementById('tabContent').innerHTML = content;
+        this.setupSettingsForm();
+        lucide.createIcons();
     }
 
     async loadAnalyticsTab() {
@@ -505,88 +521,276 @@ class ClientDashboardApp {
             const response = await fetch('/api/client-analytics.php');
             const analytics = await response.json();
 
-            const content = document.getElementById('tabContent');
-            content.innerHTML = `
-                <!-- Analytics Cards -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                        <div class="flex items-center space-x-3">
-                            <i data-lucide="trending-up" class="h-8 w-8 text-green-400"></i>
-                            <div>
-                                <p class="text-2xl font-bold text-white">${analytics.approval_rate || 0}%</p>
-                                <p class="text-sm text-slate-400">Taxa de Aprovação</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                        <div class="flex items-center space-x-3">
-                            <i data-lucide="calendar" class="h-8 w-8 text-blue-400"></i>
-                            <div>
-                                <p class="text-2xl font-bold text-white">${analytics.daily_average || 0}</p>
-                                <p class="text-sm text-slate-400">Média Diária</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                        <div class="flex items-center space-x-3">
-                            <i data-lucide="star" class="h-8 w-8 text-yellow-400"></i>
-                            <div>
-                                <p class="text-2xl font-bold text-white">${analytics.most_requested_type || 'N/A'}</p>
-                                <p class="text-sm text-slate-400">Mais Solicitado</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                        <div class="flex items-center space-x-3">
-                            <i data-lucide="activity" class="h-8 w-8 text-purple-400"></i>
-                            <div>
-                                <p class="text-2xl font-bold text-white">${analytics.daily_requests?.length || 0}</p>
-                                <p class="text-sm text-slate-400">Dias com Atividade</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chart -->
-                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-white mb-6">Solicitações dos Últimos 30 Dias</h3>
-                    <div class="h-64 flex items-end space-x-2">
-                        ${analytics.daily_requests?.length > 0 ? 
-                            analytics.daily_requests.map(day => `
-                                <div class="flex-1 flex flex-col items-center">
-                                    <div 
-                                        class="w-full bg-blue-600 rounded-t"
-                                        style="height: ${Math.max(8, (day.count / Math.max(...analytics.daily_requests.map(d => d.count))) * 200)}px"
-                                        title="${day.date}: ${day.count} solicitações"
-                                    ></div>
-                                    <span class="text-xs text-slate-400 mt-2 transform -rotate-45 origin-left">
-                                        ${new Date(day.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                                    </span>
+            const content = `
+                <div class="space-y-6">
+                    <!-- Analytics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="trending-up" class="h-8 w-8 text-green-400"></i>
+                                <div>
+                                    <p class="text-2xl font-bold text-white">${analytics.approval_rate || 0}%</p>
+                                    <p class="text-sm text-slate-400">Taxa de Aprovação</p>
                                 </div>
-                            `).join('') :
-                            '<div class="text-center text-slate-400 w-full">Nenhum dado disponível</div>'
-                        }
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="calendar" class="h-8 w-8 text-blue-400"></i>
+                                <div>
+                                    <p class="text-2xl font-bold text-white">${analytics.daily_average || 0}</p>
+                                    <p class="text-sm text-slate-400">Média Diária</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="star" class="h-8 w-8 text-yellow-400"></i>
+                                <div>
+                                    <p class="text-2xl font-bold text-white">${analytics.most_requested_type || 'N/A'}</p>
+                                    <p class="text-sm text-slate-400">Mais Solicitado</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="activity" class="h-8 w-8 text-purple-400"></i>
+                                <div>
+                                    <p class="text-2xl font-bold text-white">${(analytics.daily_requests || []).length}</p>
+                                    <p class="text-sm text-slate-400">Dias Ativos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-4">Solicitações dos Últimos 30 Dias</h3>
+                        <div class="h-64 flex items-end space-x-2">
+                            ${this.renderChart(analytics.daily_requests || [])}
+                        </div>
                     </div>
                 </div>
             `;
 
+            document.getElementById('tabContent').innerHTML = content;
             lucide.createIcons();
+
         } catch (error) {
-            console.error('Error loading analytics:', error);
-            throw error;
+            console.error('Erro ao carregar analytics:', error);
+            this.showError('Erro ao carregar analytics');
         }
     }
 
-    async showRequestDetails(requestId) {
+    renderChart(dailyData) {
+        if (!dailyData || dailyData.length === 0) {
+            return '<div class="flex items-center justify-center w-full h-full text-slate-400">Sem dados para exibir</div>';
+        }
+
+        const maxCount = Math.max(...dailyData.map(d => d.count));
+        
+        return dailyData.map(day => {
+            const height = maxCount > 0 ? (day.count / maxCount) * 100 : 0;
+            return `
+                <div class="flex-1 flex flex-col items-center">
+                    <div 
+                        class="w-full bg-blue-600 rounded-t transition-all hover:bg-blue-500"
+                        style="height: ${height}%"
+                        title="${day.date}: ${day.count} solicitações"
+                    ></div>
+                    <span class="text-xs text-slate-400 mt-2 transform rotate-45 origin-left">
+                        ${new Date(day.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    </span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    setupRequestFilters() {
+        const statusFilter = document.getElementById('statusFilter');
+        const typeFilter = document.getElementById('typeFilter');
+        const searchFilter = document.getElementById('searchFilter');
+
+        [statusFilter, typeFilter, searchFilter].forEach(filter => {
+            if (filter) {
+                filter.addEventListener('change', () => this.filterRequests());
+                filter.addEventListener('input', () => this.filterRequests());
+            }
+        });
+    }
+
+    async filterRequests() {
+        const status = document.getElementById('statusFilter')?.value || '';
+        const type = document.getElementById('typeFilter')?.value || '';
+        const search = document.getElementById('searchFilter')?.value || '';
+
+        const params = new URLSearchParams();
+        if (status) params.append('status', status);
+        if (type) params.append('content_type', type);
+        if (search) params.append('search', search);
+
+        try {
+            const response = await fetch(`/api/client-requests.php?${params}`);
+            const requests = await response.json();
+            
+            // Update table body
+            const tbody = document.getElementById('requestsTableBody');
+            if (tbody) {
+                tbody.innerHTML = requests.length > 0 ? requests.map(request => `
+                    <tr class="hover:bg-slate-700/30 transition-colors">
+                        <td class="px-4 py-3">
+                            <div class="flex items-center space-x-3">
+                                <img
+                                    src="${request.poster_path ? 
+                                        `https://image.tmdb.org/t/p/w92${request.poster_path}` : 
+                                        '/assets/images/placeholder-poster.jpg'
+                                    }"
+                                    alt="${request.content_title}"
+                                    class="w-10 h-15 object-cover rounded"
+                                    onerror="this.src='/assets/images/placeholder-poster.jpg'"
+                                />
+                                <div>
+                                    <p class="font-medium text-white">${request.content_title}</p>
+                                    ${request.season ? `<p class="text-sm text-slate-400">T${request.season}${request.episode ? ` E${request.episode}` : ''}</p>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <p class="text-white">${request.requester_name}</p>
+                            <p class="text-sm text-slate-400">${this.formatWhatsApp(request.requester_whatsapp)}</p>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                                request.content_type === 'movie' ? 'bg-blue-600/20 text-blue-400' : 'bg-purple-600/20 text-purple-400'
+                            }">
+                                <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-3 w-3"></i>
+                                <span>${request.content_type === 'movie' ? 'Filme' : 'Série'}</span>
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${this.getStatusClass(request.status)}">
+                                ${this.getStatusText(request.status)}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-slate-400">
+                            ${new Date(request.created_at).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td class="px-4 py-3">
+                            <button
+                                onclick="clientDashboard.openRequestModal(${request.id})"
+                                class="text-blue-400 hover:text-blue-300 text-sm"
+                            >
+                                Ver Detalhes
+                            </button>
+                        </td>
+                    </tr>
+                `).join('') : `
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center">
+                            <i data-lucide="inbox" class="h-12 w-12 text-slate-600 mx-auto mb-4"></i>
+                            <p class="text-slate-400">Nenhuma solicitação encontrada</p>
+                        </td>
+                    </tr>
+                `;
+                
+                lucide.createIcons();
+            }
+        } catch (error) {
+            console.error('Erro ao filtrar solicitações:', error);
+        }
+    }
+
+    setupSettingsForm() {
+        const form = document.getElementById('settingsForm');
+        if (!form) return;
+
+        // Sync color pickers
+        const primaryPicker = document.getElementById('primary_color_picker');
+        const primaryInput = document.getElementById('primary_color');
+        const secondaryPicker = document.getElementById('secondary_color_picker');
+        const secondaryInput = document.getElementById('secondary_color');
+
+        if (primaryPicker && primaryInput) {
+            primaryPicker.addEventListener('change', (e) => {
+                primaryInput.value = e.target.value;
+            });
+            primaryInput.addEventListener('input', (e) => {
+                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                    primaryPicker.value = e.target.value;
+                }
+            });
+        }
+
+        if (secondaryPicker && secondaryInput) {
+            secondaryPicker.addEventListener('change', (e) => {
+                secondaryInput.value = e.target.value;
+            });
+            secondaryInput.addEventListener('input', (e) => {
+                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                    secondaryPicker.value = e.target.value;
+                }
+            });
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await this.saveSettings();
+        });
+    }
+
+    async saveSettings() {
+        const formData = {
+            name: document.getElementById('name')?.value || '',
+            site_name: document.getElementById('site_name')?.value || '',
+            site_tagline: document.getElementById('site_tagline')?.value || '',
+            site_description: document.getElementById('site_description')?.value || '',
+            hero_title: document.getElementById('hero_title')?.value || '',
+            hero_subtitle: document.getElementById('hero_subtitle')?.value || '',
+            hero_description: document.getElementById('hero_description')?.value || '',
+            contact_email: document.getElementById('contact_email')?.value || '',
+            contact_whatsapp: document.getElementById('contact_whatsapp')?.value || '',
+            primary_color: document.getElementById('primary_color')?.value || '',
+            secondary_color: document.getElementById('secondary_color')?.value || '',
+            logo_url: document.getElementById('logo_url')?.value || '',
+            favicon_url: document.getElementById('favicon_url')?.value || ''
+        };
+
+        try {
+            const response = await fetch(`/api/client-tenants.php/${this.clientData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                this.showToast('Configurações salvas com sucesso!', 'success');
+                // Update client data
+                Object.assign(this.clientData, formData);
+                window.CLIENT_DATA = this.clientData;
+            } else {
+                throw new Error(result.error || 'Erro ao salvar configurações');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar configurações:', error);
+            this.showToast(error.message, 'error');
+        }
+    }
+
+    async openRequestModal(requestId) {
         try {
             // Get request details
-            const requestResponse = await fetch(`/api/client-requests.php/${requestId}`);
-            const request = await requestResponse.json();
+            const response = await fetch(`/api/client-requests.php/${requestId}`);
+            const request = await response.json();
 
-            if (!requestResponse.ok) {
+            if (!response.ok) {
                 throw new Error(request.error || 'Erro ao carregar solicitação');
             }
 
@@ -598,152 +802,42 @@ class ClientDashboardApp {
                     tmdbData = await tmdbResponse.json();
                 }
             } catch (error) {
-                console.warn('Erro ao buscar dados do TMDB:', error);
+                console.warn('Erro ao carregar dados do TMDB:', error);
             }
 
             this.renderRequestModal(request, tmdbData);
+
         } catch (error) {
-            console.error('Error loading request details:', error);
-            this.showToast('Erro ao carregar detalhes da solicitação', 'error');
+            console.error('Erro ao abrir modal:', error);
+            this.showToast(error.message, 'error');
         }
     }
 
-    renderRequestModal(request, tmdbData = null) {
-        // Informações básicas
-        const posterUrl = tmdbData?.poster_path ? 
-            `https://image.tmdb.org/t/p/w400${tmdbData.poster_path}` : 
+    renderRequestModal(request, tmdbData) {
+        const modal = document.getElementById('requestModal');
+        const title = request.content_title;
+        const posterUrl = request.poster_path ? 
+            `https://image.tmdb.org/t/p/w400${request.poster_path}` : 
             '/assets/images/placeholder-poster.jpg';
-        
-        const releaseYear = tmdbData ? 
-            (tmdbData.release_date || tmdbData.first_air_date ? 
-                new Date(tmdbData.release_date || tmdbData.first_air_date).getFullYear() : 'N/A') : 'N/A';
-        
-        const rating = tmdbData?.vote_average?.toFixed(1) || 'N/A';
+
+        // Extract additional info from TMDB data
+        const releaseDate = tmdbData?.release_date || tmdbData?.first_air_date;
+        const year = releaseDate ? new Date(releaseDate).getFullYear() : 'N/A';
+        const rating = tmdbData?.vote_average ? tmdbData.vote_average.toFixed(1) : 'N/A';
+        const genres = tmdbData?.genres || [];
         const overview = tmdbData?.overview || 'Sinopse não disponível.';
-        
-        // Gêneros
-        const genres = tmdbData?.genres ? 
-            tmdbData.genres.map(genre => `<span class="inline-block bg-blue-600/20 text-blue-300 px-3 py-1 rounded-full text-sm mr-2 mb-2">${genre.name}</span>`).join('') : 
-            '<span class="text-slate-400">Não disponível</span>';
-        
-        // Informações específicas por tipo
-        let specificInfo = '';
-        if (tmdbData) {
-            if (request.content_type === 'movie') {
-                const runtime = tmdbData.runtime ? `${tmdbData.runtime} min` : 'N/A';
-                const budget = tmdbData.budget && tmdbData.budget > 0 ? 
-                    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD' }).format(tmdbData.budget) : 'N/A';
-                const revenue = tmdbData.revenue && tmdbData.revenue > 0 ? 
-                    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD' }).format(tmdbData.revenue) : 'N/A';
-                
-                specificInfo = `
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <span class="text-slate-400">Duração:</span>
-                            <span class="text-white ml-2">${runtime}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400">Orçamento:</span>
-                            <span class="text-white ml-2">${budget}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400">Bilheteria:</span>
-                            <span class="text-white ml-2">${revenue}</span>
-                        </div>
-                    </div>
-                `;
-            } else {
-                const seasons = tmdbData.number_of_seasons || 'N/A';
-                const episodes = tmdbData.number_of_episodes || 'N/A';
-                const status = this.translateStatus(tmdbData.status) || 'N/A';
-                const networks = tmdbData.networks?.map(n => n.name).join(', ') || 'N/A';
-                
-                specificInfo = `
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="text-slate-400">Temporadas:</span>
-                            <span class="text-white ml-2">${seasons}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400">Episódios:</span>
-                            <span class="text-white ml-2">${episodes}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400">Status:</span>
-                            <span class="text-white ml-2">${status}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400">Rede:</span>
-                            <span class="text-white ml-2">${networks}</span>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-        
-        // Informações de produção
-        const productionCompanies = tmdbData?.production_companies ? 
-            tmdbData.production_companies.slice(0, 3).map(company => company.name).join(', ') : 'N/A';
-        
-        const countries = tmdbData?.production_countries ? 
-            tmdbData.production_countries.map(country => country.name).join(', ') : 'N/A';
-            
-        const originalLanguage = tmdbData?.original_language ? 
-            this.translateLanguage(tmdbData.original_language) : 'N/A';
-        
-        // Elenco
-        let castSection = '';
-        if (tmdbData?.credits?.cast) {
-            const cast = tmdbData.credits.cast.slice(0, 8);
-            castSection = `
-                <div class="mb-6">
-                    <h4 class="text-lg font-semibold text-white mb-4">Elenco Principal</h4>
-                    <div class="grid grid-cols-4 gap-4">
-                        ${cast.map(actor => `
-                            <div class="text-center">
-                                <img
-                                    src="${actor.profile_path ? 
-                                        `https://image.tmdb.org/t/p/w200${actor.profile_path}` : 
-                                        '/assets/images/placeholder-person.jpg'
-                                    }"
-                                    alt="${actor.name}"
-                                    class="w-full h-20 object-cover rounded-lg mb-2"
-                                    onerror="this.src='/assets/images/placeholder-person.jpg'"
-                                />
-                                <p class="text-white font-medium text-xs">${actor.name}</p>
-                                <p class="text-slate-400 text-xs">${actor.character}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Trailer
-        let trailerSection = '';
+        const runtime = tmdbData?.runtime;
+        const seasons = tmdbData?.number_of_seasons;
+        const episodes = tmdbData?.number_of_episodes;
+        const status = tmdbData?.status;
+        const originalLanguage = tmdbData?.original_language;
+        const productionCountries = tmdbData?.production_countries || [];
+        const productionCompanies = tmdbData?.production_companies || [];
+        const cast = tmdbData?.credits?.cast || [];
         const trailer = tmdbData?.videos?.results?.find(video => 
             video.type === 'Trailer' && video.site === 'YouTube'
         );
-        if (trailer) {
-            trailerSection = `
-                <div class="mb-6">
-                    <h4 class="text-lg font-semibold text-white mb-4">Trailer</h4>
-                    <div class="aspect-video">
-                        <iframe
-                            src="https://www.youtube.com/embed/${trailer.key}"
-                            title="${request.content_title} Trailer"
-                            class="w-full h-full rounded-lg"
-                            allowfullscreen
-                        ></iframe>
-                    </div>
-                </div>
-            `;
-        }
-        
-        const contentType = request.content_type === 'movie' ? 'Filme' : 'Série';
-        
-        // Render modal
-        const modal = document.getElementById('requestModal');
+
         modal.innerHTML = `
             <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto mx-4">
                 <!-- Header -->
@@ -753,14 +847,13 @@ class ClientDashboardApp {
                         <h2 class="text-xl font-semibold text-white">Detalhes da Solicitação #${request.id}</h2>
                     </div>
                     <button
-                        id="closeRequestModal"
+                        onclick="document.getElementById('requestModal').classList.add('hidden')"
                         class="text-slate-400 hover:text-white transition-colors"
                     >
                         <i data-lucide="x" class="h-6 w-6"></i>
                     </button>
                 </div>
 
-                <!-- Content -->
                 <div class="p-6">
                     <div class="grid lg:grid-cols-3 gap-8">
                         <!-- Main Content -->
@@ -770,115 +863,181 @@ class ClientDashboardApp {
                                 <div class="flex-shrink-0">
                                     <img
                                         src="${posterUrl}"
-                                        alt="${request.content_title}"
-                                        class="w-32 h-48 object-cover rounded-lg border border-slate-600"
+                                        alt="${title}"
+                                        class="w-32 h-48 object-cover rounded-lg border border-slate-700"
                                         onerror="this.src='/assets/images/placeholder-poster.jpg'"
                                     />
                                 </div>
-                                <div class="flex-1">
-                                    <h3 class="text-2xl font-bold text-white mb-2">${request.content_title}</h3>
-                                    <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-slate-300">
-                                        <div class="flex items-center space-x-1">
-                                            <i data-lucide="calendar" class="h-4 w-4"></i>
-                                            <span>${releaseYear}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <i data-lucide="star" class="h-4 w-4 text-yellow-400"></i>
-                                            <span>${rating}/10</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
-                                            <span>${contentType}</span>
-                                        </div>
-                                        <div class="flex items-center space-x-1">
-                                            <i data-lucide="globe" class="h-4 w-4"></i>
-                                            <span>${originalLanguage}</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-slate-300 text-sm leading-relaxed mb-4">${overview}</p>
-                                    
-                                    <!-- Informações Específicas -->
-                                    ${specificInfo}
-                                </div>
-                            </div>
-                            
-                            <!-- Gêneros -->
-                            <div>
-                                <h4 class="text-lg font-semibold text-white mb-3">Gêneros</h4>
-                                <div class="flex flex-wrap">
-                                    ${genres}
-                                </div>
-                            </div>
-                            
-                            <!-- Informações de Produção -->
-                            <div>
-                                <h4 class="text-lg font-semibold text-white mb-3">Produção</h4>
-                                <div class="grid grid-cols-1 gap-3 text-sm">
+                                <div class="flex-1 space-y-4">
                                     <div>
-                                        <span class="text-slate-400">Produtoras:</span>
-                                        <span class="text-white ml-2">${productionCompanies}</span>
+                                        <h3 class="text-2xl font-bold text-white mb-2">${title}</h3>
+                                        <div class="flex flex-wrap gap-4 text-sm text-slate-400">
+                                            <div class="flex items-center space-x-1">
+                                                <i data-lucide="calendar" class="h-4 w-4"></i>
+                                                <span>${year}</span>
+                                            </div>
+                                            <div class="flex items-center space-x-1">
+                                                <i data-lucide="star" class="h-4 w-4 text-yellow-400"></i>
+                                                <span>${rating}/10</span>
+                                            </div>
+                                            ${runtime ? `
+                                                <div class="flex items-center space-x-1">
+                                                    <i data-lucide="clock" class="h-4 w-4"></i>
+                                                    <span>${runtime}min</span>
+                                                </div>
+                                            ` : ''}
+                                            ${seasons ? `
+                                                <div class="flex items-center space-x-1">
+                                                    <i data-lucide="tv" class="h-4 w-4"></i>
+                                                    <span>${seasons} temporada(s)</span>
+                                                </div>
+                                            ` : ''}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="text-slate-400">Países:</span>
-                                        <span class="text-white ml-2">${countries}</span>
-                                    </div>
+
+                                    ${overview !== 'Sinopse não disponível.' ? `
+                                        <div>
+                                            <h4 class="font-semibold text-white mb-2">Sinopse</h4>
+                                            <p class="text-slate-300 text-sm leading-relaxed">${overview}</p>
+                                        </div>
+                                    ` : ''}
+
+                                    ${genres.length > 0 ? `
+                                        <div>
+                                            <h4 class="font-semibold text-white mb-2">Gêneros</h4>
+                                            <div class="flex flex-wrap gap-2">
+                                                ${genres.map(genre => `
+                                                    <span class="px-2 py-1 bg-slate-700 text-slate-300 rounded-full text-xs">
+                                                        ${genre.name}
+                                                    </span>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
-                            
-                            ${castSection}
-                            ${trailerSection}
+
+                            <!-- Additional Info -->
+                            <div class="grid md:grid-cols-2 gap-6">
+                                ${productionCompanies.length > 0 ? `
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-3">Produtoras</h4>
+                                        <div class="space-y-2">
+                                            ${productionCompanies.slice(0, 3).map(company => `
+                                                <p class="text-sm text-slate-300">${company.name}</p>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                ${productionCountries.length > 0 ? `
+                                    <div>
+                                        <h4 class="font-semibold text-white mb-3">Países</h4>
+                                        <div class="space-y-2">
+                                            ${productionCountries.map(country => `
+                                                <p class="text-sm text-slate-300">${country.name}</p>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <!-- Cast -->
+                            ${cast.length > 0 ? `
+                                <div>
+                                    <h4 class="font-semibold text-white mb-4">Elenco Principal</h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        ${cast.slice(0, 8).map(actor => `
+                                            <div class="text-center">
+                                                <img
+                                                    src="${actor.profile_path ? 
+                                                        `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 
+                                                        '/assets/images/placeholder-person.jpg'
+                                                    }"
+                                                    alt="${actor.name}"
+                                                    class="w-full h-24 object-cover rounded-lg mb-2"
+                                                    onerror="this.src='/assets/images/placeholder-person.jpg'"
+                                                />
+                                                <p class="text-xs font-medium text-white">${actor.name}</p>
+                                                <p class="text-xs text-slate-400">${actor.character}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Trailer -->
+                            ${trailer ? `
+                                <div>
+                                    <h4 class="font-semibold text-white mb-4">Trailer</h4>
+                                    <div class="aspect-video">
+                                        <iframe
+                                            src="https://www.youtube.com/embed/${trailer.key}"
+                                            title="${title} Trailer"
+                                            class="w-full h-full rounded-lg"
+                                            allowfullscreen
+                                        ></iframe>
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
 
                         <!-- Sidebar -->
                         <div class="space-y-6">
                             <!-- Request Info -->
-                            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
-                                <h4 class="text-lg font-semibold text-white mb-4">Informações da Solicitação</h4>
+                            <div class="bg-slate-700/30 rounded-lg p-4">
+                                <h4 class="font-semibold text-white mb-4">Informações da Solicitação</h4>
                                 <div class="space-y-3 text-sm">
-                                    <div>
+                                    <div class="flex justify-between">
                                         <span class="text-slate-400">ID:</span>
-                                        <span class="text-white ml-2">#${request.id}</span>
+                                        <span class="text-white">#${request.id}</span>
                                     </div>
-                                    <div>
+                                    <div class="flex justify-between">
                                         <span class="text-slate-400">Tipo:</span>
-                                        <span class="text-white ml-2">${contentType}</span>
+                                        <span class="text-white">${request.content_type === 'movie' ? 'Filme' : 'Série'}</span>
                                     </div>
-                                    <div>
+                                    <div class="flex justify-between">
                                         <span class="text-slate-400">Status:</span>
-                                        <span class="status-${request.status} px-2 py-1 rounded text-xs font-medium ml-2">
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium ${this.getStatusClass(request.status)}">
                                             ${this.getStatusText(request.status)}
                                         </span>
                                     </div>
-                                    <div>
+                                    <div class="flex justify-between">
                                         <span class="text-slate-400">Solicitado em:</span>
-                                        <span class="text-white ml-2">${this.formatDate(request.created_at)}</span>
+                                        <span class="text-white">${new Date(request.created_at).toLocaleDateString('pt-BR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</span>
                                     </div>
                                     ${request.season ? `
-                                        <div>
+                                        <div class="flex justify-between">
                                             <span class="text-slate-400">Temporada:</span>
-                                            <span class="text-white ml-2">${request.season}</span>
+                                            <span class="text-white">${request.season}</span>
                                         </div>
                                     ` : ''}
                                     ${request.episode ? `
-                                        <div>
+                                        <div class="flex justify-between">
                                             <span class="text-slate-400">Episódio:</span>
-                                            <span class="text-white ml-2">${request.episode}</span>
+                                            <span class="text-white">${request.episode}</span>
                                         </div>
                                     ` : ''}
                                 </div>
                             </div>
 
                             <!-- Requester Info -->
-                            <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
-                                <h4 class="text-lg font-semibold text-white mb-4">Dados do Solicitante</h4>
+                            <div class="bg-slate-700/30 rounded-lg p-4">
+                                <h4 class="font-semibold text-white mb-4">Dados do Solicitante</h4>
                                 <div class="space-y-3 text-sm">
                                     <div>
                                         <span class="text-slate-400">Nome:</span>
-                                        <span class="text-white ml-2">${request.requester_name}</span>
+                                        <p class="text-white font-medium">${request.requester_name}</p>
                                     </div>
                                     <div>
                                         <span class="text-slate-400">WhatsApp:</span>
-                                        <span class="text-white ml-2">${this.formatWhatsApp(request.requester_whatsapp)}</span>
+                                        <p class="text-white font-medium">${this.formatWhatsApp(request.requester_whatsapp)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -888,14 +1047,15 @@ class ClientDashboardApp {
                                 ${request.status === 'pending' ? `
                                     <button
                                         onclick="clientDashboard.updateRequestStatus(${request.id}, 'approved')"
-                                        class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+                                        class="w-full flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors"
                                     >
                                         <i data-lucide="check" class="h-5 w-5"></i>
                                         <span>Aprovar Solicitação</span>
                                     </button>
+                                    
                                     <button
                                         onclick="clientDashboard.updateRequestStatus(${request.id}, 'denied')"
-                                        class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+                                        class="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-medium transition-colors"
                                     >
                                         <i data-lucide="x" class="h-5 w-5"></i>
                                         <span>Negar Solicitação</span>
@@ -903,9 +1063,9 @@ class ClientDashboardApp {
                                 ` : ''}
                                 
                                 <a
-                                    href="https://wa.me/${request.requester_whatsapp}?text=${encodeURIComponent(`Olá ${request.requester_name}! Sobre sua solicitação de "${request.content_title}"...`)}"
+                                    href="https://wa.me/${request.requester_whatsapp}?text=${encodeURIComponent(`Olá ${request.requester_name}! Sobre sua solicitação de "${title}": `)}"
                                     target="_blank"
-                                    class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+                                    class="w-full flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors"
                                 >
                                     <i data-lucide="message-circle" class="h-5 w-5"></i>
                                     <span>Contatar via WhatsApp</span>
@@ -928,163 +1088,63 @@ class ClientDashboardApp {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    id: requestId,
-                    status: status
-                })
+                body: JSON.stringify({ id: requestId, status: status })
             });
 
             const result = await response.json();
 
-            if (!response.ok) {
+            if (response.ok) {
+                this.showToast(`Solicitação ${status === 'approved' ? 'aprovada' : 'negada'} com sucesso!`, 'success');
+                document.getElementById('requestModal').classList.add('hidden');
+                
+                // Reload current tab if it's requests
+                if (this.currentTab === 'requests') {
+                    this.loadRequestsTab();
+                }
+            } else {
                 throw new Error(result.error || 'Erro ao atualizar status');
             }
-
-            this.showToast('Status atualizado com sucesso!', 'success');
-            this.closeModal();
-            
-            // Reload current tab
-            this.loadTabContent(this.currentTab);
-
         } catch (error) {
-            console.error('Error updating status:', error);
+            console.error('Erro ao atualizar status:', error);
             this.showToast(error.message, 'error');
         }
-    }
-
-    async saveSettings() {
-        try {
-            const formData = {
-                name: document.getElementById('name').value,
-                site_name: document.getElementById('site_name').value,
-                hero_title: document.getElementById('hero_title').value,
-                hero_subtitle: document.getElementById('hero_subtitle').value,
-                hero_description: document.getElementById('hero_description').value,
-                contact_email: document.getElementById('contact_email').value,
-                contact_whatsapp: document.getElementById('contact_whatsapp').value,
-                primary_color: document.getElementById('primary_color').value,
-                secondary_color: document.getElementById('secondary_color').value
-            };
-
-            const response = await fetch(`/api/client-tenants.php/${this.client.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || 'Erro ao salvar configurações');
-            }
-
-            // Update client data
-            Object.assign(this.client, formData);
-            window.CLIENT_DATA = this.client;
-
-            this.showToast('Configurações salvas com sucesso!', 'success');
-
-        } catch (error) {
-            console.error('Error saving settings:', error);
-            this.showToast(error.message, 'error');
-        }
-    }
-
-    setupColorSync() {
-        // Primary color sync
-        const primaryColor = document.getElementById('primary_color');
-        const primaryColorText = document.getElementById('primary_color_text');
-        
-        if (primaryColor && primaryColorText) {
-            primaryColor.addEventListener('input', (e) => {
-                primaryColorText.value = e.target.value;
-            });
-            
-            primaryColorText.addEventListener('input', (e) => {
-                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
-                    primaryColor.value = e.target.value;
-                }
-            });
-        }
-
-        // Secondary color sync
-        const secondaryColor = document.getElementById('secondary_color');
-        const secondaryColorText = document.getElementById('secondary_color_text');
-        
-        if (secondaryColor && secondaryColorText) {
-            secondaryColor.addEventListener('input', (e) => {
-                secondaryColorText.value = e.target.value;
-            });
-            
-            secondaryColorText.addEventListener('input', (e) => {
-                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
-                    secondaryColor.value = e.target.value;
-                }
-            });
-        }
-    }
-
-    closeModal() {
-        const modal = document.getElementById('requestModal');
-        modal.classList.add('hidden');
-    }
-
-    // Utility functions
-    formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
     }
 
     formatWhatsApp(whatsapp) {
-        if (!whatsapp) return 'N/A';
+        if (!whatsapp) return '';
         const cleaned = whatsapp.replace(/\D/g, '');
-        if (cleaned.length >= 13) {
+        if (cleaned.length === 13) {
             return `+${cleaned.slice(0, 2)} ${cleaned.slice(2, 4)} ${cleaned.slice(4, 9)}-${cleaned.slice(9)}`;
         }
         return `+${cleaned}`;
     }
 
+    getStatusClass(status) {
+        switch (status) {
+            case 'pending': return 'status-pending';
+            case 'approved': return 'status-approved';
+            case 'denied': return 'status-denied';
+            default: return 'bg-slate-600/20 text-slate-400';
+        }
+    }
+
     getStatusText(status) {
-        const statusMap = {
-            'pending': 'Pendente',
-            'approved': 'Aprovada',
-            'denied': 'Negada'
-        };
-        return statusMap[status] || status;
+        switch (status) {
+            case 'pending': return 'Pendente';
+            case 'approved': return 'Aprovada';
+            case 'denied': return 'Negada';
+            default: return status;
+        }
     }
 
-    translateStatus(status) {
-        const statusMap = {
-            'Released': 'Lançado',
-            'Ended': 'Finalizada',
-            'Returning Series': 'Em Exibição',
-            'In Production': 'Em Produção',
-            'Canceled': 'Cancelada',
-            'Planned': 'Planejada'
-        };
-        return statusMap[status] || status;
-    }
-
-    translateLanguage(lang) {
-        const langMap = {
-            'en': 'Inglês',
-            'pt': 'Português',
-            'es': 'Espanhol',
-            'fr': 'Francês',
-            'de': 'Alemão',
-            'it': 'Italiano',
-            'ja': 'Japonês',
-            'ko': 'Coreano',
-            'zh': 'Chinês'
-        };
-        return langMap[lang] || lang.toUpperCase();
+    showError(message) {
+        document.getElementById('tabContent').innerHTML = `
+            <div class="text-center py-20">
+                <i data-lucide="alert-circle" class="h-12 w-12 text-red-400 mx-auto mb-4"></i>
+                <p class="text-red-400 font-medium">${message}</p>
+            </div>
+        `;
+        lucide.createIcons();
     }
 
     showToast(message, type = 'info') {
@@ -1105,14 +1165,13 @@ class ClientDashboardApp {
     }
 }
 
-// Initialize the app globally
+// Initialize the app
 let clientDashboard;
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing ClientDashboardApp...');
     try {
         clientDashboard = new ClientDashboardApp();
-        console.log('ClientDashboardApp initialized successfully');
+        console.log('ClientDashboardApp inicializado com sucesso');
     } catch (error) {
-        console.error('Error initializing ClientDashboardApp:', error);
+        console.error('Erro ao inicializar ClientDashboardApp:', error);
     }
 });
