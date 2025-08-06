@@ -6,68 +6,476 @@ class ClientDashboardApp {
     }
 
     init() {
+        console.log('ClientDashboardApp initialized with data:', this.clientData);
         this.setupEventListeners();
-        this.loadOverviewData();
+        this.switchTab('overview'); // Start with overview tab
     }
 
     setupEventListeners() {
-        // Tab navigation
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tab = e.currentTarget.getAttribute('data-tab');
-                this.switchTab(tab);
-            });
-        });
-
-        // Customization form
-        this.setupCustomizationForm();
+        // Tab buttons
+        const tabButtons = ['overview', 'requests', 'customization', 'analytics'];
         
-        // Request filters
-        this.setupRequestFilters();
+        tabButtons.forEach(tab => {
+            const button = document.getElementById(`tab-${tab}`);
+            if (button) {
+                button.addEventListener('click', () => {
+                    console.log(`Switching to tab: ${tab}`);
+                    this.switchTab(tab);
+                });
+            }
+        });
     }
 
     switchTab(tabName) {
+        console.log(`switchTab called with: ${tabName}`);
+        
         // Update tab buttons
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            const isActive = btn.getAttribute('data-tab') === tabName;
-            if (isActive) {
-                btn.className = 'tab-btn py-4 px-2 border-b-2 font-medium text-sm transition-colors bg-primary text-white border-primary';
-            } else {
-                btn.className = 'tab-btn py-4 px-2 border-b-2 border-transparent font-medium text-sm transition-colors text-slate-400 hover:text-white hover:border-slate-400';
-            }
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(btn => {
+            btn.className = 'tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-300';
         });
 
-        // Hide all tab contents
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.add('hidden');
-        });
-
-        // Show selected tab content
-        const selectedTab = document.getElementById(tabName + 'Tab');
-        if (selectedTab) {
-            selectedTab.classList.remove('hidden');
+        const activeButton = document.getElementById(`tab-${tabName}`);
+        if (activeButton) {
+            activeButton.className = 'tab-button py-2 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-400';
         }
 
+        // Update content
         this.currentTab = tabName;
+        this.loadTabContent(tabName);
+    }
 
-        // Load tab-specific data
+    loadTabContent(tabName) {
+        const contentDiv = document.getElementById('tab-content');
+        if (!contentDiv) {
+            console.error('tab-content div not found');
+            return;
+        }
+
+        console.log(`Loading content for tab: ${tabName}`);
+
         switch (tabName) {
             case 'overview':
-                this.loadOverviewData();
+                this.loadOverviewContent(contentDiv);
                 break;
             case 'requests':
-                this.loadRequestsData();
+                this.loadRequestsContent(contentDiv);
                 break;
             case 'customization':
-                this.setupCustomizationPreview();
+                this.loadCustomizationContent(contentDiv);
                 break;
             case 'analytics':
-                this.loadAnalyticsData();
+                this.loadAnalyticsContent(contentDiv);
                 break;
+            default:
+                contentDiv.innerHTML = '<p class="text-white">Conteúdo não encontrado</p>';
         }
     }
 
-    async loadOverviewData() {
+    loadOverviewContent(contentDiv) {
+        contentDiv.innerHTML = `
+            <div class="space-y-6">
+                <!-- Welcome Card -->
+                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="bg-blue-600 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i data-lucide="building" class="h-6 w-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Bem-vindo, ${this.clientData.name || 'Cliente'}!</h3>
+                            <p class="text-slate-400">Gerencie suas solicitações e personalize seu site</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <a href="/${this.clientData.slug || 'cliente'}" target="_blank" class="bg-slate-700/50 hover:bg-slate-700 p-4 rounded-lg transition-colors group">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="external-link" class="h-5 w-5 text-blue-400 group-hover:text-blue-300"></i>
+                                <div>
+                                    <p class="text-white font-medium">Ver Meu Site</p>
+                                    <p class="text-slate-400 text-sm">/${this.clientData.slug || 'cliente'}</p>
+                                </div>
+                            </div>
+                        </a>
+                        
+                        <button onclick="clientDashboard.switchTab('customization')" class="bg-slate-700/50 hover:bg-slate-700 p-4 rounded-lg transition-colors group text-left">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="palette" class="h-5 w-5 text-purple-400 group-hover:text-purple-300"></i>
+                                <div>
+                                    <p class="text-white font-medium">Personalizar</p>
+                                    <p class="text-slate-400 text-sm">Cores, logo, textos</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="statsCards">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="inbox" class="h-8 w-8 text-blue-400"></i>
+                            <div>
+                                <p class="text-2xl font-bold text-white" id="totalRequests">-</p>
+                                <p class="text-sm text-slate-400">Total de Solicitações</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="clock" class="h-8 w-8 text-yellow-400"></i>
+                            <div>
+                                <p class="text-2xl font-bold text-white" id="pendingRequests">-</p>
+                                <p class="text-sm text-slate-400">Pendentes</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check-circle" class="h-8 w-8 text-green-400"></i>
+                            <div>
+                                <p class="text-2xl font-bold text-white" id="approvedRequests">-</p>
+                                <p class="text-sm text-slate-400">Aprovadas</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="x-circle" class="h-8 w-8 text-red-400"></i>
+                            <div>
+                                <p class="text-2xl font-bold text-white" id="deniedRequests">-</p>
+                                <p class="text-sm text-slate-400">Negadas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Load stats
+        this.loadStats();
+        lucide.createIcons();
+    }
+
+    loadRequestsContent(contentDiv) {
+        contentDiv.innerHTML = `
+            <div class="space-y-6">
+                <!-- Filters -->
+                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <input
+                                type="text"
+                                id="searchRequests"
+                                placeholder="Pesquisar por título ou solicitante..."
+                                class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                        <div class="flex gap-2">
+                            <select
+                                id="statusFilter"
+                                class="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="">Todos os Status</option>
+                                <option value="pending">Pendentes</option>
+                                <option value="approved">Aprovadas</option>
+                                <option value="denied">Negadas</option>
+                            </select>
+                            <select
+                                id="typeFilter"
+                                class="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="">Todos os Tipos</option>
+                                <option value="movie">Filmes</option>
+                                <option value="tv">Séries</option>
+                            </select>
+                            <button
+                                id="applyFilters"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                            >
+                                Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requests List -->
+                <div id="requestsList">
+                    <div class="text-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
+                        <p class="text-slate-400">Carregando solicitações...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Setup event listeners
+        document.getElementById('applyFilters').addEventListener('click', () => {
+            this.loadRequests();
+        });
+
+        document.getElementById('searchRequests').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.loadRequests();
+            }
+        });
+
+        // Load requests
+        this.loadRequests();
+        lucide.createIcons();
+    }
+
+    loadCustomizationContent(contentDiv) {
+        contentDiv.innerHTML = `
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Form -->
+                <div class="space-y-6">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-white mb-6">Personalização do Site</h3>
+                        
+                        <form id="customizationForm" class="space-y-6">
+                            <!-- Basic Info -->
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-white">Informações Básicas</h4>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome da Empresa</label>
+                                    <input
+                                        type="text"
+                                        id="companyName"
+                                        value="${this.clientData.name || ''}"
+                                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome do Site</label>
+                                    <input
+                                        type="text"
+                                        id="siteName"
+                                        value="${this.clientData.site_name || ''}"
+                                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Slogan/Tagline</label>
+                                    <input
+                                        type="text"
+                                        id="siteTagline"
+                                        value="${this.clientData.site_tagline || ''}"
+                                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ex: Seu cinema na palma da mão"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Hero Section -->
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-white">Seção Principal</h4>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Título Principal</label>
+                                    <input
+                                        type="text"
+                                        id="heroTitle"
+                                        value="${this.clientData.hero_title || ''}"
+                                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ex: Solicite seus Filmes e Séries favoritos"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Subtítulo</label>
+                                    <input
+                                        type="text"
+                                        id="heroSubtitle"
+                                        value="${this.clientData.hero_subtitle || ''}"
+                                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ex: Sistema profissional de gerenciamento"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-300 mb-2">Descrição</label>
+                                    <textarea
+                                        id="heroDescription"
+                                        rows="3"
+                                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ex: Pesquise, solicite e acompanhe suas preferências de entretenimento."
+                                    >${this.clientData.hero_description || ''}</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Colors -->
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-white">Cores do Site</h4>
+                                
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-300 mb-2">Cor Primária</label>
+                                        <div class="flex gap-2">
+                                            <input
+                                                type="color"
+                                                id="primaryColor"
+                                                value="${this.clientData.primary_color || '#1E40AF'}"
+                                                class="w-12 h-10 rounded border border-slate-600"
+                                            />
+                                            <input
+                                                type="text"
+                                                id="primaryColorText"
+                                                value="${this.clientData.primary_color || '#1E40AF'}"
+                                                class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-300 mb-2">Cor Secundária</label>
+                                        <div class="flex gap-2">
+                                            <input
+                                                type="color"
+                                                id="secondaryColor"
+                                                value="${this.clientData.secondary_color || '#DC2626'}"
+                                                class="w-12 h-10 rounded border border-slate-600"
+                                            />
+                                            <input
+                                                type="text"
+                                                id="secondaryColorText"
+                                                value="${this.clientData.secondary_color || '#DC2626'}"
+                                                class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact -->
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-white">Informações de Contato</h4>
+                                
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-300 mb-2">Email de Contato</label>
+                                        <input
+                                            type="email"
+                                            id="contactEmail"
+                                            value="${this.clientData.contact_email || ''}"
+                                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="contato@exemplo.com"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-300 mb-2">WhatsApp</label>
+                                        <input
+                                            type="text"
+                                            id="contactWhatsapp"
+                                            value="${this.clientData.contact_whatsapp || '55'}"
+                                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="5511999999999"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                            >
+                                Salvar Alterações
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="space-y-6">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-white mb-6">Preview do Site</h3>
+                        
+                        <div id="sitePreview" class="bg-slate-900 border border-slate-600 rounded-lg overflow-hidden">
+                            <!-- Preview content will be updated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.setupCustomizationEventListeners();
+        this.updatePreview();
+        lucide.createIcons();
+    }
+
+    loadAnalyticsContent(contentDiv) {
+        contentDiv.innerHTML = `
+            <div class="space-y-6">
+                <!-- Analytics Cards -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="trending-up" class="h-8 w-8 text-green-400"></i>
+                            <div>
+                                <p class="text-2xl font-bold text-white" id="approvalRate">-</p>
+                                <p class="text-sm text-slate-400">Taxa de Aprovação</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="calendar" class="h-8 w-8 text-blue-400"></i>
+                            <div>
+                                <p class="text-2xl font-bold text-white" id="dailyAverage">-</p>
+                                <p class="text-sm text-slate-400">Média Diária</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="film" class="h-8 w-8 text-purple-400"></i>
+                            <div>
+                                <p class="text-2xl font-bold text-white" id="mostRequestedType">-</p>
+                                <p class="text-sm text-slate-400">Mais Solicitado</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="activity" class="h-8 w-8 text-yellow-400"></i>
+                            <div>
+                                <p class="text-2xl font-bold text-white" id="thisMonth">-</p>
+                                <p class="text-sm text-slate-400">Este Mês</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Chart -->
+                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-white mb-6">Atividade dos Últimos 30 Dias</h3>
+                    <div id="activityChart" class="h-64 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
+                            <p class="text-slate-400">Carregando dados...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.loadAnalytics();
+        lucide.createIcons();
+    }
+
+    async loadStats() {
         try {
             const response = await fetch('/api/client-requests.php/stats');
             const stats = await response.json();
@@ -77,46 +485,51 @@ class ClientDashboardApp {
                 document.getElementById('pendingRequests').textContent = stats.pending || 0;
                 document.getElementById('approvedRequests').textContent = stats.approved || 0;
                 document.getElementById('deniedRequests').textContent = stats.denied || 0;
+            } else {
+                console.error('Error loading stats:', stats.error);
             }
         } catch (error) {
-            console.error('Error loading overview data:', error);
+            console.error('Error loading stats:', error);
         }
     }
 
-    async loadRequestsData() {
-        try {
-            const statusFilter = document.getElementById('requestStatusFilter')?.value || '';
-            const typeFilter = document.getElementById('requestTypeFilter')?.value || '';
-            
-            const params = new URLSearchParams();
-            if (statusFilter) params.append('status', statusFilter);
-            if (typeFilter) params.append('content_type', typeFilter);
+    async loadRequests() {
+        const search = document.getElementById('searchRequests')?.value || '';
+        const status = document.getElementById('statusFilter')?.value || '';
+        const type = document.getElementById('typeFilter')?.value || '';
 
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (status) params.append('status', status);
+        if (type) params.append('content_type', type);
+
+        try {
             const response = await fetch(`/api/client-requests.php?${params}`);
             const requests = await response.json();
 
             if (response.ok) {
-                this.renderRequestsList(requests);
+                this.renderRequests(requests);
             } else {
-                this.showToast(requests.error || 'Erro ao carregar solicitações', 'error');
+                this.showError('Erro ao carregar solicitações: ' + (requests.error || 'Erro desconhecido'));
             }
         } catch (error) {
             console.error('Error loading requests:', error);
-            this.showToast('Erro de conexão', 'error');
+            this.showError('Erro de conexão');
         }
     }
 
-    renderRequestsList(requests) {
-        const container = document.getElementById('clientRequestsList');
+    renderRequests(requests) {
+        const container = document.getElementById('requestsList');
         
         if (requests.length === 0) {
             container.innerHTML = `
                 <div class="text-center py-12">
-                    <i data-lucide="inbox" class="h-16 w-16 text-slate-600 mx-auto mb-4"></i>
+                    <i data-lucide="inbox" class="h-12 w-12 text-slate-500 mx-auto mb-4"></i>
                     <h3 class="text-lg font-medium text-slate-300 mb-2">Nenhuma solicitação encontrada</h3>
-                    <p class="text-slate-500">Quando seus usuários fizerem solicitações, elas aparecerão aqui.</p>
+                    <p class="text-slate-500">Não há solicitações que correspondam aos filtros aplicados.</p>
                 </div>
             `;
+            lucide.createIcons();
             return;
         }
 
@@ -132,81 +545,68 @@ class ClientDashboardApp {
             denied: 'Negada'
         };
 
+        const typeLabels = {
+            movie: 'Filme',
+            tv: 'Série'
+        };
+
         container.innerHTML = `
             <div class="space-y-4">
                 ${requests.map(request => `
                     <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors">
-                        <div class="flex items-start gap-4">
-                            <img
-                                src="${request.poster_path ? `https://image.tmdb.org/t/p/w92${request.poster_path}` : '/assets/images/placeholder-poster.jpg'}"
-                                alt="${request.content_title}"
-                                class="w-12 h-18 object-cover rounded-lg flex-shrink-0"
-                                onerror="this.src='/assets/images/placeholder-poster.jpg'"
-                            />
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-start justify-between mb-2">
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-white">${request.content_title}</h3>
-                                        <div class="flex items-center space-x-4 text-sm text-slate-400 mt-1">
-                                            <span class="flex items-center space-x-1">
-                                                <i data-lucide="${request.content_type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
-                                                <span>${request.content_type === 'movie' ? 'Filme' : 'Série'}</span>
-                                            </span>
-                                            <span class="flex items-center space-x-1">
-                                                <i data-lucide="user" class="h-4 w-4"></i>
-                                                <span>${request.requester_name}</span>
-                                            </span>
-                                            <span class="flex items-center space-x-1">
-                                                <i data-lucide="calendar" class="h-4 w-4"></i>
-                                                <span>${new Date(request.created_at).toLocaleDateString('pt-BR')}</span>
-                                            </span>
-                                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <img
+                                    src="${request.poster_path ? `https://image.tmdb.org/t/p/w92${request.poster_path}` : '/assets/images/placeholder-poster.jpg'}"
+                                    alt="${request.content_title}"
+                                    class="w-12 h-18 object-cover rounded"
+                                    onerror="this.src='/assets/images/placeholder-poster.jpg'"
+                                />
+                                <div>
+                                    <h4 class="text-white font-semibold">${request.content_title}</h4>
+                                    <div class="flex items-center space-x-4 text-sm text-slate-400">
+                                        <span>${typeLabels[request.content_type]}</span>
+                                        <span>${request.requester_name}</span>
+                                        <span>${new Date(request.created_at).toLocaleDateString('pt-BR')}</span>
                                     </div>
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium border ${statusColors[request.status]}">
-                                        ${statusLabels[request.status]}
-                                    </span>
                                 </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-3">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium border ${statusColors[request.status]}">
+                                    ${statusLabels[request.status]}
+                                </span>
                                 
-                                <div class="flex items-center justify-between mt-4">
-                                    <div class="flex items-center space-x-2 text-sm text-slate-400">
-                                        <a 
-                                            href="https://wa.me/${request.requester_whatsapp}" 
-                                            target="_blank"
-                                            class="flex items-center space-x-1 text-green-400 hover:text-green-300 transition-colors"
-                                        >
-                                            <i data-lucide="message-circle" class="h-4 w-4"></i>
-                                            <span>+${this.formatWhatsApp(request.requester_whatsapp)}</span>
-                                        </a>
-                                        ${request.season ? `
-                                            <span class="flex items-center space-x-1">
-                                                <i data-lucide="layers" class="h-4 w-4"></i>
-                                                <span>T${request.season}${request.episode ? `E${request.episode}` : ''}</span>
-                                            </span>
-                                        ` : ''}
-                                    </div>
+                                <div class="flex space-x-2">
+                                    <button
+                                        onclick="clientDashboard.viewRequestDetails(${request.id})"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                                    >
+                                        Ver Detalhes
+                                    </button>
                                     
-                                    <div class="flex items-center space-x-2">
+                                    ${request.status === 'pending' ? `
                                         <button
-                                            onclick="clientDashboard.viewRequestDetails(${request.id})"
-                                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                                            onclick="clientDashboard.updateRequestStatus(${request.id}, 'approved')"
+                                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
                                         >
-                                            Ver Detalhes
+                                            Aprovar
                                         </button>
-                                        ${request.status === 'pending' ? `
-                                            <button
-                                                onclick="clientDashboard.updateRequestStatus(${request.id}, 'approved')"
-                                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                                            >
-                                                Aprovar
-                                            </button>
-                                            <button
-                                                onclick="clientDashboard.updateRequestStatus(${request.id}, 'denied')"
-                                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                                            >
-                                                Negar
-                                            </button>
-                                        ` : ''}
-                                    </div>
+                                        <button
+                                            onclick="clientDashboard.updateRequestStatus(${request.id}, 'denied')"
+                                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                                        >
+                                            Negar
+                                        </button>
+                                    ` : `
+                                        <a
+                                            href="https://wa.me/${request.requester_whatsapp}"
+                                            target="_blank"
+                                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors inline-block"
+                                        >
+                                            WhatsApp
+                                        </a>
+                                    `}
                                 </div>
                             </div>
                         </div>
@@ -216,6 +616,198 @@ class ClientDashboardApp {
         `;
 
         lucide.createIcons();
+    }
+
+    async loadAnalytics() {
+        try {
+            const response = await fetch('/api/client-analytics.php');
+            const analytics = await response.json();
+
+            if (response.ok) {
+                document.getElementById('approvalRate').textContent = analytics.approval_rate + '%';
+                document.getElementById('dailyAverage').textContent = analytics.daily_average;
+                document.getElementById('mostRequestedType').textContent = analytics.most_requested_type;
+                
+                // Calculate this month's requests
+                const thisMonth = analytics.daily_requests
+                    .filter(day => new Date(day.date).getMonth() === new Date().getMonth())
+                    .reduce((sum, day) => sum + parseInt(day.count), 0);
+                
+                document.getElementById('thisMonth').textContent = thisMonth;
+
+                // Simple activity chart
+                this.renderActivityChart(analytics.daily_requests);
+            } else {
+                console.error('Error loading analytics:', analytics.error);
+            }
+        } catch (error) {
+            console.error('Error loading analytics:', error);
+        }
+    }
+
+    renderActivityChart(dailyData) {
+        const chartContainer = document.getElementById('activityChart');
+        
+        if (!dailyData || dailyData.length === 0) {
+            chartContainer.innerHTML = `
+                <div class="text-center">
+                    <i data-lucide="bar-chart" class="h-12 w-12 text-slate-500 mx-auto mb-4"></i>
+                    <p class="text-slate-400">Nenhum dado disponível</p>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        const maxCount = Math.max(...dailyData.map(d => parseInt(d.count)));
+        
+        chartContainer.innerHTML = `
+            <div class="flex items-end justify-between h-48 px-4">
+                ${dailyData.slice(-14).map(day => {
+                    const height = maxCount > 0 ? (parseInt(day.count) / maxCount) * 100 : 0;
+                    const date = new Date(day.date);
+                    return `
+                        <div class="flex flex-col items-center space-y-2">
+                            <div 
+                                class="bg-blue-500 rounded-t min-w-[20px] transition-all hover:bg-blue-400" 
+                                style="height: ${Math.max(height, 2)}%"
+                                title="${day.count} solicitações em ${date.toLocaleDateString('pt-BR')}"
+                            ></div>
+                            <span class="text-xs text-slate-400 transform -rotate-45 origin-center">
+                                ${date.getDate()}/${date.getMonth() + 1}
+                            </span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    setupCustomizationEventListeners() {
+        // Color picker sync
+        const primaryColor = document.getElementById('primaryColor');
+        const primaryColorText = document.getElementById('primaryColorText');
+        const secondaryColor = document.getElementById('secondaryColor');
+        const secondaryColorText = document.getElementById('secondaryColorText');
+
+        if (primaryColor && primaryColorText) {
+            primaryColor.addEventListener('input', (e) => {
+                primaryColorText.value = e.target.value;
+                this.updatePreview();
+            });
+
+            primaryColorText.addEventListener('input', (e) => {
+                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                    primaryColor.value = e.target.value;
+                    this.updatePreview();
+                }
+            });
+        }
+
+        if (secondaryColor && secondaryColorText) {
+            secondaryColor.addEventListener('input', (e) => {
+                secondaryColorText.value = e.target.value;
+                this.updatePreview();
+            });
+
+            secondaryColorText.addEventListener('input', (e) => {
+                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+                    secondaryColor.value = e.target.value;
+                    this.updatePreview();
+                }
+            });
+        }
+
+        // Form submission
+        const form = document.getElementById('customizationForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveCustomization();
+            });
+        }
+
+        // Real-time preview updates
+        const previewFields = ['siteName', 'siteTagline', 'heroTitle', 'heroSubtitle', 'heroDescription'];
+        previewFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('input', () => {
+                    this.updatePreview();
+                });
+            }
+        });
+    }
+
+    updatePreview() {
+        const previewContainer = document.getElementById('sitePreview');
+        if (!previewContainer) return;
+
+        const siteName = document.getElementById('siteName')?.value || this.clientData.site_name || 'Meu Site';
+        const heroTitle = document.getElementById('heroTitle')?.value || this.clientData.hero_title || 'Título Principal';
+        const heroSubtitle = document.getElementById('heroSubtitle')?.value || this.clientData.hero_subtitle || 'Subtítulo';
+        const primaryColor = document.getElementById('primaryColorText')?.value || this.clientData.primary_color || '#1E40AF';
+        const secondaryColor = document.getElementById('secondaryColorText')?.value || this.clientData.secondary_color || '#DC2626';
+
+        previewContainer.innerHTML = `
+            <div class="p-6" style="background: linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}20)">
+                <div class="flex items-center space-x-3 mb-6">
+                    <i data-lucide="film" class="h-8 w-8" style="color: ${primaryColor}"></i>
+                    <span class="text-xl font-bold text-white">${siteName}</span>
+                </div>
+                
+                <div class="text-center">
+                    <h1 class="text-2xl font-bold text-white mb-2">${heroTitle}</h1>
+                    <p class="text-slate-300 mb-4">${heroSubtitle}</p>
+                    <button 
+                        class="px-6 py-2 rounded-lg text-white font-semibold"
+                        style="background-color: ${primaryColor}"
+                    >
+                        Começar Pesquisa
+                    </button>
+                </div>
+            </div>
+        `;
+
+        lucide.createIcons();
+    }
+
+    async saveCustomization() {
+        const formData = {
+            name: document.getElementById('companyName').value,
+            site_name: document.getElementById('siteName').value,
+            site_tagline: document.getElementById('siteTagline').value,
+            hero_title: document.getElementById('heroTitle').value,
+            hero_subtitle: document.getElementById('heroSubtitle').value,
+            hero_description: document.getElementById('heroDescription').value,
+            contact_email: document.getElementById('contactEmail').value,
+            contact_whatsapp: document.getElementById('contactWhatsapp').value,
+            primary_color: document.getElementById('primaryColorText').value,
+            secondary_color: document.getElementById('secondaryColorText').value
+        };
+
+        try {
+            const response = await fetch(`/api/client-tenants.php/${this.clientData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                this.showToast('Configurações salvas com sucesso!', 'success');
+                // Update client data
+                Object.assign(this.clientData, formData);
+            } else {
+                this.showToast(result.error || 'Erro ao salvar configurações', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving customization:', error);
+            this.showToast('Erro de conexão', 'error');
+        }
     }
 
     async updateRequestStatus(requestId, status) {
@@ -232,8 +824,10 @@ class ClientDashboardApp {
 
             if (response.ok) {
                 this.showToast(`Solicitação ${status === 'approved' ? 'aprovada' : 'negada'} com sucesso!`, 'success');
-                this.loadRequestsData(); // Reload the list
-                this.loadOverviewData(); // Update stats
+                if (this.currentTab === 'requests') {
+                    this.loadRequests(); // Reload requests list
+                }
+                this.loadStats(); // Update stats
             } else {
                 this.showToast(result.error || 'Erro ao atualizar status', 'error');
             }
@@ -769,318 +1363,26 @@ class ClientDashboardApp {
         });
     }
 
-    setupRequestFilters() {
-        const statusFilter = document.getElementById('requestStatusFilter');
-        const typeFilter = document.getElementById('requestTypeFilter');
-
-        if (statusFilter) {
-            statusFilter.addEventListener('change', () => {
-                if (this.currentTab === 'requests') {
-                    this.loadRequestsData();
-                }
-            });
-        }
-
-        if (typeFilter) {
-            typeFilter.addEventListener('change', () => {
-                if (this.currentTab === 'requests') {
-                    this.loadRequestsData();
-                }
-            });
-        }
+    formatWhatsApp(number) {
+        if (!number) return '';
+        const str = number.toString();
+        if (str.length <= 2) return str;
+        if (str.length <= 4) return `${str.slice(0, 2)} ${str.slice(2)}`;
+        if (str.length <= 9) return `${str.slice(0, 2)} ${str.slice(2, 4)} ${str.slice(4)}`;
+        return `${str.slice(0, 2)} ${str.slice(2, 4)} ${str.slice(4, 9)}-${str.slice(9, 13)}`;
     }
 
-    setupCustomizationForm() {
-        // Color pickers sync
-        const primaryColor = document.getElementById('primaryColor');
-        const primaryColorText = document.getElementById('primaryColorText');
-        const secondaryColor = document.getElementById('secondaryColor');
-        const secondaryColorText = document.getElementById('secondaryColorText');
-
-        if (primaryColor && primaryColorText) {
-            primaryColor.addEventListener('input', (e) => {
-                primaryColorText.value = e.target.value;
-                this.updatePreview();
-            });
-
-            primaryColorText.addEventListener('input', (e) => {
-                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
-                    primaryColor.value = e.target.value;
-                    this.updatePreview();
-                }
-            });
-        }
-
-        if (secondaryColor && secondaryColorText) {
-            secondaryColor.addEventListener('input', (e) => {
-                secondaryColorText.value = e.target.value;
-                this.updatePreview();
-            });
-
-            secondaryColorText.addEventListener('input', (e) => {
-                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
-                    secondaryColor.value = e.target.value;
-                    this.updatePreview();
-                }
-            });
-        }
-
-        // Text inputs for preview
-        const textInputs = ['companyName', 'siteName', 'siteTagline', 'heroTitle', 'heroSubtitle', 'heroDescription'];
-        textInputs.forEach(inputId => {
-            const input = document.getElementById(inputId);
-            if (input) {
-                input.addEventListener('input', () => this.updatePreview());
-            }
-        });
-
-        // File uploads
-        this.setupFileUploads();
-
-        // Save button
-        const saveBtn = document.getElementById('saveCustomization');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => this.saveCustomization());
-        }
-    }
-
-    setupFileUploads() {
-        // Logo upload
-        const logoInput = document.getElementById('logoInput');
-        const removeLogo = document.getElementById('removeLogo');
-
-        if (logoInput) {
-            logoInput.addEventListener('change', (e) => this.handleFileUpload(e, 'logo'));
-        }
-
-        if (removeLogo) {
-            removeLogo.addEventListener('click', () => this.removeImage('logo'));
-        }
-
-        // Favicon upload
-        const faviconInput = document.getElementById('faviconInput');
-        const removeFavicon = document.getElementById('removeFavicon');
-
-        if (faviconInput) {
-            faviconInput.addEventListener('change', (e) => this.handleFileUpload(e, 'favicon'));
-        }
-
-        if (removeFavicon) {
-            removeFavicon.addEventListener('click', () => this.removeImage('favicon'));
-        }
-    }
-
-    async handleFileUpload(event, type) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('type', type);
-        formData.append('tenant_id', this.clientData.id);
-
-        try {
-            const response = await fetch('/admin/upload.php', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                // Update preview
-                const previewImg = document.getElementById(type + 'Preview');
-                const currentUrlInput = document.getElementById('current' + type.charAt(0).toUpperCase() + type.slice(1) + 'Url');
-                
-                if (previewImg) previewImg.src = result.url;
-                if (currentUrlInput) currentUrlInput.value = result.url;
-                
-                this.updatePreview();
-                this.showToast('Imagem enviada com sucesso!', 'success');
-            } else {
-                this.showToast(result.error || 'Erro no upload', 'error');
-            }
-        } catch (error) {
-            console.error('Upload error:', error);
-            this.showToast('Erro no upload', 'error');
-        }
-    }
-
-    removeImage(type) {
-        const previewImg = document.getElementById(type + 'Preview');
-        const currentUrlInput = document.getElementById('current' + type.charAt(0).toUpperCase() + type.slice(1) + 'Url');
-        const defaultUrl = `/assets/images/placeholder-${type}.png`;
-        
-        if (previewImg) previewImg.src = defaultUrl;
-        if (currentUrlInput) currentUrlInput.value = '';
-        
-        this.updatePreview();
-    }
-
-    updatePreview() {
-        const siteName = document.getElementById('siteName')?.value || 'Nome do Site';
-        const heroTitle = document.getElementById('heroTitle')?.value || 'Título Principal';
-        const heroSubtitle = document.getElementById('heroSubtitle')?.value || 'Subtítulo';
-        const heroDescription = document.getElementById('heroDescription')?.value || 'Descrição do hero';
-        const logoUrl = document.getElementById('currentLogoUrl')?.value || '/assets/images/placeholder-logo.png';
-
-        // Update preview elements
-        const previewSiteName = document.getElementById('previewSiteName');
-        const previewHeroTitle = document.getElementById('previewHeroTitle');
-        const previewHeroSubtitle = document.getElementById('previewHeroSubtitle');
-        const previewHeroDescription = document.getElementById('previewHeroDescription');
-        const previewLogo = document.getElementById('previewLogo');
-
-        if (previewSiteName) previewSiteName.textContent = siteName;
-        if (previewHeroTitle) previewHeroTitle.textContent = heroTitle;
-        if (previewHeroSubtitle) previewHeroSubtitle.textContent = heroSubtitle;
-        if (previewHeroDescription) previewHeroDescription.textContent = heroDescription;
-        if (previewLogo) previewLogo.src = logoUrl;
-    }
-
-    setupCustomizationPreview() {
-        this.updatePreview();
-    }
-
-    async saveCustomization() {
-        const saveBtn = document.getElementById('saveCustomization');
-        const originalText = saveBtn.textContent;
-        
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Salvando...';
-
-        try {
-            const formData = {
-                name: document.getElementById('companyName').value,
-                site_name: document.getElementById('siteName').value,
-                site_tagline: document.getElementById('siteTagline').value,
-                site_description: document.getElementById('siteDescription').value,
-                hero_title: document.getElementById('heroTitle').value,
-                hero_subtitle: document.getElementById('heroSubtitle').value,
-                hero_description: document.getElementById('heroDescription').value,
-                contact_email: document.getElementById('contactEmail').value,
-                contact_whatsapp: document.getElementById('contactWhatsapp').value,
-                primary_color: document.getElementById('primaryColor').value,
-                secondary_color: document.getElementById('secondaryColor').value,
-                logo_url: document.getElementById('currentLogoUrl').value,
-                favicon_url: document.getElementById('currentFaviconUrl').value
-            };
-
-            const response = await fetch(`/api/client-tenants.php/${this.clientData.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                this.showToast('Configurações salvas com sucesso!', 'success');
-                // Update client data
-                this.clientData = { ...this.clientData, ...result.data };
-                window.CLIENT_DATA = this.clientData;
-            } else {
-                this.showToast(result.error || 'Erro ao salvar', 'error');
-            }
-        } catch (error) {
-            console.error('Error saving customization:', error);
-            this.showToast('Erro de conexão', 'error');
-        } finally {
-            saveBtn.disabled = false;
-            saveBtn.textContent = originalText;
-        }
-    }
-
-    async loadAnalyticsData() {
-        try {
-            const response = await fetch('/api/client-analytics.php');
-            const analytics = await response.json();
-
-            if (response.ok) {
-                this.renderAnalytics(analytics);
-            } else {
-                this.showToast(analytics.error || 'Erro ao carregar analytics', 'error');
-            }
-        } catch (error) {
-            console.error('Error loading analytics:', error);
-            this.showToast('Erro de conexão', 'error');
-        }
-    }
-
-    renderAnalytics(analytics) {
-        const container = document.getElementById('analyticsContent');
-        
-        container.innerHTML = `
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <i data-lucide="percent" class="h-8 w-8 text-green-400"></i>
-                        <div>
-                            <p class="text-2xl font-bold text-white">${analytics.approval_rate}%</p>
-                            <p class="text-sm text-slate-400">Taxa de Aprovação</p>
-                        </div>
-                    </div>
+    showError(message) {
+        const container = document.getElementById('requestsList');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <i data-lucide="alert-circle" class="h-12 w-12 text-red-400 mx-auto mb-4"></i>
+                    <p class="text-red-400">${message}</p>
                 </div>
-                
-                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <i data-lucide="trending-up" class="h-8 w-8 text-blue-400"></i>
-                        <div>
-                            <p class="text-2xl font-bold text-white">${analytics.daily_average}</p>
-                            <p class="text-sm text-slate-400">Média Diária</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <i data-lucide="heart" class="h-8 w-8 text-purple-400"></i>
-                        <div>
-                            <p class="text-2xl font-bold text-white">${analytics.most_requested_type}</p>
-                            <p class="text-sm text-slate-400">Mais Solicitado</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <i data-lucide="calendar" class="h-8 w-8 text-yellow-400"></i>
-                        <div>
-                            <p class="text-2xl font-bold text-white">${analytics.daily_requests?.length || 0}</p>
-                            <p class="text-sm text-slate-400">Dias com Atividade</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-white mb-4">Atividade dos Últimos 30 Dias</h3>
-                <div class="space-y-2">
-                    ${analytics.daily_requests && analytics.daily_requests.length > 0 ? 
-                        analytics.daily_requests.map(day => `
-                            <div class="flex items-center justify-between py-2 px-3 bg-slate-700/50 rounded">
-                                <span class="text-slate-300">${new Date(day.date).toLocaleDateString('pt-BR')}</span>
-                                <span class="text-white font-medium">${day.count} solicitação(ões)</span>
-                            </div>
-                        `).join('') : 
-                        '<p class="text-slate-400 text-center py-8">Nenhuma atividade nos últimos 30 dias</p>'
-                    }
-                </div>
-            </div>
-        `;
-
-        lucide.createIcons();
-    }
-
-    formatWhatsApp(whatsapp) {
-        if (!whatsapp) return '';
-        const cleaned = whatsapp.replace(/\D/g, '');
-        if (cleaned.length <= 2) return cleaned;
-        if (cleaned.length <= 4) return `${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
-        if (cleaned.length <= 9) return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 4)} ${cleaned.slice(4)}`;
-        return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 4)} ${cleaned.slice(4, 9)}-${cleaned.slice(9, 13)}`;
+            `;
+            lucide.createIcons();
+        }
     }
 
     showToast(message, type = 'info') {
@@ -1101,8 +1403,11 @@ class ClientDashboardApp {
     }
 }
 
-// Initialize the app and make it globally available
+// Global variable for access from onclick handlers
 let clientDashboard;
+
+// Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing ClientDashboardApp');
     clientDashboard = new ClientDashboardApp();
 });
