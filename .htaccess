@@ -6,9 +6,17 @@ RewriteEngine On
 
 # API Routes
 RewriteRule ^api/auth/(.*)$ api/auth.php/$1 [QSA,L]
+RewriteRule ^api/tenant/(.*)$ api/tenant.php/$1 [QSA,L]
 RewriteRule ^api/requests/(.*)$ api/requests.php/$1 [QSA,L]
 RewriteRule ^api/requests$ api/requests.php [QSA,L]
 RewriteRule ^api/tmdb/(.*)$ api/tmdb.php/$1 [QSA,L]
+
+# Tenant Routes - deve vir antes das rotas genéricas
+RewriteRule ^([a-zA-Z0-9\-]+)/?$ tenant.php?slug=$1 [QSA,L]
+RewriteRule ^([a-zA-Z0-9\-]+)/search/?$ tenant-search.php?slug=$1 [QSA,L]
+RewriteRule ^([a-zA-Z0-9\-]+)/details/?$ tenant-details.php?slug=$1 [QSA,L]
+RewriteRule ^([a-zA-Z0-9\-]+)/login/?$ tenant-login.php?slug=$1 [QSA,L]
+RewriteRule ^([a-zA-Z0-9\-]+)/dashboard/?$ tenant-dashboard.php?slug=$1 [QSA,L]
 
 # Security Headers
 Header always set X-Content-Type-Options nosniff

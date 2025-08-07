@@ -18,6 +18,7 @@ class AuthService {
         $payload = [
             'iat' => $issued_at,
             'exp' => $expiration_time,
+            'type' => 'admin',
             'data' => [
                 'id' => $user_data['id'],
                 'email' => $user_data['email'],
@@ -29,10 +30,14 @@ class AuthService {
         return JWT::encode($payload, $this->secret_key, $this->algorithm);
     }
 
+    public function generateTokenWithPayload($payload) {
+        return JWT::encode($payload, $this->secret_key, $this->algorithm);
+    }
+
     public function validateToken($token) {
         try {
             $decoded = JWT::decode($token, new Key($this->secret_key, $this->algorithm));
-            return (array) $decoded->data;
+            return (array) $decoded;
         } catch (Exception $e) {
             return false;
         }
@@ -54,7 +59,10 @@ class AuthService {
         }
 
         if ($token) {
-            return $this->validateToken($token);
+            $decoded = $this->validateToken($token);
+            if ($decoded && isset($decoded['type']) && $decoded['type'] === 'admin') {
+                return $decoded['data'];
+            }
         }
 
         return false;

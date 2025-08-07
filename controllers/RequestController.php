@@ -2,16 +2,34 @@
 class RequestController {
     private $db;
     private $request;
+    private $tenantService;
 
     public function __construct() {
         $database = new Database();
         $this->db = $database->getConnection();
         $this->request = new Request($this->db);
+        $this->tenantService = new TenantService();
     }
 
     public function create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $input = json_decode(file_get_contents('php://input'), true);
+
+            // Para requests públicos, extrair tenant_id da URL ou parâmetro
+            $tenant_id = $input['tenant_id'] ?? null;
+            if (!$tenant_id) {
+                // Tentar extrair do slug da URL
+                $tenantMiddleware = new TenantMiddleware();
+                $slug = $tenantMiddleware->extractSlugFromUrl();
+                if ($slug) {
+                    $database = new Database();
+                    $db = $database->getConnection();
+                    $tenant = new Tenant($db);
+                    if ($tenant->findBySlug($slug)) {
+                        $tenant_id = $tenant->id;
+                    }
+                }
+            }
 
             // Validação dos dados
             $errors = $this->validateRequestData($input);
@@ -21,6 +39,7 @@ class RequestController {
                 return;
             }
 
+            $this->request->tenant_id = $tenant_id;
             $this->request->content_id = $input['content_id'];
             $this->request->content_type = $input['content_type'];
             $this->request->content_title = $input['content_title'];
@@ -40,8 +59,24 @@ class RequestController {
     }
 
     public function getAll() {
-        $middleware = new AuthMiddleware();
-        $middleware->requireAuth();
+        // Verificar se é admin ou tenant
+        $authMiddleware = new AuthMiddleware();
+        $tenantMiddleware = new TenantMiddleware();
+        
+        $user = null;
+        $tenant = null;
+        
+        try {
+            $user = $authMiddleware->requireAuth();
+        } catch (Exception $e) {
+            try {
+                $tenant = $tenantMiddleware->requireTenantAuth();
+            } catch (Exception $e) {
+                http_response_code(401);
+                echo json_encode(['error' => 'Não autorizado']);
+                return;
+            }
+        }
 
         $filters = [
             'status' => $_GET['status'] ?? '',
@@ -51,22 +86,60 @@ class RequestController {
             'offset' => $_GET['offset'] ?? null
         ];
 
+        // Se for tenant, filtrar apenas suas solicitações
+        if ($tenant) {
+            $filters['tenant_id'] = $tenant['id'];
+        }
         $requests = $this->request->getAll($filters);
         echo json_encode($requests);
     }
 
     public function getStats() {
-        $middleware = new AuthMiddleware();
-        $middleware->requireAuth();
+        // Verificar se é admin ou tenant
+        $authMiddleware = new AuthMiddleware();
+        $tenantMiddleware = new TenantMiddleware();
+        
+        $user = null;
+        $tenant = null;
+        
+        try {
+            $user = $authMiddleware->requireAuth();
+        } catch (Exception $e) {
+            try {
+                $tenant = $tenantMiddleware->requireTenantAuth();
+            } catch (Exception $e) {
+                http_response_code(401);
+                echo json_encode(['error' => 'Não autorizado']);
+                return;
+            }
+        }
 
-        $stats = $this->request->getStats();
+        // Se for tenant, filtrar apenas suas estatísticas
+        $tenant_id = $tenant ? $tenant['id'] : null;
+        $stats = $this->request->getStats($tenant_id);
         echo json_encode($stats);
     }
 
     public function updateStatus() {
         if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-            $middleware = new AuthMiddleware();
-            $middleware->requireAuth();
+            // Verificar se é admin ou tenant
+            $authMiddleware = new AuthMiddleware();
+            $tenantMiddleware = new TenantMiddleware();
+            
+            $user = null;
+            $tenant = null;
+            
+            try {
+                $user = $authMiddleware->requireAuth();
+            } catch (Exception $e) {
+                try {
+                    $tenant = $tenantMiddleware->requireTenantAuth();
+                } catch (Exception $e) {
+                    http_response_code(401);
+                    echo json_encode(['error' => 'Não autorizado']);
+                    return;
+                }
+            }
 
             $input = json_decode(file_get_contents('php://input'), true);
             $id = $input['id'] ?? '';
@@ -84,6 +157,14 @@ class RequestController {
                 return;
             }
 
+            // Se for tenant, verificar se a solicitação pertence a ele
+            if ($tenant) {
+                if (!$this->request->findByIdAndTenant($id, $tenant['id'])) {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'Solicitação não encontrada']);
+                    return;
+                }
+            }
             if ($this->request->updateStatus($id, $status)) {
                 echo json_encode(['success' => true, 'message' => 'Status atualizado com sucesso']);
             } else {
@@ -94,12 +175,37 @@ class RequestController {
     }
 
     public function getById($id) {
-        $middleware = new AuthMiddleware();
-        $middleware->requireAuth();
+        // Verificar se é admin ou tenant
+        $authMiddleware = new AuthMiddleware();
+        $tenantMiddleware = new TenantMiddleware();
+        
+        $user = null;
+        $tenant = null;
+        
+        try {
+            $user = $authMiddleware->requireAuth();
+        } catch (Exception $e) {
+            try {
+                $tenant = $tenantMiddleware->requireTenantAuth();
+            } catch (Exception $e) {
+                http_response_code(401);
+                echo json_encode(['error' => 'Não autorizado']);
+                return;
+            }
+        }
 
-        if ($this->request->findById($id)) {
+        // Se for tenant, verificar se a solicitação pertence a ele
+        $found = false;
+        if ($tenant) {
+            $found = $this->request->findByIdAndTenant($id, $tenant['id']);
+        } else {
+            $found = $this->request->findById($id);
+        }
+
+        if ($found) {
             echo json_encode([
                 'id' => $this->request->id,
+                'tenant_id' => $this->request->tenant_id,
                 'content_id' => $this->request->content_id,
                 'content_type' => $this->request->content_type,
                 'content_title' => $this->request->content_title,

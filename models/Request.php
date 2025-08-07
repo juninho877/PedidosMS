@@ -21,11 +21,12 @@ class Request {
 
     public function create() {
         $query = "INSERT INTO " . $this->table . " 
-                  (content_id, content_type, content_title, requester_name, requester_whatsapp, season, episode, poster_path) 
-                  VALUES (:content_id, :content_type, :content_title, :requester_name, :requester_whatsapp, :season, :episode, :poster_path)";
+                  (tenant_id, content_id, content_type, content_title, requester_name, requester_whatsapp, season, episode, poster_path) 
+                  VALUES (:tenant_id, :content_id, :content_type, :content_title, :requester_name, :requester_whatsapp, :season, :episode, :poster_path)";
         
         $stmt = $this->conn->prepare($query);
         
+        $stmt->bindParam(':tenant_id', $this->tenant_id);
         $stmt->bindParam(':content_id', $this->content_id);
         $stmt->bindParam(':content_type', $this->content_type);
         $stmt->bindParam(':content_title', $this->content_title);
@@ -41,6 +42,12 @@ class Request {
     public function getAll($filters = []) {
         $query = "SELECT * FROM " . $this->table . " WHERE 1=1";
         $params = [];
+
+        // Filtro por tenant (obrigatório para clientes)
+        if (!empty($filters['tenant_id'])) {
+            $query .= " AND tenant_id = :tenant_id";
+            $params[':tenant_id'] = $filters['tenant_id'];
+        }
 
         if (!empty($filters['status'])) {
             $query .= " AND status = :status";
@@ -83,7 +90,7 @@ class Request {
         return $stmt->fetchAll();
     }
 
-    public function getStats() {
+    public function getStats($tenant_id = null) {
         $query = "SELECT 
                     COUNT(*) as total,
                     SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
@@ -93,7 +100,18 @@ class Request {
                     SUM(CASE WHEN content_type = 'tv' THEN 1 ELSE 0 END) as tv
                   FROM " . $this->table;
         
+        $params = [];
+        if ($tenant_id) {
+            $query .= " WHERE tenant_id = :tenant_id";
+            $params[':tenant_id'] = $tenant_id;
+        }
+        
         $stmt = $this->conn->prepare($query);
+        
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        
         $stmt->execute();
         return $stmt->fetch();
     }
@@ -117,6 +135,33 @@ class Request {
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch();
             $this->id = $row['id'];
+            $this->tenant_id = $row['tenant_id'];
+            $this->content_id = $row['content_id'];
+            $this->content_type = $row['content_type'];
+            $this->content_title = $row['content_title'];
+            $this->requester_name = $row['requester_name'];
+            $this->requester_whatsapp = $row['requester_whatsapp'];
+            $this->season = $row['season'];
+            $this->episode = $row['episode'];
+            $this->status = $row['status'];
+            $this->poster_path = $row['poster_path'];
+            $this->created_at = $row['created_at'];
+            return true;
+        }
+        return false;
+    }
+
+    public function findByIdAndTenant($id, $tenant_id) {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id AND tenant_id = :tenant_id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':tenant_id', $tenant_id);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch();
+            $this->id = $row['id'];
+            $this->tenant_id = $row['tenant_id'];
             $this->content_id = $row['content_id'];
             $this->content_type = $row['content_type'];
             $this->content_title = $row['content_title'];
