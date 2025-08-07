@@ -109,7 +109,7 @@
                 <div class="bg-green-600 w-16 h-16 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <i data-lucide="users" class="h-8 w-8 text-white"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-white mb-4">3. Acompanhe</h3>
+            <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-4xl w-full p-6">
                 <p class="text-slate-400">
                     Nossa equipe analisa sua solicitação e você recebe atualizações sobre o status através do WhatsApp.
                 </p>
@@ -119,7 +119,17 @@
 
     <!-- Stats Section -->
     <div class="bg-slate-800/30 border-y border-slate-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div class="space-y-6">
+                    <div class="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="alert-triangle" class="h-5 w-5 text-amber-400"></i>
+                            <p class="text-amber-300 font-medium">Informações limitadas</p>
+                        </div>
+                        <p class="text-amber-200/80 text-sm mt-1">
+                            Não foi possível carregar informações detalhadas do TMDB para este conteúdo.
+                        </p>
+                    </div>
+                    
             <div class="grid grid-cols-4 gap-8 text-center">
                 <div>
                     <div class="flex items-center justify-center mb-4">
@@ -127,23 +137,54 @@
                     </div>
                     <div class="text-3xl font-bold text-white mb-2">10K+</div>
                     <div class="text-slate-400">Filmes no Catálogo</div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-center mb-4">
-                        <i data-lucide="tv" class="h-8 w-8 text-purple-400"></i>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-slate-700/20 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-white mb-3">Informações do Conteúdo</h4>
+                            <div class="space-y-2 text-sm">
+                                <div>
+                                    <span class="text-slate-400">Tipo:</span>
+                                    <span class="text-white ml-2">${request.content_type === 'movie' ? 'Filme' : 'Série'}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400">ID TMDB:</span>
+                                    <span class="text-white ml-2">${request.content_id}</span>
+                                </div>
+                                ${request.season ? `
+                                    <div>
+                                        <span class="text-slate-400">Temporada:</span>
+                                        <span class="text-white ml-2">${request.season}</span>
+                                    </div>
+                                ` : ''}
+                                ${request.episode ? `
+                                    <div>
+                                        <span class="text-slate-400">Episódio:</span>
+                                        <span class="text-white ml-2">${request.episode}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-700/20 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-white mb-3">Informações da Solicitação</h4>
+                            <div class="space-y-2 text-sm">
+                                <div>
+                                    <span class="text-slate-400">Solicitante:</span>
+                                    <span class="text-white ml-2">${request.requester_name}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400">Data:</span>
+                                    <span class="text-white ml-2">${new Date(request.created_at).toLocaleDateString('pt-BR')}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400">WhatsApp:</span>
+                                    <span class="text-white ml-2">+${request.requester_whatsapp}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-3xl font-bold text-white mb-2">5K+</div>
-                    <div class="text-slate-400">Séries Disponíveis</div>
                 </div>
-                <div>
-                    <div class="flex items-center justify-center mb-4">
-                        <i data-lucide="trending-up" class="h-8 w-8 text-green-400"></i>
-                    </div>
-                    <div class="text-3xl font-bold text-white mb-2">98%</div>
-                    <div class="text-slate-400">Taxa de Satisfação</div>
-                </div>
-                <div>
-                    <div class="flex items-center justify-center mb-4">
+                    <!-- Actions -->
+                    <div class="flex flex-wrap gap-3 pt-4 border-t border-slate-700">
                         <i data-lucide="star" class="h-8 w-8 text-yellow-400"></i>
                     </div>
                     <div class="text-3xl font-bold text-white mb-2">24h</div>
@@ -154,10 +195,14 @@
     </div>
 
     <!-- CTA Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+                        <a href="https://wa.me/${request.requester_whatsapp}?text=Olá ${encodeURIComponent(request.requester_name)}, sobre sua solicitação de '${encodeURIComponent(request.content_title)}'..." target="_blank" class="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
         <h2 class="text-4xl font-bold text-white mb-6">
             Pronto para solicitar seu conteúdo?
         </h2>
+                        <a href="https://www.themoviedb.org/${request.content_type}/${request.content_id}" target="_blank" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <i data-lucide="external-link" class="h-4 w-4"></i>
+                            <span>Ver no TMDB</span>
+                        </a>
         <p class="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
             Junte-se a milhares de usuários que já encontraram seus filmes e séries favoritos através do nosso sistema.
         </p>
