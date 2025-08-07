@@ -6,7 +6,7 @@
     <title><?php echo htmlspecialchars($tenantConfig['site_name']); ?> - Sistema de Solicitação de Filmes e Séries</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="<?php echo htmlspecialchars($tenantConfig['favicon_url'] ?? ''); ?>">
     <style>
         :root {
