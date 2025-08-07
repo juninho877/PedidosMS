@@ -23,21 +23,23 @@ Header always set X-XSS-Protection "1; mode=block"
 
 Options -Indexes
 
-# Landing Page - Redirect root to main page
-RewriteRule ^$ index.php [L]
+# Allow direct access to existing files and directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# Admin Routes - MUST come first
+# Admin Routes - Must come first and be very specific
 RewriteRule ^admin/?$ admin/dashboard.php [L]
 RewriteRule ^admin/login/?$ admin/login.php [L]
 RewriteRule ^admin/dashboard/?$ admin/dashboard.php [L]
 RewriteRule ^admin/tenants/?$ admin/tenants.php [L]
 
-# Client Routes - MUST come second
+# Client Routes - Must come second and be very specific  
 RewriteRule ^client/?$ client/dashboard.php [L]
 RewriteRule ^client/login/?$ client/login.php [L]
 RewriteRule ^client/dashboard/?$ client/dashboard.php [L]
 
-# API Routes - MUST come third
+# API Routes - Must come third
 RewriteRule ^api/auth/?(.*)$ api/auth.php/$1 [QSA,L]
 RewriteRule ^api/client-auth/?(.*)$ api/client-auth.php/$1 [QSA,L]
 RewriteRule ^api/client-requests/?(.*)$ api/client-requests.php/$1 [QSA,L]
@@ -47,18 +49,16 @@ RewriteRule ^api/tenants/?(.*)$ api/tenants.php/$1 [QSA,L]
 RewriteRule ^api/tmdb/?(.*)$ api/tmdb.php/$1 [QSA,L]
 RewriteRule ^api/tenant-requests/?$ api/tenant-requests.php [QSA,L]
 
-# Assets - Allow direct access
-RewriteCond %{REQUEST_URI} ^/(assets|vendor)/
-RewriteRule ^ - [L]
+# Assets - Allow direct access (already handled by file existence check above)
 
-# Tenant Routes - MUST come last (catch-all)
-# Only match if it's not admin, client, api, or assets
+# Tenant Routes - ONLY for valid tenant slugs (catch-all at the end)
+# Only match if it's not admin, client, api, assets, or existing files
 RewriteCond %{REQUEST_URI} !^/(admin|client|api|assets|vendor)/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^([a-zA-Z0-9\-_]+)/?$ public/tenant_router.php [QSA,L]
+RewriteRule ^([a-zA-Z0-9\-_]+)/?$ public/tenant_router.php?slug=$1 [QSA,L]
 
 RewriteCond %{REQUEST_URI} !^/(admin|client|api|assets|vendor)/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^([a-zA-Z0-9\-_]+)/(.*)$ public/tenant_router.php [QSA,L]
+RewriteRule ^([a-zA-Z0-9\-_]+)/(.*)$ public/tenant_router.php?slug=$1&path=$2 [QSA,L]
