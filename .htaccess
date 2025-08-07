@@ -11,26 +11,35 @@ Header always set X-XSS-Protection "1; mode=block"
     Deny from all
 </Files>
 
-<FilesMatch "\.env">
+<Files "composer.lock">
     Order allow,deny
     Deny from all
-</FilesMatch>
-
-<Files "*.php">
-    <RequireAll>
-        Require all granted
-    </RequireAll>
 </Files>
 
-# Block access to config and bootstrap directories
-<DirectoryMatch "^.*(config|bootstrap).*$">
+<Files "*.env">
     Order allow,deny
     Deny from all
-</DirectoryMatch>
+</Files>
 
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Block access to config and bootstrap directories via URL
+RewriteRule ^config/ - [F,L]
+RewriteRule ^bootstrap/ - [F,L]
+RewriteRule ^app/ - [F,L]
+RewriteRule ^vendor/ - [F,L]
+RewriteRule ^storage/ - [F,L]
+
+# Disable directory browsing
 Options -Indexes
 
-# Redirect all requests to public/index.php
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# Allow existing files and directories to be accessed directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route everything through public/index.php
 RewriteRule ^(.*)$ public/index.php [QSA,L]
