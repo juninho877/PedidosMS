@@ -3,17 +3,15 @@ class Database {
     private $host = 'localhost';
     private $db_name = 'pedidos';
     private $username = 'pedidos';
-    private $password = '$n9v2uO18';
-    private $conn = null;
+    private $password = 'G01WLes%ejljs_m9';
+    private $conn;
 
     public function getConnection() {
-        if ($this->conn !== null) {
-            return $this->conn;
-        }
-
+        $this->conn = null;
+        
         try {
             $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8mb4",
+                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8",
                 $this->username,
                 $this->password,
                 [
@@ -22,10 +20,11 @@ class Database {
                     PDO::ATTR_EMULATE_PREPARES => false
                 ]
             );
-            return $this->conn;
-        } catch (PDOException $e) {
-            throw new Exception("Erro de conexão com o banco de dados: " . $e->getMessage());
+        } catch(PDOException $exception) {
+            echo "Erro de conexão: " . $exception->getMessage();
         }
+        
+        return $this->conn;
     }
 }
 ?>
