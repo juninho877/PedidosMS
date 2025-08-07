@@ -5,7 +5,7 @@ require_once __DIR__ . '/../bootstrap/app.php';
 
 try {
     // Criar e executar a aplicação
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
+    $app = new App\Core\Application();
     $app->run();
 } catch (Exception $e) {
     // Em produção, você pode querer logar o erro e mostrar uma página de erro amigável

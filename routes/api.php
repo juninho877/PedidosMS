@@ -30,7 +30,7 @@ $router->group(['prefix' => 'api'], function($router) {
     $router->post('/tenant-requests', 'App\Controllers\Api\RequestController@store');
     
     // Protected Admin Routes
-    $router->group(['middleware' => ['App\Middleware\AuthMiddleware']], function($router) {
+    $router->group(['middleware' => [AuthMiddleware::class]], function($router) {
         // Tenants management
         $router->get('/tenants', 'App\Controllers\Api\TenantController@index');
         $router->post('/tenants', 'App\Controllers\Api\TenantController@store');
@@ -40,7 +40,7 @@ $router->group(['prefix' => 'api'], function($router) {
     });
     
     // Protected Client Routes
-    $router->group(['middleware' => ['App\Middleware\ClientAuthMiddleware']], function($router) {
+    $router->group(['middleware' => [ClientAuthMiddleware::class]], function($router) {
         // Client requests management
         $router->get('/client-requests', 'App\Controllers\Api\RequestController@index');
         $router->get('/client-requests/{id}', 'App\Controllers\Api\RequestController@show');
