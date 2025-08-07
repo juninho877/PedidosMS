@@ -1,3 +1,28 @@
+<?php
+require_once '../config/config.php';
+require_once '../config/Database.php';
+
+// Identificar o tenant pela URL
+$requestUri = $_SERVER['REQUEST_URI'] ?? '';
+$segments = array_filter(explode('/', trim($requestUri, '/')));
+$slug = $segments[0] ?? '';
+
+// Verificar se o tenant existe
+$tenantMiddleware = new TenantMiddleware();
+$tenant = $tenantMiddleware->identifyTenant($slug);
+
+if (!$tenant) {
+    http_response_code(404);
+    include '404.php';
+    exit;
+}
+
+$tenantConfig = $tenantMiddleware->getTenantConfig();
+
+// Determinar qual página mostrar baseado na URL
+$page = $segments[1] ?? 'home';
+
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
