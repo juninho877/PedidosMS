@@ -11,9 +11,6 @@
     <style>
         :root {
             --primary-color: <?php echo htmlspecialchars($tenantConfig['primary_color'] ?? '#3b82f6'); ?>;
-            // Log error instead of echoing it (which breaks JSON responses)
-            error_log("Database connection error: " . $exception->getMessage());
-            throw new Exception("Erro de conexão com o banco de dados");
         }
         .bg-primary { background-color: var(--primary-color); }
         .text-primary { color: var(--primary-color); }
