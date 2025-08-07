@@ -1,86 +1,42 @@
 RewriteEngine On
 
-# Landing Page - Redirect root to landing page
-RewriteRule ^$ landing.php [L]
-RewriteRule ^index\.php$ landing.php [R=301,L]
+# Landing Page - Redirect root to main page
+RewriteRule ^$ index.php [L]
 
-# Client Dashboard Routes
+# Client Routes
 RewriteRule ^client/login/?$ client/login.php [L]
 RewriteRule ^client/dashboard/?$ client/dashboard.php [L]
 
-# API Routes for Client
+# Admin Routes
+RewriteRule ^admin/login/?$ admin/login.php [L]
+RewriteRule ^admin/dashboard/?$ admin/dashboard.php [L]
+RewriteRule ^admin/tenants/?$ admin/tenants.php [L]
+
+# API Routes
+RewriteRule ^api/auth/(.*)$ api/auth.php/$1 [QSA,L]
 RewriteRule ^api/client-auth/(.*)$ api/client-auth.php/$1 [QSA,L]
 RewriteRule ^api/client-requests/(.*)$ api/client-requests.php/$1 [QSA,L]
 RewriteRule ^api/client-requests$ api/client-requests.php [QSA,L]
 RewriteRule ^api/client-tenants/(.*)$ api/client-tenants.php/$1 [QSA,L]
 RewriteRule ^api/client-analytics$ api/client-analytics.php [QSA,L]
-
-# Client Dashboard Routes
-RewriteRule ^client/login/?$ client/login.php [L]
-RewriteRule ^client/dashboard/?$ client/dashboard.php [L]
-
-# Client Dashboard Routes
-RewriteRule ^client/login/?$ client/login.php [L]
-RewriteRule ^client/dashboard/?$ client/dashboard.php [L]
-
-# Tenant Routes - Must come before API routes
-# Capture tenant slug and route to tenant router
-RewriteCond %{REQUEST_URI} !^/(api|admin|client|assets|vendor|onboarding)/
-RewriteRule ^([a-zA-Z0-9\-_]+)/?$ public/tenant_router.php [QSA,L]
-RewriteCond %{REQUEST_URI} !^/(api|admin|client|assets|vendor|onboarding)/
-RewriteRule ^([a-zA-Z0-9\-_]+)/(.*)$ public/tenant_router.php [QSA,L]
-
-# Redirect to HTTPS (uncomment in production)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# API Routes
-RewriteRule ^api/auth/(.*)$ api/auth.php/$1 [QSA,L]
-RewriteRule ^api/requests/(.*)$ api/requests.php/$1 [QSA,L]
-RewriteRule ^api/requests$ api/requests.php [QSA,L]
-RewriteRule ^api/tmdb/(.*)$ api/tmdb.php/$1 [QSA,L]
-RewriteRule ^api/tenant-requests$ api/tenant-requests.php [QSA,L]
 RewriteRule ^api/tenants/(.*)$ api/tenants.php/$1 [QSA,L]
 RewriteRule ^api/tenants$ api/tenants.php [QSA,L]
+RewriteRule ^api/tmdb/(.*)$ api/tmdb.php/$1 [QSA,L]
+RewriteRule ^api/tenant-requests$ api/tenant-requests.php [QSA,L]
+
+# Tenant Routes - Must come after API routes
+RewriteCond %{REQUEST_URI} !^/(api|admin|client|assets|vendor)/
+RewriteRule ^([a-zA-Z0-9\-_]+)/?$ public/tenant_router.php [QSA,L]
+RewriteCond %{REQUEST_URI} !^/(api|admin|client|assets|vendor)/
+RewriteRule ^([a-zA-Z0-9\-_]+)/(.*)$ public/tenant_router.php [QSA,L]
 
 # Security Headers
 Header always set X-Content-Type-Options nosniff
 Header always set X-Frame-Options DENY
 Header always set X-XSS-Protection "1; mode=block"
-Header always set Referrer-Policy "strict-origin-when-cross-origin"
-
-# Cache Control
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType image/png "access plus 1 month"
-    ExpiresByType image/jpg "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-    ExpiresByType image/gif "access plus 1 month"
-    ExpiresByType image/svg+xml "access plus 1 month"
-</IfModule>
-
-# Compress files
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/plain
-    AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/xml
-    AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/rss+xml
-    AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
-</IfModule>
 
 # Prevent access to sensitive files
 <Files "composer.json">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "composer.lock">
     Order allow,deny
     Deny from all
 </Files>
@@ -90,5 +46,4 @@ Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Deny from all
 </FilesMatch>
 
-# Prevent directory browsing
 Options -Indexes

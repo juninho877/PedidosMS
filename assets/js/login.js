@@ -8,13 +8,11 @@ class LoginApp {
     }
 
     setupEventListeners() {
-        // Login form
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleLogin();
         });
 
-        // Toggle password visibility
         document.getElementById('togglePassword').addEventListener('click', () => {
             this.togglePasswordVisibility();
         });
@@ -41,16 +39,13 @@ class LoginApp {
         const password = document.getElementById('password').value;
         const loginBtn = document.getElementById('loginBtn');
 
-        // Clear previous errors
         this.clearErrors();
 
-        // Basic validation
         if (!email || !password) {
             this.showError('general', 'Email e senha são obrigatórios');
             return;
         }
 
-        // Disable button and show loading
         loginBtn.disabled = true;
         loginBtn.innerHTML = `
             <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -72,13 +67,11 @@ class LoginApp {
                 throw new Error(result.error || 'Erro no login');
             }
 
-            // Success - redirect to dashboard
             window.location.href = '/admin/dashboard.php';
 
         } catch (error) {
             this.showError('general', error.message);
         } finally {
-            // Reset button
             loginBtn.disabled = false;
             loginBtn.innerHTML = `
                 <i data-lucide="log-in" class="h-5 w-5"></i>
@@ -107,7 +100,6 @@ class LoginApp {
     }
 }
 
-// Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
     new LoginApp();
 });

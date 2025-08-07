@@ -11,7 +11,6 @@ if ($method !== 'GET') {
     exit;
 }
 
-// Require client authentication
 $middleware = new ClientAuthMiddleware();
 $client = $middleware->requireClientAuth();
 
@@ -49,7 +48,6 @@ try {
     $approvalRate = $approvalData['total'] > 0 ? 
         round(($approvalData['approved'] / $approvalData['total']) * 100, 1) : 0;
 
-    // Get daily average
     $dailyAverage = $approvalData['total'] > 0 ? 
         round($approvalData['total'] / 30, 1) : 0;
 

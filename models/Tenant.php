@@ -82,7 +82,6 @@ class Tenant {
         
         $stmt = $this->conn->prepare($query);
         
-        // Hash password
         $hashed_password = password_hash($data['password'], PASSWORD_DEFAULT);
         
         $stmt->bindParam(':slug', $data['slug']);

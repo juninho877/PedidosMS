@@ -19,7 +19,6 @@ switch ($path) {
         break;
         
     default:
-        // Handle /api/tmdb/movie/{id} or /api/tmdb/tv/{id}
         if (preg_match('/^\/(movie|tv)\/(\d+)$/', $path, $matches)) {
             $type = $matches[1];
             $id = $matches[2];

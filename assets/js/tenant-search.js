@@ -1,8 +1,7 @@
 class TenantSearchApp {
     constructor() {
-        this.currentView = 'grid';
-        this.hasSearched = false;
         this.tenantSlug = window.TENANT_SLUG || '';
+        this.tmdbImageBaseUrl = window.TMDB_IMAGE_BASE_URL || '';
         this.init();
     }
 
@@ -13,24 +12,9 @@ class TenantSearchApp {
     }
 
     setupEventListeners() {
-        // Search form
         document.getElementById('searchForm').addEventListener('submit', (e) => {
             e.preventDefault();
             this.performSearch();
-        });
-
-        // Toggle filters
-        document.getElementById('toggleFilters').addEventListener('click', () => {
-            this.toggleFilters();
-        });
-
-        // View mode buttons
-        document.getElementById('gridView').addEventListener('click', () => {
-            this.setViewMode('grid');
-        });
-
-        document.getElementById('listView').addEventListener('click', () => {
-            this.setViewMode('list');
         });
     }
 
@@ -43,32 +27,6 @@ class TenantSearchApp {
             option.value = year;
             option.textContent = year;
             yearSelect.appendChild(option);
-        }
-    }
-
-    toggleFilters() {
-        const filtersSection = document.getElementById('filtersSection');
-        filtersSection.classList.toggle('hidden');
-    }
-
-    setViewMode(mode) {
-        this.currentView = mode;
-        
-        // Update button states
-        const gridBtn = document.getElementById('gridView');
-        const listBtn = document.getElementById('listView');
-        
-        if (mode === 'grid') {
-            gridBtn.className = 'p-2 sm:p-3 rounded-lg transition-colors bg-primary text-white';
-            listBtn.className = 'p-2 sm:p-3 rounded-lg transition-colors text-slate-400 hover:text-white hover:bg-slate-700';
-        } else {
-            listBtn.className = 'p-2 sm:p-3 rounded-lg transition-colors bg-primary text-white';
-            gridBtn.className = 'p-2 sm:p-3 rounded-lg transition-colors text-slate-400 hover:text-white hover:bg-slate-700';
-        }
-
-        // Re-render results if we have them
-        if (this.hasSearched && this.lastResults) {
-            this.renderResults(this.lastResults);
         }
     }
 
@@ -95,10 +53,7 @@ class TenantSearchApp {
                 throw new Error(data.error || 'Erro na busca');
             }
 
-            this.lastResults = data.results || [];
-            this.hasSearched = true;
-            this.renderResults(this.lastResults);
-            this.showViewControls();
+            this.renderResults(data.results || []);
 
         } catch (error) {
             this.showError(error.message);
@@ -108,22 +63,13 @@ class TenantSearchApp {
     showLoading() {
         document.getElementById('emptyState').classList.add('hidden');
         document.getElementById('searchResults').classList.add('hidden');
-        document.getElementById('viewControls').classList.add('hidden');
         document.getElementById('loadingState').classList.remove('hidden');
     }
 
     showEmptyState() {
         document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('searchResults').classList.add('hidden');
-        document.getElementById('viewControls').classList.add('hidden');
         document.getElementById('emptyState').classList.remove('hidden');
-    }
-
-    showViewControls() {
-        document.getElementById('viewControls').classList.remove('hidden');
-        const count = this.lastResults ? this.lastResults.length : 0;
-        document.getElementById('resultsCount').textContent = 
-            count > 0 ? `${count} resultado(s) encontrado(s)` : 'Nenhum resultado encontrado';
     }
 
     renderResults(results) {
@@ -134,45 +80,35 @@ class TenantSearchApp {
         resultsContainer.classList.remove('hidden');
 
         if (results.length === 0) {
-            resultsContainer.innerHTML = this.getNoResultsHTML();
+            resultsContainer.innerHTML = `
+                <div class="text-center py-12">
+                    <i data-lucide="search" class="h-12 w-12 text-slate-500 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-medium text-slate-300 mb-2">Nenhum resultado encontrado</h3>
+                    <p class="text-slate-500">Tente pesquisar com termos diferentes</p>
+                </div>
+            `;
+            lucide.createIcons();
             return;
         }
 
-        if (this.currentView === 'grid') {
-            resultsContainer.innerHTML = this.getGridHTML(results);
-        } else {
-            resultsContainer.innerHTML = this.getListHTML(results);
-        }
+        resultsContainer.innerHTML = `
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                ${results.map(item => this.getItemHTML(item)).join('')}
+            </div>
+        `;
 
-        // Re-initialize Lucide icons
         lucide.createIcons();
     }
 
-    getGridHTML(results) {
-        return `
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
-                ${results.map(item => this.getGridItemHTML(item)).join('')}
-            </div>
-        `;
-    }
-
-    getListHTML(results) {
-        return `
-            <div class="space-y-4">
-                ${results.map(item => this.getListItemHTML(item)).join('')}
-            </div>
-        `;
-    }
-
-    getGridItemHTML(item) {
+    getItemHTML(item) {
         const title = item.title || item.name;
         const date = item.release_date || item.first_air_date;
         const year = date ? new Date(date).getFullYear() : 'N/A';
         const type = item.title ? 'movie' : 'tv';
         const typeLabel = item.title ? 'Filme' : 'Série';
         const posterUrl = item.poster_path ? 
-            `https://image.tmdb.org/t/p/w300${item.poster_path}` : 
-            '/assets/images/placeholder-poster.jpg';
+            `${this.tmdbImageBaseUrl}/w300${item.poster_path}` : 
+            'https://via.placeholder.com/300x450/374151/ffffff?text=Sem+Poster';
 
         return `
             <a href="/${encodeURIComponent(this.tenantSlug)}/details?type=${encodeURIComponent(type)}&id=${encodeURIComponent(item.id)}" class="group">
@@ -182,14 +118,12 @@ class TenantSearchApp {
                             src="${posterUrl}"
                             alt="${title}"
                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            onerror="this.src='/assets/images/placeholder-poster.jpg'"
+                            onerror="this.src='https://via.placeholder.com/300x450/374151/ffffff?text=Sem+Poster'"
                         />
                         <div class="absolute top-2 left-2">
-                            <div class="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                type === 'movie' ? 'bg-primary/80 text-white' : 'bg-purple-600/80 text-white'
-                            }">
+                            <div class="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-primary/80 text-white">
                                 <i data-lucide="${type === 'movie' ? 'film' : 'tv'}" class="h-3 w-3"></i>
-                                <span class="hidden sm:inline">${typeLabel}</span>
+                                <span>${typeLabel}</span>
                             </div>
                         </div>
                         <div class="absolute top-2 right-2">
@@ -199,11 +133,11 @@ class TenantSearchApp {
                             </div>
                         </div>
                     </div>
-                    <div class="p-3 sm:p-4">
-                        <h3 class="text-sm sm:text-base font-semibold text-white group-hover:text-primary transition-colors line-clamp-2 mb-2">
+                    <div class="p-4">
+                        <h3 class="font-semibold text-white group-hover:text-primary transition-colors line-clamp-2 mb-2">
                             ${title}
                         </h3>
-                        <div class="flex items-center space-x-1 text-xs sm:text-sm text-slate-400">
+                        <div class="flex items-center space-x-1 text-sm text-slate-400">
                             <i data-lucide="calendar" class="h-4 w-4"></i>
                             <span>${year}</span>
                         </div>
@@ -213,82 +147,12 @@ class TenantSearchApp {
         `;
     }
 
-    getListItemHTML(item) {
-        const title = item.title || item.name;
-        const date = item.release_date || item.first_air_date;
-        const year = date ? new Date(date).getFullYear() : 'N/A';
-        const type = item.title ? 'movie' : 'tv';
-        const typeLabel = item.title ? 'Filme' : 'Série';
-        const posterUrl = item.poster_path ? 
-            `https://image.tmdb.org/t/p/w200${item.poster_path}` : 
-            '/assets/images/placeholder-poster.jpg';
-
-        return `
-            <a href="/${encodeURIComponent(this.tenantSlug)}/details?type=${encodeURIComponent(type)}&id=${encodeURIComponent(item.id)}" class="block bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-primary/50 hover:bg-slate-800/70 transition-all group">
-                <div class="flex gap-3 sm:gap-4">
-                    <div class="flex-shrink-0">
-                        <img
-                            src="${posterUrl}"
-                            alt="${title}"
-                            class="w-12 h-18 sm:w-16 sm:h-24 object-cover rounded-lg"
-                            onerror="this.src='/assets/images/placeholder-poster.jpg'"
-                        />
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <h3 class="text-base sm:text-lg font-semibold text-white group-hover:text-primary transition-colors">
-                                    ${title}
-                                </h3>
-                                <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-slate-400">
-                                    <div class="flex items-center space-x-1">
-                                        <i data-lucide="${type === 'movie' ? 'film' : 'tv'}" class="h-4 w-4"></i>
-                                        <span>${typeLabel}</span>
-                                    </div>
-                                    <div class="flex items-center space-x-1">
-                                        <i data-lucide="calendar" class="h-4 w-4"></i>
-                                        <span>${year}</span>
-                                    </div>
-                                    <div class="flex items-center space-x-1">
-                                        <i data-lucide="star" class="h-4 w-4 text-yellow-400"></i>
-                                        <span>${item.vote_average.toFixed(1)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        ${item.overview ? `
-                            <p class="text-slate-400 mt-2 sm:mt-3 line-clamp-2 text-sm sm:text-base hidden sm:block">
-                                ${item.overview}
-                            </p>
-                        ` : ''}
-                    </div>
-                </div>
-            </a>
-        `;
-    }
-
-    getNoResultsHTML() {
-        return `
-            <div class="text-center py-8 sm:py-12">
-                <div class="bg-slate-800/50 rounded-lg p-8 max-w-md mx-auto">
-                    <i data-lucide="search" class="h-10 w-10 sm:h-12 sm:w-12 text-slate-500 mx-auto mb-4"></i>
-                    <h3 class="text-base sm:text-lg font-medium text-slate-300 mb-2">
-                        Nenhum resultado encontrado
-                    </h3>
-                    <p class="text-sm sm:text-base text-slate-500 px-4">
-                        Tente pesquisar com termos diferentes ou verifique a ortografia
-                    </p>
-                </div>
-            </div>
-        `;
-    }
-
     showError(message) {
         document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('searchResults').innerHTML = `
-            <div class="text-center py-8 sm:py-12">
+            <div class="text-center py-12">
                 <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-6 max-w-md mx-auto">
-                    <p class="text-sm sm:text-base text-red-400 font-medium px-4">${message}</p>
+                    <p class="text-red-400 font-medium">${message}</p>
                 </div>
             </div>
         `;
@@ -296,7 +160,6 @@ class TenantSearchApp {
     }
 }
 
-// Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
     new TenantSearchApp();
 });

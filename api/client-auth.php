@@ -59,7 +59,6 @@ function handleClientLogin() {
     if ($tenant->login($slug, $password)) {
         $authService = new AuthService();
         
-        // Include all tenant data in the token
         $client_data = [
             'id' => $tenant->id,
             'slug' => $tenant->slug,

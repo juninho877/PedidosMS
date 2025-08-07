@@ -1,51 +1,31 @@
 <?php
-error_log("TenantMiddleware.php: Arquivo sendo carregado");
-
 class TenantMiddleware {
     private $db;
     private $tenant;
     private $currentTenant = null;
 
     public function __construct() {
-        if (!class_exists('Database')) {
-            error_log("TenantMiddleware: ERRO - Classe Database não encontrada");
-            throw new Exception("Database class not available");
-        }
-        
-        if (!class_exists('Tenant')) {
-            error_log("TenantMiddleware: ERRO - Classe Tenant não encontrada");
-            throw new Exception("Tenant class not available");
-        }
-        
         $database = new Database();
         $this->db = $database->getConnection();
         $this->tenant = new Tenant($this->db);
-        
-        error_log("TenantMiddleware: Inicializado com sucesso");
     }
 
     public function identifyTenant($slug = null) {
-        error_log("TenantMiddleware: identifyTenant() chamado com slug: " . ($slug ?? 'null'));
-        
         if ($slug === null) {
-            // Extrair slug da URL atual
             $requestUri = $_SERVER['REQUEST_URI'] ?? '';
             $segments = array_filter(explode('/', trim($requestUri, '/')));
             $slug = reset($segments);
         }
 
         if (empty($slug)) {
-            error_log("TenantMiddleware: Slug vazio");
             return false;
         }
 
         if ($this->tenant->findBySlug($slug)) {
             $this->currentTenant = $this->tenant;
-            error_log("TenantMiddleware: Tenant encontrado: " . $this->tenant->name);
             return true;
         }
 
-        error_log("TenantMiddleware: Tenant não encontrado para slug: $slug");
         return false;
     }
 
@@ -55,7 +35,6 @@ class TenantMiddleware {
 
     public function getTenantConfig() {
         if (!$this->currentTenant) {
-            // Tentar identificar automaticamente
             if (!$this->identifyTenant()) {
                 return null;
             }
@@ -89,6 +68,4 @@ class TenantMiddleware {
         return $this->currentTenant;
     }
 }
-
-error_log("TenantMiddleware.php: Classe TenantMiddleware definida com sucesso");
 ?>

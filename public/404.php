@@ -19,19 +19,13 @@
                 </p>
             </div>
             
-            <div class="space-y-4">
-                <a 
-                    href="/" 
-                    class="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-                >
-                    <i data-lucide="home" class="h-5 w-5"></i>
-                    <span>Voltar ao Início</span>
-                </a>
-                
-                <div class="text-slate-500 text-sm">
-                    <p>Se você acredita que isso é um erro, entre em contato conosco.</p>
-                </div>
-            </div>
+            <a 
+                href="/" 
+                class="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+                <i data-lucide="home" class="h-5 w-5"></i>
+                <span>Voltar ao Início</span>
+            </a>
         </div>
     </div>
 

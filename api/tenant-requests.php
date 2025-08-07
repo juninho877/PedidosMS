@@ -8,7 +8,6 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     
-    // Validar tenant
     $tenantMiddleware = new TenantMiddleware();
     if (!$tenantMiddleware->identifyTenant($input['tenant_slug'] ?? '')) {
         http_response_code(404);
@@ -18,12 +17,10 @@ if ($method === 'POST') {
     
     $tenant = $tenantMiddleware->getCurrentTenant();
     
-    // Criar solicitação
     $database = new Database();
     $db = $database->getConnection();
     $request = new Request($db);
     
-    // Validação dos dados
     $errors = validateTenantRequestData($input);
     if (!empty($errors)) {
         http_response_code(400);

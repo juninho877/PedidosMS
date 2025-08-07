@@ -1,6 +1,4 @@
 <?php
-error_log("Request.php: Arquivo sendo carregado");
-
 class Request {
     private $conn;
     private $table = 'requests';
@@ -21,12 +19,9 @@ class Request {
 
     public function __construct($db) {
         $this->conn = $db;
-        error_log("Request: Inicializado com sucesso");
     }
 
     public function create() {
-        error_log("Request: create() chamado");
-        
         $query = "INSERT INTO " . $this->table . " 
                   (tenant_id, content_id, content_type, content_title, requester_name, requester_whatsapp, season, episode, poster_path) 
                   VALUES (:tenant_id, :content_id, :content_type, :content_title, :requester_name, :requester_whatsapp, :season, :episode, :poster_path)";
@@ -47,12 +42,9 @@ class Request {
     }
 
     public function getAll($filters = []) {
-        error_log("Request: getAll() chamado com filtros: " . json_encode($filters));
-        
         $where_conditions = [];
         $params = [];
 
-        // Filter by tenant_id (including NULL for admin)
         if (isset($filters['tenant_id'])) {
             if ($filters['tenant_id'] === null) {
                 $where_conditions[] = "tenant_id IS NULL";
@@ -62,19 +54,16 @@ class Request {
             }
         }
 
-        // Filter by status
         if (!empty($filters['status'])) {
             $where_conditions[] = "status = :status";
             $params[':status'] = $filters['status'];
         }
 
-        // Filter by content type
         if (!empty($filters['content_type'])) {
             $where_conditions[] = "content_type = :content_type";
             $params[':content_type'] = $filters['content_type'];
         }
 
-        // Search filter
         if (!empty($filters['search'])) {
             $where_conditions[] = "(content_title LIKE :search OR requester_name LIKE :search)";
             $params[':search'] = '%' . $filters['search'] . '%';
@@ -84,7 +73,6 @@ class Request {
         
         $query = "SELECT * FROM " . $this->table . " " . $where_clause . " ORDER BY created_at DESC";
         
-        // Add limit and offset if specified
         if (isset($filters['limit']) && is_numeric($filters['limit'])) {
             $query .= " LIMIT " . intval($filters['limit']);
             
@@ -104,8 +92,6 @@ class Request {
     }
 
     public function findById($id) {
-        error_log("Request: findById() chamado para ID: $id");
-        
         $query = "SELECT * FROM " . $this->table . " WHERE id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id);
@@ -118,9 +104,6 @@ class Request {
     }
 
     public function updateStatus($id, $status, $tenant_id = null) {
-        error_log("Request: updateStatus() chamado - ID: $id, Status: $status, Tenant: $tenant_id");
-        
-        // Build WHERE clause based on tenant_id
         if ($tenant_id === null) {
             $where_clause = "id = :id AND tenant_id IS NULL";
         } else {
@@ -141,9 +124,6 @@ class Request {
     }
 
     public function getStats($tenant_id = null) {
-        error_log("Request: getStats() chamado para tenant: $tenant_id");
-        
-        // Build WHERE clause based on tenant_id
         if ($tenant_id === null) {
             $where_clause = "WHERE tenant_id IS NULL";
         } else {
@@ -170,9 +150,6 @@ class Request {
     }
 
     public function delete($id, $tenant_id = null) {
-        error_log("Request: delete() chamado para ID: $id, Tenant: $tenant_id");
-        
-        // Build WHERE clause based on tenant_id
         if ($tenant_id === null) {
             $where_clause = "id = :id AND tenant_id IS NULL";
         } else {
@@ -191,6 +168,4 @@ class Request {
         return $stmt->execute();
     }
 }
-
-error_log("Request.php: Classe Request definida com sucesso");
 ?>

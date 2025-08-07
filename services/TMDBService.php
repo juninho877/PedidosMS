@@ -1,6 +1,4 @@
 <?php
-error_log("TMDBService.php: Arquivo sendo carregado");
-
 class TMDBService {
     private $api_key;
     private $base_url;
@@ -10,13 +8,10 @@ class TMDBService {
         $this->api_key = TMDB_API_KEY;
         $this->base_url = TMDB_BASE_URL;
         $this->image_base_url = TMDB_IMAGE_BASE_URL;
-        error_log("TMDBService: Inicializado com sucesso");
     }
 
     private function makeRequest($endpoint) {
         $url = $this->base_url . $endpoint . (strpos($endpoint, '?') ? '&' : '?') . 'api_key=' . $this->api_key;
-        
-        error_log("TMDBService: Fazendo requisição para: $url");
         
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -29,7 +24,6 @@ class TMDBService {
         curl_close($ch);
 
         if ($http_code !== 200) {
-            error_log("TMDBService: Erro na API - HTTP Code: $http_code");
             throw new Exception('Erro na API do TMDB: ' . $http_code);
         }
 
@@ -70,11 +64,5 @@ class TMDBService {
     public function getImageUrl($path, $size = 'w300') {
         return $this->image_base_url . '/' . $size . $path;
     }
-
-    public function getYouTubeEmbedUrl($key) {
-        return 'https://www.youtube.com/embed/' . $key;
-    }
 }
-
-error_log("TMDBService.php: Classe TMDBService definida com sucesso");
 ?>

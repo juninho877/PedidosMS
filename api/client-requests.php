@@ -6,7 +6,6 @@ header('Content-Type: application/json');
 $method = $_SERVER['REQUEST_METHOD'];
 $path = $_SERVER['PATH_INFO'] ?? '';
 
-// Require client authentication
 $middleware = new ClientAuthMiddleware();
 $client = $middleware->requireClientAuth();
 
@@ -44,7 +43,6 @@ switch ($path) {
         break;
         
     default:
-        // Handle /api/client-requests/{id}
         if (preg_match('/^\/(\d+)$/', $path, $matches)) {
             $id = $matches[1];
             if ($method === 'GET') {
@@ -114,7 +112,6 @@ function updateClientRequestStatus($request, $client) {
             return;
         }
 
-        // Update status for this client's request
         if ($request->updateStatus($id, $status, $client['id'])) {
             echo json_encode(['success' => true, 'message' => 'Status atualizado com sucesso']);
         } else {
@@ -131,7 +128,6 @@ function getClientRequestById($request, $client, $id) {
     try {
         $requestData = $request->findById($id);
         if ($requestData) {
-            // Verify that this request belongs to this client
             if ($requestData['tenant_id'] != $client['id']) {
                 http_response_code(403);
                 echo json_encode(['error' => 'Acesso negado']);
