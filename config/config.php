@@ -1,11 +1,16 @@
 <?php
+// Start output buffering to prevent premature output
+ob_start();
+
 // Configurações gerais do sistema
 define('APP_ROOT', dirname(__DIR__));
 define('BASE_URL', 'http://localhost');
 define('SITE_NAME', 'CineRequest');
 
 // Incluir autoloader do Composer
-require_once APP_ROOT . '/vendor/autoload.php';
+if (file_exists(APP_ROOT . '/vendor/autoload.php')) {
+    require_once APP_ROOT . '/vendor/autoload.php';
+}
 
 // Incluir classe Database
 require_once __DIR__ . '/database.php';
@@ -23,6 +28,10 @@ define('JWT_ALGORITHM', 'HS256');
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_secure', 0); // Mude para 1 em HTTPS
+
+// Configurações de erro para desenvolvimento
+ini_set('display_errors', 0); // Não mostrar erros na tela (quebra JSON)
+ini_set('log_errors', 1); // Log errors to file
 
 // Timezone
 date_default_timezone_set('America/Sao_Paulo');

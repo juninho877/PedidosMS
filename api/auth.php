@@ -1,12 +1,24 @@
 <?php
+// Prevent any output before JSON
+ob_start();
+
 require_once '../config/config.php';
+
+// Clean any previous output
+ob_clean();
 
 header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'];
 $path = $_SERVER['PATH_INFO'] ?? '';
 
-$authController = new AuthController();
+try {
+    $authController = new AuthController();
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro de inicialização do servidor']);
+    exit;
+}
 
 switch ($path) {
     case '/login':
