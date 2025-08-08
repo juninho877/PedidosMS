@@ -265,11 +265,27 @@ class TenantCustomizeApp {
 
             console.log('Sending request to /api/tenant.php/update');
             
+            console.log('Sending request to /api/tenant.php/update');
+            
             const response = await fetch('/api/tenant.php/update', {
                 method: 'POST',
                 body: formData
             });
 
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response was:', responseText);
+                throw new Error('Resposta inválida do servidor');
+            }
             console.log('Response status:', response.status);
             console.log('Response headers:', response.headers);
             
@@ -296,6 +312,7 @@ class TenantCustomizeApp {
             this.tenantData = { ...this.tenantData, ...result.tenant };
 
         } catch (error) {
+            console.error('Save error:', error);
             console.error('Save error:', error);
             this.showToast(error.message, 'error');
         } finally {
