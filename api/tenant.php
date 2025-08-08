@@ -1,3 +1,10 @@
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+// Handle preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 <?php
 require_once '../config/config.php';
 
@@ -18,6 +25,13 @@ $path = $_SERVER['PATH_INFO'] ?? '';
 try {
     $tenantController = new TenantController();
 } catch (Exception $e) {
+    error_log("TenantController initialization error: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro de inicialização do servidor']);
+    exit;
+}
+
+try {
     error_log("TenantController initialization error: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['error' => 'Erro de inicialização do servidor']);
@@ -76,11 +90,7 @@ switch ($path) {
             } else {
                 http_response_code(405);
                 echo json_encode(['error' => 'Método não permitido']);
-            }
-        } else {
-            http_response_code(404);
-            echo json_encode(['error' => 'Endpoint não encontrado']);
-        }
-        break;
+header('Access-Control-Allow-Origin: *');
 }
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 ?>
