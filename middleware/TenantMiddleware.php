@@ -29,7 +29,7 @@ class TenantMiddleware {
         $tenant = $this->tenantService->getCurrentTenant();
         
         if ($tenant) {
-            header('Location: /' . $tenant['slug'] . '/dashboard');
+            header('Location: /' . $tenant->slug . '/dashboard');
             exit;
         }
     }
