@@ -28,7 +28,7 @@ class TenantService {
     public function validateTenantToken($token) {
         $decoded = $this->authService->validateToken($token);
         if ($decoded && isset($decoded['type']) && $decoded['type'] === 'tenant') {
-            return (object) $decoded['data'];
+            return $decoded['data'];
         }
         return false;
     }

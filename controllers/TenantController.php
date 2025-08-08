@@ -107,39 +107,24 @@ class TenantController {
 
     public function update() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            error_log("TenantController::update() called");
-            
             $tenant = $this->tenantService->getCurrentTenant();
             if (!$tenant) {
-                error_log("No authenticated tenant found");
                 http_response_code(401);
                 echo json_encode(['error' => 'Não autorizado']);
                 return;
             }
 
-            error_log("Authenticated tenant: " . print_r($tenant, true));
-
             // Carregar dados atuais do tenant
-            if (!$this->tenant->findBySlug($tenant->slug)) {
-                error_log("Tenant not found by slug: " . $tenant->slug);
+            if (!$this->tenant->findBySlug($tenant['slug'])) {
                 http_response_code(404);
                 echo json_encode(['error' => 'Cliente não encontrado']);
                 return;
             }
 
-            error_log("Current tenant data loaded successfully");
-            error_log("POST data: " . print_r($_POST, true));
-            error_log("FILES data: " . print_r($_FILES, true));
-
             // Create uploads directory if it doesn't exist
             $uploadDir = APP_ROOT . '/assets/uploads/tenants/';
             if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true)) {
-                    error_log("Failed to create upload directory: " . $uploadDir);
-                    http_response_code(500);
-                    echo json_encode(['error' => 'Erro ao criar diretório de upload']);
-                    return;
-                }
+                mkdir($uploadDir, 0755, true);
             }
 
             // Handle file uploads
@@ -147,9 +132,8 @@ class TenantController {
             $faviconUrl = $this->tenant->favicon_url;
 
             if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] === UPLOAD_ERR_OK) {
-                $logoUrl = $this->handleFileUpload($_FILES['logo_file'], 'logo', $tenant->slug);
+                $logoUrl = $this->handleFileUpload($_FILES['logo_file'], 'logo', $tenant['slug']);
                 if (!$logoUrl) {
-                    error_log("Logo upload failed");
                     http_response_code(400);
                     echo json_encode(['error' => 'Erro no upload do logo']);
                     return;
@@ -157,30 +141,30 @@ class TenantController {
             }
 
             if (isset($_FILES['favicon_file']) && $_FILES['favicon_file']['error'] === UPLOAD_ERR_OK) {
-                $faviconUrl = $this->handleFileUpload($_FILES['favicon_file'], 'favicon', $tenant->slug);
+                $faviconUrl = $this->handleFileUpload($_FILES['favicon_file'], 'favicon', $tenant['slug']);
                 if (!$faviconUrl) {
-                    error_log("Favicon upload failed");
                     http_response_code(400);
                     echo json_encode(['error' => 'Erro no upload do favicon']);
                     return;
                 }
             }
 
-            error_log("File uploads completed. Logo: " . $logoUrl . ", Favicon: " . $faviconUrl);
-
             // Atualizar apenas os campos permitidos
+            $this->tenant->name = $_POST['name'] ?? $this->tenant->name;
+            $this->tenant->site_name = $_POST['site_name'] ?? $this->tenant->site_name;
+            $this->tenant->site_tagline = $_POST['site_tagline'] ?? $this->tenant->site_tagline;
+            $this->tenant->site_description = $_POST['site_description'] ?? $this->tenant->site_description;
             $this->tenant->hero_title = $_POST['hero_title'] ?? $this->tenant->hero_title;
             $this->tenant->hero_subtitle = $_POST['hero_subtitle'] ?? $this->tenant->hero_subtitle;
             $this->tenant->hero_description = $_POST['hero_description'] ?? $this->tenant->hero_description;
+            $this->tenant->contact_email = $_POST['contact_email'] ?? $this->tenant->contact_email;
+            $this->tenant->contact_whatsapp = $_POST['contact_whatsapp'] ?? $this->tenant->contact_whatsapp;
             $this->tenant->primary_color = $_POST['primary_color'] ?? $this->tenant->primary_color;
             $this->tenant->secondary_color = $_POST['secondary_color'] ?? $this->tenant->secondary_color;
             $this->tenant->logo_url = $logoUrl;
             $this->tenant->favicon_url = $faviconUrl;
 
-            error_log("Tenant data prepared for update");
-
             if ($this->tenant->update()) {
-                error_log("Tenant updated successfully");
                 echo json_encode([
                     'success' => true, 
                     'message' => 'Configurações atualizadas com sucesso',
@@ -195,7 +179,6 @@ class TenantController {
                     ]
                 ]);
             } else {
-                error_log("Failed to update tenant in database");
                 http_response_code(500);
                 echo json_encode(['error' => 'Erro ao atualizar configurações']);
             }
@@ -203,8 +186,6 @@ class TenantController {
     }
 
     private function handleFileUpload($file, $type, $tenantSlug) {
-        error_log("handleFileUpload called for type: $type, tenant: $tenantSlug");
-        
         $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
         if ($type === 'favicon') {
             $allowedTypes[] = 'image/x-icon';
@@ -213,13 +194,11 @@ class TenantController {
 
         // Validate file type
         if (!in_array($file['type'], $allowedTypes)) {
-            error_log("Invalid file type: " . $file['type']);
             return false;
         }
 
         // Validate file size (2MB max)
         if ($file['size'] > 2 * 1024 * 1024) {
-            error_log("File too large: " . $file['size']);
             return false;
         }
 
@@ -231,11 +210,9 @@ class TenantController {
 
         // Move uploaded file
         if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            error_log("File uploaded successfully: " . $publicPath);
             return $publicPath;
         }
 
-        error_log("Failed to move uploaded file from " . $file['tmp_name'] . " to " . $uploadPath);
         return false;
     }
 }
