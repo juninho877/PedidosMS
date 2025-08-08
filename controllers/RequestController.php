@@ -88,7 +88,7 @@ class RequestController {
 
         // Se for tenant, filtrar apenas suas solicitações
         if ($tenant) {
-            $filters['tenant_id'] = $tenant['id'];
+            $filters['tenant_id'] = $tenant->id;
         }
         $requests = $this->request->getAll($filters);
         echo json_encode($requests);
@@ -115,7 +115,7 @@ class RequestController {
         }
 
         // Se for tenant, filtrar apenas suas estatísticas
-        $tenant_id = $tenant ? $tenant['id'] : null;
+        $tenant_id = $tenant ? $tenant->id : null;
         $stats = $this->request->getStats($tenant_id);
         echo json_encode($stats);
     }
@@ -159,7 +159,7 @@ class RequestController {
 
             // Se for tenant, verificar se a solicitação pertence a ele
             if ($tenant) {
-                if (!$this->request->findByIdAndTenant($id, $tenant['id'])) {
+                if (!$this->request->findByIdAndTenant($id, $tenant->id)) {
                     http_response_code(404);
                     echo json_encode(['error' => 'Solicitação não encontrada']);
                     return;
@@ -197,7 +197,7 @@ class RequestController {
         // Se for tenant, verificar se a solicitação pertence a ele
         $found = false;
         if ($tenant) {
-            $found = $this->request->findByIdAndTenant($id, $tenant['id']);
+            $found = $this->request->findByIdAndTenant($id, $tenant->id);
         } else {
             $found = $this->request->findById($id);
         }
