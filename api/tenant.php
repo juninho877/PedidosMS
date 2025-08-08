@@ -1,13 +1,16 @@
 <?php
-// Prevent any output before JSON
-ob_start();
-
 require_once '../config/config.php';
 
-// Clean any previous output
-ob_clean();
-
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+// Handle preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 $path = $_SERVER['PATH_INFO'] ?? '';
@@ -15,6 +18,13 @@ $path = $_SERVER['PATH_INFO'] ?? '';
 try {
     $tenantController = new TenantController();
 } catch (Exception $e) {
+    error_log("TenantController initialization error: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro de inicialização do servidor']);
+    exit;
+}
+
+try {
     http_response_code(500);
     echo json_encode(['error' => 'Erro de inicialização do servidor']);
     exit;
