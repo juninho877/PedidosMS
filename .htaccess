@@ -17,6 +17,7 @@ RewriteRule ^([a-zA-Z0-9\-]+)/search/?$ tenant-search.php?slug=$1 [QSA,L]
 RewriteRule ^([a-zA-Z0-9\-]+)/details/?$ tenant-details.php?slug=$1 [QSA,L]
 RewriteRule ^([a-zA-Z0-9\-]+)/login/?$ tenant-login.php?slug=$1 [QSA,L]
 RewriteRule ^([a-zA-Z0-9\-]+)/dashboard/?$ tenant-dashboard.php?slug=$1 [QSA,L]
+RewriteRule ^([a-zA-Z0-9\-]+)/customize/?$ tenant-customize.php?slug=$1 [QSA,L]
 
 # Security Headers
 Header always set X-Content-Type-Options nosniff

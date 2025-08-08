@@ -106,15 +106,13 @@ class TenantController {
     }
 
     public function update() {
-        if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $tenant = $this->tenantService->getCurrentTenant();
             if (!$tenant) {
                 http_response_code(401);
                 echo json_encode(['error' => 'Não autorizado']);
                 return;
             }
-
-            $input = json_decode(file_get_contents('php://input'), true);
 
             // Carregar dados atuais do tenant
             if (!$this->tenant->findBySlug($tenant['slug'])) {
@@ -123,28 +121,99 @@ class TenantController {
                 return;
             }
 
+            // Create uploads directory if it doesn't exist
+            $uploadDir = APP_ROOT . '/assets/uploads/tenants/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // Handle file uploads
+            $logoUrl = $this->tenant->logo_url;
+            $faviconUrl = $this->tenant->favicon_url;
+
+            if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] === UPLOAD_ERR_OK) {
+                $logoUrl = $this->handleFileUpload($_FILES['logo_file'], 'logo', $tenant['slug']);
+                if (!$logoUrl) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Erro no upload do logo']);
+                    return;
+                }
+            }
+
+            if (isset($_FILES['favicon_file']) && $_FILES['favicon_file']['error'] === UPLOAD_ERR_OK) {
+                $faviconUrl = $this->handleFileUpload($_FILES['favicon_file'], 'favicon', $tenant['slug']);
+                if (!$faviconUrl) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Erro no upload do favicon']);
+                    return;
+                }
+            }
+
             // Atualizar apenas os campos permitidos
-            $this->tenant->name = $input['name'] ?? $this->tenant->name;
-            $this->tenant->site_name = $input['site_name'] ?? $this->tenant->site_name;
-            $this->tenant->site_tagline = $input['site_tagline'] ?? $this->tenant->site_tagline;
-            $this->tenant->site_description = $input['site_description'] ?? $this->tenant->site_description;
-            $this->tenant->hero_title = $input['hero_title'] ?? $this->tenant->hero_title;
-            $this->tenant->hero_subtitle = $input['hero_subtitle'] ?? $this->tenant->hero_subtitle;
-            $this->tenant->hero_description = $input['hero_description'] ?? $this->tenant->hero_description;
-            $this->tenant->contact_email = $input['contact_email'] ?? $this->tenant->contact_email;
-            $this->tenant->contact_whatsapp = $input['contact_whatsapp'] ?? $this->tenant->contact_whatsapp;
-            $this->tenant->primary_color = $input['primary_color'] ?? $this->tenant->primary_color;
-            $this->tenant->secondary_color = $input['secondary_color'] ?? $this->tenant->secondary_color;
-            $this->tenant->logo_url = $input['logo_url'] ?? $this->tenant->logo_url;
-            $this->tenant->favicon_url = $input['favicon_url'] ?? $this->tenant->favicon_url;
+            $this->tenant->name = $_POST['name'] ?? $this->tenant->name;
+            $this->tenant->site_name = $_POST['site_name'] ?? $this->tenant->site_name;
+            $this->tenant->site_tagline = $_POST['site_tagline'] ?? $this->tenant->site_tagline;
+            $this->tenant->site_description = $_POST['site_description'] ?? $this->tenant->site_description;
+            $this->tenant->hero_title = $_POST['hero_title'] ?? $this->tenant->hero_title;
+            $this->tenant->hero_subtitle = $_POST['hero_subtitle'] ?? $this->tenant->hero_subtitle;
+            $this->tenant->hero_description = $_POST['hero_description'] ?? $this->tenant->hero_description;
+            $this->tenant->contact_email = $_POST['contact_email'] ?? $this->tenant->contact_email;
+            $this->tenant->contact_whatsapp = $_POST['contact_whatsapp'] ?? $this->tenant->contact_whatsapp;
+            $this->tenant->primary_color = $_POST['primary_color'] ?? $this->tenant->primary_color;
+            $this->tenant->secondary_color = $_POST['secondary_color'] ?? $this->tenant->secondary_color;
+            $this->tenant->logo_url = $logoUrl;
+            $this->tenant->favicon_url = $faviconUrl;
 
             if ($this->tenant->update()) {
-                echo json_encode(['success' => true, 'message' => 'Configurações atualizadas com sucesso']);
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Configurações atualizadas com sucesso',
+                    'tenant' => [
+                        'hero_title' => $this->tenant->hero_title,
+                        'hero_subtitle' => $this->tenant->hero_subtitle,
+                        'hero_description' => $this->tenant->hero_description,
+                        'primary_color' => $this->tenant->primary_color,
+                        'secondary_color' => $this->tenant->secondary_color,
+                        'logo_url' => $this->tenant->logo_url,
+                        'favicon_url' => $this->tenant->favicon_url
+                    ]
+                ]);
             } else {
                 http_response_code(500);
                 echo json_encode(['error' => 'Erro ao atualizar configurações']);
             }
         }
+    }
+
+    private function handleFileUpload($file, $type, $tenantSlug) {
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if ($type === 'favicon') {
+            $allowedTypes[] = 'image/x-icon';
+            $allowedTypes[] = 'image/vnd.microsoft.icon';
+        }
+
+        // Validate file type
+        if (!in_array($file['type'], $allowedTypes)) {
+            return false;
+        }
+
+        // Validate file size (2MB max)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            return false;
+        }
+
+        // Generate unique filename
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = $tenantSlug . '_' . $type . '_' . time() . '.' . $extension;
+        $uploadPath = APP_ROOT . '/assets/uploads/tenants/' . $filename;
+        $publicPath = '/assets/uploads/tenants/' . $filename;
+
+        // Move uploaded file
+        if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+            return $publicPath;
+        }
+
+        return false;
     }
 }
 ?>

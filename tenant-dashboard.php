@@ -102,6 +102,11 @@ $tenant->findBySlug($slug);
                         <span class="hidden lg:inline">Dashboard</span>
                     </a>
 
+                    <a href="/<?php echo $slug; ?>/customize" class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-slate-300 hover:text-white hover:bg-slate-700 text-sm lg:text-base">
+                        <i data-lucide="palette" class="h-4 w-4"></i>
+                        <span class="hidden lg:inline">Personalizar</span>
+                    </a>
+
                     <button
                         id="logoutBtn"
                         class="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors text-sm lg:text-base"
@@ -126,6 +131,10 @@ $tenant->findBySlug($slug);
                     <a href="/<?php echo $slug; ?>/dashboard" class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors btn-primary text-white">
                         <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
                         <span>Dashboard</span>
+                    </a>
+                    <a href="/<?php echo $slug; ?>/customize" class="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors text-slate-300 hover:text-white hover:bg-slate-700">
+                        <i data-lucide="palette" class="h-4 w-4"></i>
+                        <span>Personalizar</span>
                     </a>
                     <button
                         id="logoutBtnMobile"
