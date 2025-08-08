@@ -59,19 +59,24 @@ class RequestController {
     }
 
     public function getAll() {
-        // Verificar se é admin ou tenant
-        $authMiddleware = new AuthMiddleware();
-        $tenantMiddleware = new TenantMiddleware();
-        
+        // Verificar autenticação (admin ou tenant)
         $user = null;
         $tenant = null;
         
-        try {
-            $user = $authMiddleware->requireAuth();
-        } catch (Exception $e) {
-            try {
-                $tenant = $tenantMiddleware->requireTenantAuth();
-            } catch (Exception $e) {
+        // Primeiro tentar autenticação de admin
+        $authService = new AuthService();
+        $adminUser = $authService->getCurrentUser();
+        
+        if ($adminUser) {
+            $user = $adminUser;
+        } else {
+            // Se não for admin, tentar autenticação de tenant
+            $tenantService = new TenantService();
+            $currentTenant = $tenantService->getCurrentTenant();
+            
+            if ($currentTenant) {
+                $tenant = $currentTenant;
+            } else {
                 http_response_code(401);
                 echo json_encode(['error' => 'Não autorizado']);
                 return;
@@ -90,24 +95,30 @@ class RequestController {
         if ($tenant) {
             $filters['tenant_id'] = $tenant->id;
         }
+        
         $requests = $this->request->getAll($filters);
         echo json_encode($requests);
     }
 
     public function getStats() {
-        // Verificar se é admin ou tenant
-        $authMiddleware = new AuthMiddleware();
-        $tenantMiddleware = new TenantMiddleware();
-        
+        // Verificar autenticação (admin ou tenant)
         $user = null;
         $tenant = null;
         
-        try {
-            $user = $authMiddleware->requireAuth();
-        } catch (Exception $e) {
-            try {
-                $tenant = $tenantMiddleware->requireTenantAuth();
-            } catch (Exception $e) {
+        // Primeiro tentar autenticação de admin
+        $authService = new AuthService();
+        $adminUser = $authService->getCurrentUser();
+        
+        if ($adminUser) {
+            $user = $adminUser;
+        } else {
+            // Se não for admin, tentar autenticação de tenant
+            $tenantService = new TenantService();
+            $currentTenant = $tenantService->getCurrentTenant();
+            
+            if ($currentTenant) {
+                $tenant = $currentTenant;
+            } else {
                 http_response_code(401);
                 echo json_encode(['error' => 'Não autorizado']);
                 return;
@@ -122,19 +133,24 @@ class RequestController {
 
     public function updateStatus() {
         if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-            // Verificar se é admin ou tenant
-            $authMiddleware = new AuthMiddleware();
-            $tenantMiddleware = new TenantMiddleware();
-            
+            // Verificar autenticação (admin ou tenant)
             $user = null;
             $tenant = null;
             
-            try {
-                $user = $authMiddleware->requireAuth();
-            } catch (Exception $e) {
-                try {
-                    $tenant = $tenantMiddleware->requireTenantAuth();
-                } catch (Exception $e) {
+            // Primeiro tentar autenticação de admin
+            $authService = new AuthService();
+            $adminUser = $authService->getCurrentUser();
+            
+            if ($adminUser) {
+                $user = $adminUser;
+            } else {
+                // Se não for admin, tentar autenticação de tenant
+                $tenantService = new TenantService();
+                $currentTenant = $tenantService->getCurrentTenant();
+                
+                if ($currentTenant) {
+                    $tenant = $currentTenant;
+                } else {
                     http_response_code(401);
                     echo json_encode(['error' => 'Não autorizado']);
                     return;
@@ -165,6 +181,7 @@ class RequestController {
                     return;
                 }
             }
+            
             if ($this->request->updateStatus($id, $status)) {
                 echo json_encode(['success' => true, 'message' => 'Status atualizado com sucesso']);
             } else {
@@ -175,19 +192,24 @@ class RequestController {
     }
 
     public function getById($id) {
-        // Verificar se é admin ou tenant
-        $authMiddleware = new AuthMiddleware();
-        $tenantMiddleware = new TenantMiddleware();
-        
+        // Verificar autenticação (admin ou tenant)
         $user = null;
         $tenant = null;
         
-        try {
-            $user = $authMiddleware->requireAuth();
-        } catch (Exception $e) {
-            try {
-                $tenant = $tenantMiddleware->requireTenantAuth();
-            } catch (Exception $e) {
+        // Primeiro tentar autenticação de admin
+        $authService = new AuthService();
+        $adminUser = $authService->getCurrentUser();
+        
+        if ($adminUser) {
+            $user = $adminUser;
+        } else {
+            // Se não for admin, tentar autenticação de tenant
+            $tenantService = new TenantService();
+            $currentTenant = $tenantService->getCurrentTenant();
+            
+            if ($currentTenant) {
+                $tenant = $currentTenant;
+            } else {
                 http_response_code(401);
                 echo json_encode(['error' => 'Não autorizado']);
                 return;

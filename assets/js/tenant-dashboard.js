@@ -59,7 +59,7 @@ class TenantDashboardApp {
 
     async loadStats() {
         try {
-            const response = await fetch('/api/requests/stats');
+            const response = await fetch('/api/requests.php/stats');
             const stats = await response.json();
 
             if (!response.ok) {
@@ -69,6 +69,7 @@ class TenantDashboardApp {
             this.renderStats(stats);
         } catch (error) {
             console.error('Error loading stats:', error);
+            this.showError('Erro ao carregar estatísticas: ' + error.message);
         }
     }
 
@@ -132,7 +133,7 @@ class TenantDashboardApp {
             if (this.currentFilters.status) params.append('status', this.currentFilters.status);
             if (this.currentFilters.content_type) params.append('content_type', this.currentFilters.content_type);
 
-            const response = await fetch(`/api/requests?${params}`);
+            const response = await fetch(`/api/requests.php?${params}`);
             const requests = await response.json();
 
             if (!response.ok) {
@@ -290,7 +291,7 @@ class TenantDashboardApp {
 
     async viewRequest(id) {
         try {
-            const response = await fetch(`/api/requests/${id}`);
+            const response = await fetch(`/api/requests.php/${id}`);
             const request = await response.json();
 
             if (!response.ok) {
@@ -299,7 +300,7 @@ class TenantDashboardApp {
 
             // Buscar informações adicionais do TMDB
             try {
-                const tmdbResponse = await fetch(`/api/tmdb/${request.content_type}/${request.content_id}`);
+                const tmdbResponse = await fetch(`/api/tmdb.php/${request.content_type}/${request.content_id}`);
                 const tmdbData = await tmdbResponse.json();
                 
                 if (tmdbResponse.ok) {
@@ -321,7 +322,7 @@ class TenantDashboardApp {
         }
 
         try {
-            const response = await fetch('/api/requests/update-status', {
+            const response = await fetch('/api/requests.php/update-status', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

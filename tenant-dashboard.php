@@ -8,7 +8,7 @@ if (empty($slug)) {
     exit;
 }
 
-// Verificar se o tenant existe
+// Verificar se o tenant existe e está autenticado
 $tenantMiddleware = new TenantMiddleware();
 if (!$tenantMiddleware->validateTenantSlug($slug)) {
     header('Location: /');
