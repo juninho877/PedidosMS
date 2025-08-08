@@ -49,7 +49,7 @@ switch ($path) {
         break;
 
     case '/update':
-        if ($method === 'POST') {
+        if ($method === 'POST' || $method === 'PUT') {
             $tenantController->update();
         } else {
             http_response_code(405);

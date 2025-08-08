@@ -106,7 +106,7 @@ class TenantController {
     }
 
     public function update() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT') {
             $tenant = $this->tenantService->getCurrentTenant();
             if (!$tenant) {
                 http_response_code(401);
@@ -115,7 +115,7 @@ class TenantController {
             }
 
             // Carregar dados atuais do tenant
-            if (!$this->tenant->findBySlug($tenant['slug'])) {
+            if (!$this->tenant->findBySlug($tenant->slug)) {
                 http_response_code(404);
                 echo json_encode(['error' => 'Cliente não encontrado']);
                 return;
@@ -124,7 +124,12 @@ class TenantController {
             // Create uploads directory if it doesn't exist
             $uploadDir = APP_ROOT . '/assets/uploads/tenants/';
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
+                if (!mkdir($uploadDir, 0755, true)) {
+                    error_log("Failed to create upload directory: " . $uploadDir);
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Erro ao criar diretório de upload']);
+                    return;
+                }
             }
 
             // Handle file uploads
@@ -132,7 +137,7 @@ class TenantController {
             $faviconUrl = $this->tenant->favicon_url;
 
             if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] === UPLOAD_ERR_OK) {
-                $logoUrl = $this->handleFileUpload($_FILES['logo_file'], 'logo', $tenant['slug']);
+                $logoUrl = $this->handleFileUpload($_FILES['logo_file'], 'logo', $tenant->slug);
                 if (!$logoUrl) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Erro no upload do logo']);
@@ -141,7 +146,7 @@ class TenantController {
             }
 
             if (isset($_FILES['favicon_file']) && $_FILES['favicon_file']['error'] === UPLOAD_ERR_OK) {
-                $faviconUrl = $this->handleFileUpload($_FILES['favicon_file'], 'favicon', $tenant['slug']);
+                $faviconUrl = $this->handleFileUpload($_FILES['favicon_file'], 'favicon', $tenant->slug);
                 if (!$faviconUrl) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Erro no upload do favicon']);
@@ -164,56 +169,73 @@ class TenantController {
             $this->tenant->logo_url = $logoUrl;
             $this->tenant->favicon_url = $faviconUrl;
 
-            if ($this->tenant->update()) {
-                echo json_encode([
-                    'success' => true, 
-                    'message' => 'Configurações atualizadas com sucesso',
-                    'tenant' => [
-                        'hero_title' => $this->tenant->hero_title,
-                        'hero_subtitle' => $this->tenant->hero_subtitle,
-                        'hero_description' => $this->tenant->hero_description,
-                        'primary_color' => $this->tenant->primary_color,
-                        'secondary_color' => $this->tenant->secondary_color,
-                        'logo_url' => $this->tenant->logo_url,
-                        'favicon_url' => $this->tenant->favicon_url
-                    ]
-                ]);
-            } else {
+            try {
+                if ($this->tenant->update()) {
+                    echo json_encode([
+                        'success' => true, 
+                        'message' => 'Configurações atualizadas com sucesso',
+                        'tenant' => [
+                            'hero_title' => $this->tenant->hero_title,
+                            'hero_subtitle' => $this->tenant->hero_subtitle,
+                            'hero_description' => $this->tenant->hero_description,
+                            'primary_color' => $this->tenant->primary_color,
+                            'secondary_color' => $this->tenant->secondary_color,
+                            'logo_url' => $this->tenant->logo_url,
+                            'favicon_url' => $this->tenant->favicon_url
+                        ]
+                    ]);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Erro ao atualizar configurações']);
+                }
+            } catch (Exception $e) {
+                error_log("Tenant update error: " . $e->getMessage());
                 http_response_code(500);
-                echo json_encode(['error' => 'Erro ao atualizar configurações']);
+                echo json_encode([
+                    'error' => 'Erro interno do servidor',
+                    'details' => $e->getMessage()
+                ]);
             }
         }
     }
 
     private function handleFileUpload($file, $type, $tenantSlug) {
-        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-        if ($type === 'favicon') {
-            $allowedTypes[] = 'image/x-icon';
-            $allowedTypes[] = 'image/vnd.microsoft.icon';
-        }
+        try {
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if ($type === 'favicon') {
+                $allowedTypes[] = 'image/x-icon';
+                $allowedTypes[] = 'image/vnd.microsoft.icon';
+            }
+            // Validate file type
+            if (!in_array($file['type'], $allowedTypes)) {
+                error_log("Invalid file type: " . $file['type']);
+                return false;
+            }
 
-        // Validate file type
-        if (!in_array($file['type'], $allowedTypes)) {
+            // Validate file size (2MB max)
+            if ($file['size'] > 2 * 1024 * 1024) {
+                error_log("File too large: " . $file['size']);
+                return false;
+            }
+
+            // Generate unique filename
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = $tenantSlug . '_' . $type . '_' . time() . '.' . $extension;
+            $uploadPath = APP_ROOT . '/assets/uploads/tenants/' . $filename;
+            $publicPath = '/assets/uploads/tenants/' . $filename;
+
+            // Move uploaded file
+            if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+                return $publicPath;
+            } else {
+                error_log("Failed to move uploaded file to: " . $uploadPath);
+                return false;
+            }
+
+        } catch (Exception $e) {
+            error_log("File upload error: " . $e->getMessage());
             return false;
         }
-
-        // Validate file size (2MB max)
-        if ($file['size'] > 2 * 1024 * 1024) {
-            return false;
-        }
-
-        // Generate unique filename
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = $tenantSlug . '_' . $type . '_' . time() . '.' . $extension;
-        $uploadPath = APP_ROOT . '/assets/uploads/tenants/' . $filename;
-        $publicPath = '/assets/uploads/tenants/' . $filename;
-
-        // Move uploaded file
-        if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            return $publicPath;
-        }
-
-        return false;
     }
 }
 ?>

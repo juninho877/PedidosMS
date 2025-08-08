@@ -263,12 +263,30 @@ class TenantCustomizeApp {
                 formData.append('favicon_file', faviconFile);
             }
 
+            console.log('Sending request to:', '/api/tenant.php/update');
+            console.log('FormData entries:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
             const response = await fetch('/api/tenant.php/update', {
                 method: 'POST',
                 body: formData
             });
 
-            const result = await response.json();
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
+
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response text:', responseText);
+                throw new Error('Resposta inválida do servidor: ' + responseText.substring(0, 100));
+            }
 
             if (!response.ok) {
                 throw new Error(result.error || 'Erro ao salvar alterações');
@@ -281,6 +299,7 @@ class TenantCustomizeApp {
             this.tenantData = { ...this.tenantData, ...result.tenant };
 
         } catch (error) {
+            console.error('Save error:', error);
             this.showToast(error.message, 'error');
         } finally {
             // Reset button
