@@ -173,8 +173,14 @@ class SearchApp {
             `https://image.tmdb.org/t/p/w300${item.poster_path}` : 
             '/assets/images/placeholder-poster.jpg';
 
+        // Check if we're in a tenant context
+        const tenantSlug = window.TENANT_SLUG;
+        const detailsUrl = tenantSlug ? 
+            `/${tenantSlug}/details?type=${type}&id=${item.id}` : 
+            `details.php?type=${type}&id=${item.id}`;
+
         return `
-            <a href="details.php?type=${type}&id=${item.id}" class="group">
+            <a href="${detailsUrl}" class="group">
                 <div class="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden hover:border-blue-500/50 hover:bg-slate-800/70 transition-all transform hover:scale-105">
                     <div class="aspect-[2/3] relative overflow-hidden">
                         <img
@@ -222,8 +228,14 @@ class SearchApp {
             `https://image.tmdb.org/t/p/w200${item.poster_path}` : 
             '/assets/images/placeholder-poster.jpg';
 
+        // Check if we're in a tenant context
+        const tenantSlug = window.TENANT_SLUG;
+        const detailsUrl = tenantSlug ? 
+            `/${tenantSlug}/details?type=${type}&id=${item.id}` : 
+            `details.php?type=${type}&id=${item.id}`;
+
         return `
-            <a href="details.php?type=${type}&id=${item.id}" class="block bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-blue-500/50 hover:bg-slate-800/70 transition-all group">
+            <a href="${detailsUrl}" class="block bg-slate-800/50 border border-slate-700 rounded-lg p-4 hover:border-blue-500/50 hover:bg-slate-800/70 transition-all group">
                 <div class="flex gap-3 sm:gap-4">
                     <div class="flex-shrink-0">
                         <img

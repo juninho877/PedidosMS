@@ -465,6 +465,11 @@ class DetailsApp {
             poster_path: content.poster_path
         };
 
+        // Add tenant_id if we're in a tenant context
+        if (window.TENANT_DATA && window.TENANT_DATA.id) {
+            formData.tenant_id = window.TENANT_DATA.id;
+        }
+
         if (this.contentType === 'tv') {
             const season = document.getElementById('season').value;
             const episode = document.getElementById('episode').value;
